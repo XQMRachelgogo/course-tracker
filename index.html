@@ -197,15 +197,35 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
   inline-size:100%;
   max-inline-size:100%;
   min-inline-size:0;
+  flex:1 1 0%;
   -webkit-appearance:none;
   appearance:none;
   padding:12px 14px;
   background-clip:padding-box;
 }
+.reschedule-grid .form-input[type="date"]{
+  width:100%;
+  min-width:0;
+  inline-size:100%;
+  min-inline-size:0;
+  flex:1 1 0%;
+}
+.reschedule-grid .form-input[type="date"]::-webkit-date-and-time-value,
+.reschedule-grid .form-input[type="date"]::-webkit-datetime-edit{
+  min-height:1.25em;
+}
 @supports (-webkit-touch-callout: none) {
   .form-input[type="date"],.time-input[type="date"],.form-input[type="time"],.time-input[type="time"]{
     font-size:16px;
     line-height:1.2;
+  }
+  .reschedule-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch}
+  .reschedule-grid .form-input[type="date"]{
+    min-height:46px;
+    height:46px;
+    padding-top:11px;
+    padding-bottom:11px;
+    -webkit-min-logical-width:100%;
   }
 }
 
@@ -546,7 +566,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
       <label class="form-label">学费记录</label>
       <div style="font-size:12px;color:#a39abb;margin-bottom:8px;line-height:1.5;">每次缴费时记录金额，系统会按<strong style="color:#7a6fa8;">实际上课年份</strong>分摊，统计当年花销。</div>
       <div id="f-fee-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
-      <div style="display:grid;grid-template-columns:80px 1fr 130px;gap:6px;align-items:center;">
+      <div style="display:grid;grid-template-columns:80px 1fr 96px 130px;gap:6px;align-items:center;">
         <select class="form-input" id="f-fee-currency" style="padding:8px 6px;font-size:13px;">
           <option value="CNY">¥ 人民币</option>
           <option value="USD">$ 美元</option>
@@ -558,8 +578,10 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
           <option value="AUD">A$ 澳元</option>
         </select>
         <input class="form-input" id="f-fee-amount" type="number" min="0" step="0.01" placeholder="金额" inputmode="decimal" style="padding:8px 10px;font-size:14px;" />
+        <input class="form-input" id="f-fee-sessions" type="number" min="0" step="1" placeholder="购买课时" inputmode="numeric" style="padding:8px 10px;font-size:13px;" />
         <input class="form-input" id="f-fee-date" type="date" style="padding:8px 8px;font-size:13px;" />
       </div>
+      <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">新建课程时可直接填写首笔付费和购买课时，点保存后会一起创建；已有课程再买课包时，新增购买课时会自动并入总课时/剩余课时。</div>
       <button type="button" class="add-shift-btn" style="margin-top:8px;" onclick="addFeeFromForm()">+ 添加一笔学费</button>
     </div>
     <div class="form-btns" id="edit-form-btns"></div>
@@ -625,6 +647,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 var STORAGE_KEY = 'course_tracker_v2';
+var FEE_DISPLAY_CURRENCY_KEY = 'course_tracker_fee_display_currency';
 var SUPABASE_URL = 'https://sdcxjbkkbytcujlqxcxp.supabase.co';
 var SUPABASE_ANON_KEY = 'sb_publishable_NNrQXaKRsT_8GVatoflfQw_ZfjxWANh';
 var TABLE_NAME = 'course_tracker_state';
@@ -691,7 +714,14 @@ function normalizeCourse(course) {
   c.weekday = c.weekdays[0];
   c.history = Array.isArray(c.history) ? c.history : [];
   c.reschedules = Array.isArray(c.reschedules) ? c.reschedules : [];
-  c.fees = Array.isArray(c.fees) ? c.fees : [];
+  c.fees = Array.isArray(c.fees) ? c.fees.map(function(f){
+    var fee = deepClone(f || {});
+    fee.amount = parseFloat(fee.amount) || 0;
+    fee.currency = fee.currency || 'CNY';
+    fee.date = fee.date || '';
+    fee.sessions = Math.max(0, parseInt(fee.sessions, 10) || 0);
+    return fee;
+  }) : [];
   c.classTime = c.classTime || '10:00';
   c.classEndTime = c.classEndTime || addMinutesToTime(c.classTime, 60);
   c.used = Math.max(0, parseInt(c.used, 10) || 0);
@@ -1462,9 +1492,7 @@ function openAddForm() {
   document.getElementById('f-shift-from').value = '';
   document.getElementById('f-shift-to').value = '';
   document.getElementById('f-shift-note').value = '';
-  document.getElementById('f-fee-amount').value = '';
-  document.getElementById('f-fee-date').value = isoDate(new Date());
-  document.getElementById('f-fee-currency').value = 'CNY';
+  clearFeeInputs(false);
   renderFeeList(null);
   toggleTotalMode(); selectWeekday([1]); buildColorGrid(COLORS[0]); renderRescheduleList(null);
   document.getElementById('edit-form-btns').innerHTML =
@@ -1494,8 +1522,7 @@ function openEditForm(idx) {
   document.getElementById('f-shift-from').value = '';
   document.getElementById('f-shift-to').value = '';
   document.getElementById('f-shift-note').value = '';
-  document.getElementById('f-fee-amount').value = '';
-  document.getElementById('f-fee-date').value = isoDate(new Date());
+  clearFeeInputs(true);
   var lastCurrency = (course.fees && course.fees.length) ? (course.fees[course.fees.length-1].currency || 'CNY') : 'CNY';
   document.getElementById('f-fee-currency').value = lastCurrency;
   renderFeeList(course);
@@ -1517,6 +1544,8 @@ function saveForm() {
   var total = hasTot ? getCounterValue('f-total') : null;
   var remaining = hasTot ? null : getCounterValue('f-remaining');
   var used = getCounterValue('f-used');
+  var pendingFee = buildFeeEntryFromInputs();
+  if (pendingFee === false) return;
   var courses = loadData();
   if (editingIdx !== null) {
     var c = courses[editingIdx];
@@ -1532,9 +1561,13 @@ function saveForm() {
     c.used = used;
     c.payAlert = document.getElementById('f-pay-alert').checked;
     c.fees = c.fees || [];
+    if (pendingFee) {
+      c.fees.push(pendingFee);
+      applyPurchasedSessionsToCourse(c, pendingFee.sessions);
+    }
   } else {
     var newId = 'c' + Date.now();
-    courses.push({
+    var newCourse = {
       id: newId,
       name: name,
       weekdays: formWeekdays.slice(),
@@ -1550,7 +1583,12 @@ function saveForm() {
       reschedules: [],
       fees: [],
       payAlert: document.getElementById('f-pay-alert').checked
-    });
+    };
+    if (pendingFee) {
+      newCourse.fees.push(pendingFee);
+      applyPurchasedSessionsToCourse(newCourse, pendingFee.sessions);
+    }
+    courses.push(newCourse);
     expandedIds[newId] = false;
   }
   saveData(courses);
@@ -1579,6 +1617,53 @@ function fmtMoney(amount, currency) {
   return sym + (n % 1 < 0.005 ? Math.round(n).toLocaleString('zh-CN') : n.toLocaleString('zh-CN', {minimumFractionDigits:2, maximumFractionDigits:2}));
 }
 
+
+function getSavedFeeDisplayCurrency() {
+  try { return localStorage.getItem(FEE_DISPLAY_CURRENCY_KEY) || 'CNY'; } catch(e) { return 'CNY'; }
+}
+function setSavedFeeDisplayCurrency(currency) {
+  try { localStorage.setItem(FEE_DISPLAY_CURRENCY_KEY, currency || 'CNY'); } catch(e) {}
+}
+function applySavedFeeDisplayCurrency() {
+  var el = document.getElementById('fee-display-currency');
+  if (el) el.value = getSavedFeeDisplayCurrency();
+}
+
+function getFeeSessionsInputValue() {
+  var el = document.getElementById('f-fee-sessions');
+  return el ? Math.max(0, parseInt(el.value, 10) || 0) : 0;
+}
+function clearFeeInputs(keepCurrency) {
+  document.getElementById('f-fee-amount').value = '';
+  document.getElementById('f-fee-date').value = isoDate(new Date());
+  var sessionsEl = document.getElementById('f-fee-sessions');
+  if (sessionsEl) sessionsEl.value = '';
+  if (!keepCurrency) document.getElementById('f-fee-currency').value = 'CNY';
+}
+function applyPurchasedSessionsToCourse(course, purchasedSessions) {
+  var qty = Math.max(0, parseInt(purchasedSessions, 10) || 0);
+  if (!qty) return;
+  if (course.total !== null && course.total !== undefined) {
+    course.total += qty;
+    return;
+  }
+  if (course.remaining !== null && course.remaining !== undefined) {
+    course.remaining += qty;
+    return;
+  }
+  course.remaining = qty;
+}
+function buildFeeEntryFromInputs() {
+  var amountRaw = document.getElementById('f-fee-amount').value.trim();
+  var date = document.getElementById('f-fee-date').value;
+  var currency = document.getElementById('f-fee-currency').value || 'CNY';
+  var sessions = getFeeSessionsInputValue();
+  if (!amountRaw && !sessions) return null;
+  if (!amountRaw || isNaN(parseFloat(amountRaw)) || parseFloat(amountRaw) <= 0) { showToast('请填写有效金额'); return false; }
+  if (!date) { showToast('请选择缴费日期'); return false; }
+  return { id: 'fee' + Date.now(), amount: parseFloat(amountRaw), currency: currency, date: date, sessions: sessions };
+}
+
 function renderFeeSummary() {
   var courses = loadData();
   var thisYear = new Date().getFullYear();
@@ -1588,7 +1673,9 @@ function renderFeeSummary() {
   var displayCurEl = document.getElementById('fee-display-currency');
   if (!totalEl || !breakdownEl) return;
 
-  var displayCur = (displayCurEl && displayCurEl.value) || 'CNY';
+  if (displayCurEl && !displayCurEl.value) displayCurEl.value = getSavedFeeDisplayCurrency();
+  var displayCur = (displayCurEl && displayCurEl.value) || getSavedFeeDisplayCurrency() || 'CNY';
+  setSavedFeeDisplayCurrency(displayCur);
   var needsConversion = false;
 
   var grandTotalCNY = 0;
@@ -1613,7 +1700,7 @@ function renderFeeSummary() {
 
   if (!items.length) {
     totalEl.textContent = '—';
-    breakdownEl.innerHTML = '<div style="font-size:12px;color:#b4acc9;">在课程编辑里添加学费记录后，这里会按实际上课比例分摊显示。</div>';
+    breakdownEl.innerHTML = '<div style="font-size:12px;color:#b4acc9;">在课程编辑里添加学费记录后，这里会按付款先确认、跨年明显上不完时递延显示。</div>';
     if (rateNoteEl) rateNoteEl.textContent = '';
     return;
   }
@@ -1645,31 +1732,32 @@ function renderFeeList(course) {
   if (!fees.length) { list.innerHTML = '<div style="font-size:12px;color:#b4acc9;padding:4px 0;">暂无记录</div>'; return; }
   list.innerHTML = fees.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; }).map(function(f){
     var origIdx = fees.indexOf(f);
-    var sym = CURRENCY_SYMBOLS[f.currency] || (f.currency || '¥');
+    var sessionsText = f.sessions ? '<span style="font-size:11px;color:#8f86aa;background:#f4efff;border-radius:999px;padding:2px 8px;">+' + f.sessions + '次</span>' : '';
     return '<div class="fee-item-row">' +
       '<span class="fee-item-date">' + f.date + '</span>' +
       '<span style="font-size:11px;color:#a39abb;margin-right:2px;">' + (f.currency || 'CNY') + '</span>' +
       '<span class="fee-item-amt">' + fmtMoney(f.amount, f.currency || 'CNY') + '</span>' +
+      sessionsText +
       '<button class="fee-item-del" onclick="deleteFee(' + origIdx + ')" title="删除">✕</button>' +
     '</div>';
   }).join('');
 }
 
 function addFeeFromForm() {
-  var amountRaw = document.getElementById('f-fee-amount').value.trim();
-  var date = document.getElementById('f-fee-date').value;
-  var currency = document.getElementById('f-fee-currency').value || 'CNY';
-  if (!amountRaw || isNaN(parseFloat(amountRaw)) || parseFloat(amountRaw) <= 0) { showToast('请填写有效金额'); return; }
-  if (!date) { showToast('请选择缴费日期'); return; }
+  var feeEntry = buildFeeEntryFromInputs();
+  if (feeEntry === false) return;
+  if (!feeEntry) { showToast('请先填写金额或购买课时'); return; }
   var courses = loadData();
   var target = editingIdx !== null ? courses[editingIdx] : null;
-  if (!target) { showToast('请先保存课程'); return; }
+  if (!target) { showToast('新建课程时，直接填写后点保存即可'); return; }
   target.fees = target.fees || [];
-  target.fees.push({ id: 'fee' + Date.now(), amount: parseFloat(amountRaw), currency: currency, date: date });
+  target.fees.push(feeEntry);
+  applyPurchasedSessionsToCourse(target, feeEntry.sessions);
   saveData(courses);
-  document.getElementById('f-fee-amount').value = '';
+  clearFeeInputs(true);
   renderFeeList(target);
   renderFeeSummary();
+  render();
   showToast('已添加学费记录');
 }
 
@@ -1678,10 +1766,16 @@ function deleteFee(feeIdx) {
   var courses = loadData();
   var c = courses[editingIdx];
   c.fees = c.fees || [];
-  c.fees.splice(feeIdx, 1);
+  var removed = c.fees.splice(feeIdx, 1)[0];
+  var qty = removed && removed.sessions ? Math.max(0, parseInt(removed.sessions, 10) || 0) : 0;
+  if (qty) {
+    if (c.total !== null && c.total !== undefined) c.total = Math.max(c.used, c.total - qty);
+    else if (c.remaining !== null && c.remaining !== undefined) c.remaining = Math.max(0, c.remaining - qty);
+  }
   saveData(courses);
   renderFeeList(c);
   renderFeeSummary();
+  render();
 }
 
 // Get all dates of actual classes taken (history status='done'), grouped by year
@@ -1696,54 +1790,51 @@ function getClassDatesByYear(course) {
   return byYear;
 }
 
+function weeksRemainingInYearForCourse(course, fromDateStr) {
+  var weekdays = Array.isArray(course.weekdays) && course.weekdays.length ? course.weekdays.slice() : [typeof course.weekday === 'number' ? course.weekday : 1];
+  if (!weekdays.length) weekdays = [1];
+  var from = fromDateStr ? new Date(fromDateStr + 'T00:00:00') : getTodayDate();
+  if (isNaN(from.getTime())) from = getTodayDate();
+  from.setHours(0,0,0,0);
+  var year = from.getFullYear();
+  var end = new Date(year, 11, 31);
+  end.setHours(0,0,0,0);
+  var count = 0;
+  var cursor = new Date(from);
+  while (cursor <= end) {
+    if (weekdays.indexOf(cursor.getDay()) !== -1) count += 1;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return count;
+}
+
 function prorateFeesByYear(course) {
   var result = {};
-  var fees = course.fees || [];
+  var fees = (course.fees || []).slice().sort(function(a,b){ return (a.date || '') > (b.date || '') ? 1 : -1; });
   if (!fees.length) return result;
-
-  var classByYear = getClassDatesByYear(course);
-  var totalHistorySessions = Object.keys(classByYear).reduce(function(a, yr) { return a + classByYear[yr]; }, 0);
-  var thisYear = new Date().getFullYear();
-  var used = Math.max(0, parseInt(course.used, 10) || 0);
-  var startYear = course.startDate ? parseInt(String(course.startDate).slice(0,4), 10) : null;
-  var earliestFeeYear = null;
-
-  fees.forEach(function(f) {
-    var feeYear = f.date ? parseInt(String(f.date).slice(0,4), 10) : null;
-    if (!feeYear) return;
-    if (earliestFeeYear === null || feeYear < earliestFeeYear) earliestFeeYear = feeYear;
-  });
-
-  var fallbackYear = startYear || earliestFeeYear || thisYear;
-  var manualSessions = Math.max(0, used - totalHistorySessions);
-
-  if (manualSessions > 0) {
-    classByYear[fallbackYear] = (classByYear[fallbackYear] || 0) + manualSessions;
-  }
-
-  var totalSessions = Object.keys(classByYear).reduce(function(a, yr) { return a + classByYear[yr]; }, 0);
-
-  if (totalSessions > 0) {
-    fees.forEach(function(f) {
-      var currency = f.currency || 'CNY';
-      var amount = parseFloat(f.amount) || 0;
-      if (!amount) return;
-      Object.keys(classByYear).forEach(function(yr) {
-        var share = amount * classByYear[yr] / totalSessions;
-        if (!result[yr]) result[yr] = {};
-        result[yr][currency] = (result[yr][currency] || 0) + share;
-      });
-    });
-    return result;
-  }
 
   fees.forEach(function(f) {
     var currency = f.currency || 'CNY';
     var amount = parseFloat(f.amount) || 0;
     if (!amount) return;
-    var targetYear = thisYear;
-    if (!result[targetYear]) result[targetYear] = {};
-    result[targetYear][currency] = (result[targetYear][currency] || 0) + amount;
+    var feeYear = f.date ? parseInt(String(f.date).slice(0,4), 10) : new Date().getFullYear();
+    var sessions = Math.max(0, parseInt(f.sessions, 10) || 0);
+    if (!sessions) {
+      if (!result[feeYear]) result[feeYear] = {};
+      result[feeYear][currency] = (result[feeYear][currency] || 0) + amount;
+      return;
+    }
+    var schedulableThisYear = weeksRemainingInYearForCourse(course, f.date || (feeYear + '-01-01'));
+    var recognizedSessions = Math.min(sessions, schedulableThisYear);
+    var deferredSessions = Math.max(0, sessions - recognizedSessions);
+    var recognizedAmount = amount * recognizedSessions / sessions;
+    var deferredAmount = amount - recognizedAmount;
+    if (!result[feeYear]) result[feeYear] = {};
+    result[feeYear][currency] = (result[feeYear][currency] || 0) + recognizedAmount;
+    if (deferredSessions > 0) {
+      if (!result[feeYear + 1]) result[feeYear + 1] = {};
+      result[feeYear + 1][currency] = (result[feeYear + 1][currency] || 0) + deferredAmount;
+    }
   });
 
   return result;
@@ -2053,6 +2144,7 @@ document.addEventListener('touchend', function(e){
   if (now - lastTouchEnd <= 300) e.preventDefault();
   lastTouchEnd = now;
 }, {passive:false});
+applySavedFeeDisplayCurrency();
 initAuth();
 </script>
 
