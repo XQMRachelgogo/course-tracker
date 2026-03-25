@@ -979,9 +979,27 @@ function toggleTotalMode() {
   document.getElementById('f-total-section').style.display = hasTot ? 'block' : 'none';
   document.getElementById('f-remaining-section').style.display = hasTot ? 'none' : 'block';
 }
-function adjustVal(id, delta) {
+function getCounterValue(id) {
   var el = document.getElementById(id);
-  el.textContent = Math.max(0, parseInt(el.textContent) + delta);
+  if (!el) return 0;
+  var raw = ('value' in el ? el.value : el.textContent || '').trim();
+  var num = parseInt(raw, 10);
+  return isNaN(num) ? 0 : Math.max(0, num);
+}
+
+function setCounterValue(id, value) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var safe = isNaN(parseInt(value, 10)) ? 0 : Math.max(0, parseInt(value, 10));
+  if ('value' in el) {
+    el.value = safe;
+  } else {
+    el.textContent = safe;
+  }
+}
+
+function adjustVal(id, delta) {
+  setCounterValue(id, getCounterValue(id) + delta);
 }
 
 function openAddForm() {
