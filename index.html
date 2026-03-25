@@ -155,7 +155,7 @@ body{
 .switch input:checked+.switch-slider{background:#8a7ef0}.switch input:checked+.switch-slider:before{transform:translateX(16px)}
 .adjust-row{display:flex;align-items:center;gap:10px}.adjust-label{font-size:13px;color:#574e74;flex:1}.counter{display:flex;align-items:center;gap:8px}
 .counter-btn{width:32px;height:32px;border-radius:10px;border:1px solid rgba(127,119,221,0.12);background:#fff;font-size:18px;color:#50476c;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}.counter-btn:hover{background:#f8f4ff}
-.counter-val{font-size:16px;font-weight:700;color:#433b64;min-width:28px;text-align:center}
+.counter-val{font-size:16px;font-weight:700;color:#433b64;min-width:28px;text-align:center}.counter-input{width:72px;height:38px;border-radius:12px;border:1px solid rgba(127,119,221,0.16);background:#fff;font-size:16px;font-weight:700;color:#433b64;text-align:center;padding:0 8px;font-family:inherit}.counter-input:focus{outline:none;border-color:#8f84ff;box-shadow:0 0 0 3px rgba(143,132,255,0.12)}
 .form-btns{display:flex;gap:8px;margin-top:1.5rem}.form-btn{flex:1;padding:12px;font-size:14px;border-radius:14px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#51476f;cursor:pointer;font-family:inherit;font-weight:700}
 .form-btn.save,.download-btn{background:#8a7ef0;border-color:#8a7ef0;color:#fff}.form-btn.save:hover,.download-btn:hover{background:#7769e7}.form-btn:hover{background:#f8f4ff}.form-btn.del{color:#b33b4d;border-color:#f4b5bc}.form-btn.del:hover{background:#ffe9eb}
 .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(127,119,221,0.14),transparent);margin:1.45rem 0 1rem}.section-label{font-size:11px;color:#a39abb;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
@@ -369,7 +369,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
           <span class="adjust-label">总课时数</span>
           <div class="counter">
             <button class="counter-btn" onclick="adjustVal('f-total',-1)">−</button>
-            <span class="counter-val" id="f-total">10</span>
+            <input class="counter-input" id="f-total" type="number" min="0" step="1" value="10" inputmode="numeric" />
             <button class="counter-btn" onclick="adjustVal('f-total',1)">+</button>
           </div>
         </div>
@@ -381,7 +381,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
           <span class="adjust-label">当前剩余课时</span>
           <div class="counter">
             <button class="counter-btn" onclick="adjustVal('f-remaining',-1)">−</button>
-            <span class="counter-val" id="f-remaining">10</span>
+            <input class="counter-input" id="f-remaining" type="number" min="0" step="1" value="10" inputmode="numeric" />
             <button class="counter-btn" onclick="adjustVal('f-remaining',1)">+</button>
           </div>
         </div>
@@ -392,14 +392,14 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
         <span class="adjust-label">已上课次数</span>
         <div class="counter">
           <button class="counter-btn" onclick="adjustVal('f-used',-1)">−</button>
-          <span class="counter-val" id="f-used">0</span>
+          <input class="counter-input" id="f-used" type="number" min="0" step="1" value="0" inputmode="numeric" />
           <button class="counter-btn" onclick="adjustVal('f-used',1)">+</button>
         </div>
       </div>
     </div>
     <div class="form-group">
       <div class="form-switch-row">
-        <span class="form-switch-label">剩余少时提醒续费</span>
+        <span class="form-switch-label">课时不足时提醒续费</span>
         <label class="switch"><input type="checkbox" id="f-pay-alert" /><span class="switch-slider"></span></label>
       </div>
     </div>
@@ -861,7 +861,7 @@ function render() {
             '<span class="summary-title">'+course.name+'</span>'+
             (isToday ? '<span class="today-chip">今日打卡</span>' : '<span class="badge '+badgeClass+'">'+badgeText+'</span>')+
           '</div>'+
-          '<div class="summary-meta">'+(isToday ? '今天是上课日，展开即可直接打卡' : '下次：'+formatShortDate(nextDate)+' · 每'+WEEKDAYS[course.weekday])+'</div>'+
+          '<div class="summary-meta">'+(isToday ? '今天是上课日，点击即可打卡记录' : '下次：'+formatShortDate(nextDate)+' · 每'+WEEKDAYS[course.weekday])+'</div>'+
         '</div>'+
         '<div class="summary-count">'+compactCount+'</div>'+
         (isToday ? '' : '<div class="summary-chevron">⌄</div>')+
@@ -990,9 +990,9 @@ function openAddForm() {
   document.getElementById('f-name').value = '';
   document.getElementById('f-start').value = isoDate(new Date());
   document.getElementById('f-has-total').checked = false;
-  document.getElementById('f-total').textContent = '10';
-  document.getElementById('f-remaining').textContent = '10';
-  document.getElementById('f-used').textContent = '0';
+  setCounterValue('f-total', 10);
+  setCounterValue('f-remaining', 10);
+  setCounterValue('f-used', 0);
   document.getElementById('f-pay-alert').checked = false;
   toggleTotalMode(); selectWeekday(1); buildColorGrid(COLORS[0]);
   document.getElementById('edit-form-btns').innerHTML =
@@ -1011,10 +1011,10 @@ function openEditForm(idx) {
   document.getElementById('f-start').value = course.startDate;
   var hasTot = course.total !== null && course.total !== undefined;
   document.getElementById('f-has-total').checked = hasTot;
-  document.getElementById('f-total').textContent = hasTot ? course.total : 10;
+  setCounterValue('f-total', hasTot ? course.total : 10);
   var curRem = getRemainingCount(course);
-  document.getElementById('f-remaining').textContent = curRem !== null ? curRem : 10;
-  document.getElementById('f-used').textContent = course.used;
+  setCounterValue('f-remaining', curRem !== null ? curRem : 10);
+  setCounterValue('f-used', course.used);
   document.getElementById('f-pay-alert').checked = !!course.payAlert;
   toggleTotalMode(); selectWeekday(course.weekday); buildColorGrid(course.color);
   document.getElementById('edit-form-btns').innerHTML =
@@ -1027,9 +1027,9 @@ function saveForm() {
   var name = document.getElementById('f-name').value.trim();
   if (!name) { showToast('请填写课程名称'); return; }
   var hasTot = document.getElementById('f-has-total').checked;
-  var total = hasTot ? parseInt(document.getElementById('f-total').textContent) : null;
-  var remaining = hasTot ? null : parseInt(document.getElementById('f-remaining').textContent);
-  var used = parseInt(document.getElementById('f-used').textContent);
+  var total = hasTot ? getCounterValue('f-total') : null;
+  var remaining = hasTot ? null : getCounterValue('f-remaining');
+  var used = getCounterValue('f-used');
   var courses = loadData();
   if (editingIdx !== null) {
     var c = courses[editingIdx];
