@@ -234,7 +234,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
         <span class="sync-pill" id="sync-pill">未同步</span>
       </div>
 
-      <div class="auth-tabs">
+      <div id="auth-tabs" class="auth-tabs">
         <button id="tab-signin" class="auth-tab active" onclick="switchAuthMode('signin')">登录</button>
         <button id="tab-signup" class="auth-tab" onclick="switchAuthMode('signup')">注册</button>
         <button id="tab-reset" class="auth-tab" onclick="switchAuthMode('reset')">忘记密码</button>
@@ -566,27 +566,44 @@ function updateAuthUI() {
   var launcher = document.getElementById('auth-launcher');
   var account = document.getElementById('auth-account');
   var signoutTop = document.getElementById('auth-signout-top');
+  var tabs = document.getElementById('auth-tabs');
+  var signinMode = document.getElementById('mode-signin');
+  var signupMode = document.getElementById('mode-signup');
+  var resetMode = document.getElementById('mode-reset');
+
   if (currentUser) {
     if (account) account.classList.remove('hidden');
     if (signoutTop) signoutTop.classList.remove('hidden');
+    if (tabs) tabs.classList.add('hidden');
+    if (signinMode) signinMode.classList.add('hidden');
+    if (signupMode) signupMode.classList.add('hidden');
+    if (resetMode) resetMode.classList.add('hidden');
+
     if (launcher) {
       launcher.classList.add('logged-in');
       launcher.innerHTML = '☁️';
       launcher.setAttribute('aria-label','账户与同步');
       launcher.title = '账户与同步';
     }
-    closeAuthModal();
+
     document.getElementById('user-email').textContent = currentUser.email || '已登录';
     setSyncPill('已同步', 'ok');
   } else {
     if (account) account.classList.add('hidden');
     if (signoutTop) signoutTop.classList.add('hidden');
+    if (tabs) tabs.classList.remove('hidden');
+    if (signinMode) signinMode.classList.remove('hidden');
+    if (signupMode) signupMode.classList.remove('hidden');
+    if (resetMode) resetMode.classList.remove('hidden');
+
     if (launcher) {
       launcher.classList.remove('logged-in');
       launcher.innerHTML = '☁️<span class="auth-launcher-label">登录同步</span><small>不占地方</small>';
       launcher.setAttribute('aria-label','登录与同步');
       launcher.title = '';
     }
+
+    switchAuthMode('signin');
   }
 }
 async function hydrateDataForUser() {
