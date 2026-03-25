@@ -248,9 +248,6 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .version-notes-body h3{margin:8px 0 8px;font-size:15px;color:#5a3b73;}
 .version-notes-body ul{margin:6px 0 12px 18px;padding:0;}
 .version-notes-body li{margin:4px 0;}
-.version-tag{display:inline-block;margin-top:4px;padding:4px 10px;border-radius:999px;background:#ffe7f3;color:#8a4f73;font-size:12px;font-weight:700;}
-
-.version-top{max-width:760px;margin:6px auto 0;padding:0 14px;display:flex;justify-content:flex-start}.version-chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#eefaf5;color:#2d8b63;font-size:12px;font-weight:700;border:1px solid #d7f0e4}
 
 </style>
 </head>
@@ -330,9 +327,6 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
       </div>
     </div>
   </div>
-
-
-  <div class="version-top"><span class="version-chip">版本 v2026.03.25-login-safe-1</span></div>
 
   <div class="header">
     <div class="header-text">
@@ -656,7 +650,6 @@ function setSyncPill(text, cls) {
 function showSetupBox(show) {
   var box = document.getElementById('setup-box');
   if (!box) return;
-  document.getElementById('setup-sql').textContent = setupSQL;
   box.classList.toggle('hidden', !show);
 }
 async function fetchRemoteState() {
@@ -1784,61 +1777,18 @@ initAuth();
 <section class="version-notes-wrap">
   <details class="version-notes">
     <summary>
-      <span>✨ 功能版本说明</span>
-      <span class="sub">点开查看目前已经做好的功能</span>
+      <span>✨ 功能介绍</span>
+      <span class="sub">点开查看当前可用功能</span>
     </summary>
     <div class="version-notes-body">
-      <div class="version-tag">当前版本：课程管理 + 云同步 + 课表生成</div>
-      <h3>1. 课程管理</h3>
       <ul>
-        <li>课程卡片默认折叠，只显示课程名和剩余次数 / 总次数。</li>
-        <li>当天有课的课程会自动排在最上面，并默认展开，方便直接打卡。</li>
-        <li>课程可编辑总课时、剩余次数、已上次数、到期日、提醒设置。</li>
-        <li>编辑按钮和移动端点击区域已放大，更方便手指操作。</li>
-      </ul>
-
-      <h3>2. 打卡与扣课时</h3>
-      <ul>
-        <li>上课当天可直接打卡，打卡后自动扣 1 次课时。</li>
-        <li>支持撤销打卡，避免误操作。</li>
-        <li>支持多上课日设置，一门课一周可以按多个上课日多次扣课时。</li>
-        <li>支持调课：比如原本周二上课，改到周三后，可在周三正常打卡一次。</li>
-      </ul>
-
-      <h3>3. 续费 / 延期逻辑</h3>
-      <ul>
-        <li>当打完最后一节课、剩余课时变为 0 时，会弹出确认。</li>
-        <li>可选择确认这是最后一次，或确认已续费 / 延期。</li>
-        <li>续费默认增加 10 次，也可改成其他次数。</li>
-        <li>续费后已上次数不会清零，会继续累计；剩余次数则自动增加后继续递减。</li>
-      </ul>
-
-      <h3>4. 账号与同步</h3>
-      <ul>
-        <li>支持邮箱注册、登录、退出登录、忘记密码、重设密码。</li>
-        <li>未登录时可先使用本地保存；登录后会同步到 Supabase 云端。</li>
-        <li>登录入口已缩成右上角小按钮，登录后不再显示注册 / 登录 / 找回密码表单。</li>
-      </ul>
-
-      <h3>5. 课表与时间</h3>
-      <ul>
-        <li>编辑课程时可设置上课开始时间和结束时间。</li>
-        <li>首页支持“一键生成课表”，按周一到周日直观展示每周课程安排。</li>
-        <li>课表中会显示课程名、时间段、固定课 / 调课，并高亮当天。</li>
-      </ul>
-
-      <h3>6. 移动端优化</h3>
-      <ul>
-        <li>页面已做移动端优化，尽量减少误触、乱缩放和双击放大。</li>
-        <li>已加入更适合手机桌面的图标和网页图标。</li>
-        <li>整体界面改成了更柔和、偏童趣的风格。</li>
-      </ul>
-
-      <h3>7. 其他</h3>
-      <ul>
-        <li>支持导出日历（.ics）。</li>
-        <li>支持课时不足时提醒续费。</li>
-        <li>支持查看历史记录，方便核对机构是否正确扣课时。</li>
+        <li>课程卡片默认折叠，当天课程优先显示并可直接打卡。</li>
+        <li>支持课程新增、编辑、删除，课时数可直接输入。</li>
+        <li>上课日支持多选，并可设置开始时间和结束时间。</li>
+        <li>支持调课安排，记录原计划日期和调课后日期。</li>
+        <li>课时用完时可直接续课，已上次数会继续累计。</li>
+        <li>支持邮箱登录、云端同步和忘记密码。</li>
+        <li>支持一键生成周课表，并可导出到 Apple Calendar。</li>
       </ul>
     </div>
   </details>
