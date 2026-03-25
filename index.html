@@ -46,10 +46,6 @@ body{
 }
 body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-behavior:none;}
 .app{width:100%;max-width:480px;margin:0 auto}
-.version-bar{display:flex;justify-content:center;margin:0 0 10px}
-.version-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.82);border:1px solid rgba(120,102,164,0.14);box-shadow:0 6px 18px rgba(151,119,215,0.08);font-size:12px;color:#7a6fa8;font-weight:700}
-.version-bar{display:flex;justify-content:center;margin:0 0 10px}
-.version-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.82);border:1px solid rgba(120,102,164,0.14);box-shadow:0 6px 18px rgba(151,119,215,0.08);font-size:12px;color:#7a6fa8;font-weight:700}
 .header{
   display:flex;align-items:center;margin-bottom:1.1rem;
   background:rgba(255,255,255,0.72);backdrop-filter:blur(10px);
@@ -254,6 +250,8 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .version-notes-body li{margin:4px 0;}
 .version-tag{display:inline-block;margin-top:4px;padding:4px 10px;border-radius:999px;background:#ffe7f3;color:#8a4f73;font-size:12px;font-weight:700;}
 
+.version-top{max-width:760px;margin:6px auto 0;padding:0 14px;display:flex;justify-content:flex-start}.version-chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#eefaf5;color:#2d8b63;font-size:12px;font-weight:700;border:1px solid #d7f0e4}
+
 </style>
 </head>
 <body>
@@ -332,6 +330,9 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
       </div>
     </div>
   </div>
+
+
+  <div class="version-top"><span class="version-chip">版本 v2026.03.25-login-safe-1</span></div>
 
   <div class="header">
     <div class="header-text">
@@ -560,7 +561,6 @@ var TABLE_NAME = 'course_tracker_state';
 var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var COLORS = ['#8A7EF0','#5BC7A5','#FF9E6B','#6FA8FF','#FF93B5','#FFC663','#A6D96A','#FF7D8D','#8D8D9A','#35B8A6'];
 var WEEKDAYS = ['周日','周一','周二','周三','周四','周五','周六'];
-var APP_VERSION = 'v2026.03.25-StrictStart-2';
 var editingIdx = null;
 var formWeekdays = [1];
 var formColor = COLORS[0];
@@ -870,56 +870,15 @@ async function initAuth() {
   });
 }
 
-function parseLocalDate(value) {
-  if (!value && value !== 0) return null;
-  if (value instanceof Date) {
-    var d0 = new Date(value.getFullYear(), value.getMonth(), value.getDate());
-    d0.setHours(0,0,0,0);
-    return d0;
-  }
-  if (typeof value === 'number') {
-    var d1 = new Date(value);
-    if (isNaN(d1.getTime())) return null;
-    d1 = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate());
-    d1.setHours(0,0,0,0);
-    return d1;
-  }
-  var raw = String(value).trim();
-  if (!raw) return null;
-  var m = raw.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/);
-  if (m) {
-    var y = parseInt(m[1],10), mo = parseInt(m[2],10), da = parseInt(m[3],10);
-    var d2 = new Date(y, mo - 1, da);
-    d2.setHours(0,0,0,0);
-    return d2;
-  }
-  var d3 = new Date(raw);
-  if (isNaN(d3.getTime())) return null;
-  d3 = new Date(d3.getFullYear(), d3.getMonth(), d3.getDate());
-  d3.setHours(0,0,0,0);
-  return d3;
-}
-function getCourseStartDate(course) {
-  return parseLocalDate(course && course.startDate) || getTodayDate();
-}
-function isoDate(d) {
-  var dd = parseLocalDate(d) || getTodayDate();
-  return dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');
-}
-function formatDate(d) {
-  var dd = parseLocalDate(d) || getTodayDate();
-  return dd.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'});
-}
-function formatShortDate(d) {
-  var dd = parseLocalDate(d) || getTodayDate();
-  return dd.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'});
-}
+function isoDate(d) { return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function formatDate(d) { return d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'}); }
+function formatShortDate(d) { return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}); }
 function formatShortDateFromIso(iso) {
   if (!iso) return '';
-  var d = parseLocalDate(iso);
-  return !d ? String(iso) : formatShortDate(d);
+  var d = new Date(iso);
+  return isNaN(d.getTime()) ? iso : formatShortDate(d);
 }
-function getTodayDate(){ var t = new Date(); t = new Date(t.getFullYear(), t.getMonth(), t.getDate()); t.setHours(0,0,0,0); return t; }
+function getTodayDate(){ var t = new Date(); t.setHours(0,0,0,0); return t; }
 function getCourseWeekdays(course) {
   return sortWeekdays(Array.isArray(course.weekdays) && course.weekdays.length ? course.weekdays : [typeof course.weekday === 'number' ? course.weekday : 1]);
 }
@@ -929,13 +888,15 @@ function formatWeekdayList(course) {
 function isRegularCourseOnDate(course, dateObj) {
   var current = new Date(dateObj || getTodayDate());
   current.setHours(0,0,0,0);
-  var startDate = getCourseStartDate(course);
+  var startDate = new Date(course.startDate);
+  startDate.setHours(0,0,0,0);
   return startDate <= current && getCourseWeekdays(course).indexOf(current.getDay()) >= 0;
 }
 function getNextRegularClassDate(course, fromDate) {
   var base = new Date(fromDate || getTodayDate());
   base.setHours(0,0,0,0);
-  var start = getCourseStartDate(course);
+  var start = new Date(course.startDate);
+  start.setHours(0,0,0,0);
   if (base < start) base = new Date(start);
   var best = null;
   getCourseWeekdays(course).forEach(function(day){
@@ -990,23 +951,17 @@ function getTodayMeta(course) {
 }
 function getNextSessionInfo(course) {
   var today = getTodayDate();
-  var start = getCourseStartDate(course);
-  var base = today > start ? today : start;
-  var nextRegular = getNextRegularClassDate(course, base);
+  var nextRegular = getNextRegularClassDate(course, today);
   var best = { date: nextRegular, type: 'regular', note: '每' + formatWeekdayList(course) };
   (course.reschedules || []).forEach(function(plan){
     if (plan.used) return;
-    var d = parseLocalDate(plan.toDate);
-    if (!d) return;
-    if (d < base) return;
+    var d = new Date(plan.toDate);
+    d.setHours(0,0,0,0);
+    if (d < today) return;
     if (!best || d < best.date) {
       best = { date: d, type: 'reschedule', note: '调课：' + formatShortDateFromIso(plan.fromDate) + ' → ' + formatShortDateFromIso(plan.toDate) };
     }
   });
-  if (today < start && best && best.date && best.date >= start) {
-    best.unstarted = true;
-    if (best.type === 'regular') best.note = '首课起于 ' + formatShortDate(start) + ' · 每' + formatWeekdayList(course);
-  }
   return best;
 }
 function getRemainingCount(course) {
@@ -1660,7 +1615,8 @@ function generateICS() {
   var rrDays = ['SU','MO','TU','WE','TH','FR','SA'];
 
   function estimateLastRegularDate(course, sessionsLeft) {
-    var cursor = getCourseStartDate(course);
+    var cursor = new Date(course.startDate);
+    cursor.setHours(0,0,0,0);
     var count = 0;
     for (var i = 0; i < 4000; i++) {
       if (isRegularCourseOnDate(course, cursor)) {
@@ -1669,7 +1625,7 @@ function generateICS() {
       }
       cursor.setDate(cursor.getDate() + 1);
     }
-    return getNextRegularClassDate(course, getCourseStartDate(course));
+    return getNextRegularClassDate(course, new Date(course.startDate));
   }
 
   for (var i = 0; i < courses.length; i++) {
@@ -1687,7 +1643,7 @@ function generateICS() {
     var weeksToRun = totalSessions ? Math.ceil(totalSessions / weeklySlots) + 6 : 60;
 
     getCourseWeekdays(c).forEach(function(day){
-      var startDate = getCourseStartDate(c);
+      var startDate = new Date(c.startDate); startDate.setHours(0,0,0,0);
       var firstDate = new Date(startDate);
       var diff = (day - firstDate.getDay() + 7) % 7;
       firstDate.setDate(firstDate.getDate() + diff);
@@ -1822,7 +1778,6 @@ document.addEventListener('touchend', function(e){
   if (now - lastTouchEnd <= 300) e.preventDefault();
   lastTouchEnd = now;
 }, {passive:false});
-document.getElementById('app-version').textContent = '版本 ' + APP_VERSION;
 initAuth();
 </script>
 
