@@ -191,7 +191,7 @@ body{
 .schedule-item-note{font-size:11px;color:#a39abb;margin-top:3px;line-height:1.5}
 .schedule-tag{font-size:10px;padding:3px 7px;border-radius:999px;background:#f4efff;color:#6c5db5;font-weight:700;white-space:nowrap}
 .schedule-tag.shift{background:#fff1dd;color:#a05e10}
-.export-options{margin:1rem 0}.export-option{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(127,119,221,0.06)}.export-option:last-child{border-bottom:none}.export-option-label{font-size:13px;color:#574e74;font-weight:600}.export-option-desc{font-size:11px;color:#a39abb;margin-top:2px}
+.export-options{margin:1rem 0}.export-option{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(127,119,221,0.06)}.export-option:last-child{border-bottom:none}.export-option-copy{flex:1;min-width:0}.export-option-label{font-size:13px;color:#574e74;font-weight:600;line-height:1.4}.export-option-desc{font-size:11px;color:#a39abb;margin-top:2px;line-height:1.5}.export-option .reminder-select{flex:0 0 168px;width:168px;max-width:168px}
 .download-btn{width:100%;padding:14px;font-size:15px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-weight:700;margin-top:1rem}
 .today-chip{font-size:11px;padding:4px 8px;border-radius:999px;background:#fff3c0;color:#a56d00;font-weight:700}
 button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.auth-btn,.auth-tab,.history-toggle,.modal-close,.counter-btn,.wd-btn,.color-swatch{
@@ -230,7 +230,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .sync-pill{font-size:11px;padding:4px 8px;border-radius:999px;background:#f7f2ff;color:#7F77DD}.sync-pill.error{background:#fff1f1;color:#c75151}.sync-pill.ok{background:#eefaf5;color:#2d8b63}
 .hidden{display:none!important}.setup-box{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff8ed;color:#8b5d10;font-size:12px;line-height:1.6}.setup-box code{display:block;white-space:pre-wrap;background:#fff;border-radius:8px;padding:8px;margin-top:8px;color:#704b0b}.auth-mini{font-size:11px;color:#a095bc;line-height:1.6;margin-top:8px;text-align:center}
 @media (max-width:380px){.auth-launcher{width:40px;height:40px;font-size:16px}}
-
+@media (max-width:380px){.export-option{align-items:flex-start;flex-direction:column}.export-option .reminder-select{width:100%;max-width:none;flex:none}}
 
 .version-notes-wrap{max-width:760px;margin:18px auto 32px;padding:0 14px;}
 .version-notes{background:#fffafc;border:1px solid #ffd8ea;border-radius:18px;box-shadow:0 8px 20px rgba(255,158,203,.10);overflow:hidden;}
@@ -503,7 +503,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
     <div id="export-time-list"></div>
     <div class="export-options">
       <div class="export-option">
-        <div style="flex:1">
+        <div class="export-option-copy">
           <div class="export-option-label">每周上课提醒</div>
           <div class="export-option-desc">课前推送，含打卡提示</div>
         </div>
@@ -515,14 +515,14 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
         </select>
       </div>
       <div class="export-option">
-        <div style="flex:1">
+        <div class="export-option-copy">
           <div class="export-option-label">续费提醒</div>
           <div class="export-option-desc">剩余 ≤ 2 次时，在下一个上课日提醒</div>
         </div>
         <label class="switch"><input type="checkbox" id="exp-pay-alert" checked /><span class="switch-slider"></span></label>
       </div>
       <div class="export-option">
-        <div style="flex:1">
+        <div class="export-option-copy">
           <div class="export-option-label">课包到期提醒</div>
           <div class="export-option-desc">最后一节课当天 + 提前3天各提醒一次</div>
         </div>
@@ -550,13 +550,7 @@ var formWeekdays = [1];
 var formColor = COLORS[0];
 var expandedIds = {};
 
-var defaultCourses = [
-  {id:'xingti',name:'形体课',weekdays:[1],weekday:1,color:'#8A7EF0',total:10,used:3,remaining:null,startDate:'2025-03-09',classTime:'10:00',classEndTime:'11:00',history:[{date:'2025-03-09',status:'done'},{date:'2025-03-16',status:'done'},{date:'2025-03-23',status:'done'}],reschedules:[],payAlert:false},
-  {id:'sumiao',name:'素描课',weekdays:[2],weekday:2,color:'#5BC7A5',total:10,used:3,remaining:null,startDate:'2025-03-10',classTime:'10:00',classEndTime:'11:00',history:[{date:'2025-03-10',status:'done'},{date:'2025-03-17',status:'done'},{date:'2025-03-24',status:'done'}],reschedules:[],payAlert:false},
-  {id:'meishu',name:'美术课',weekdays:[2,4],weekday:2,color:'#FF9E6B',total:null,used:0,remaining:16,startDate:'2025-03-25',classTime:'10:00',classEndTime:'11:00',history:[],reschedules:[],payAlert:false},
-  {id:'zhongwen',name:'中文阅读',weekdays:[4],weekday:4,color:'#6FA8FF',total:null,used:0,remaining:null,startDate:'2025-04-16',classTime:'10:00',classEndTime:'11:00',history:[],reschedules:[],payAlert:false},
-  {id:'jita',name:'吉他课',weekdays:[0],weekday:0,color:'#FF93B5',total:null,used:0,remaining:2,startDate:'2025-03-29',classTime:'10:00',classEndTime:'11:00',history:[],reschedules:[],payAlert:true}
-];
+var defaultCourses = [];
 var currentCourses = [];
 var currentUser = null;
 var saveTimer = null;
@@ -1030,6 +1024,16 @@ function render() {
   var today = getTodayDate();
   var todayStr = isoDate(today);
   document.getElementById('today-date').textContent = formatDate(today);
+
+  if (sorted.length === 0) {
+    container.innerHTML =
+      '<div style="text-align:center;padding:2.5rem 1rem;color:#a39abb;">' +
+        '<div style="font-size:36px;margin-bottom:12px;">🗒️</div>' +
+        '<div style="font-size:15px;font-weight:600;color:#7a6fa8;margin-bottom:8px;">还没有课程</div>' +
+        '<div style="font-size:13px;line-height:1.6;">点右上角"管理课程"→ 新增课程 开始吧</div>' +
+      '</div>';
+    return;
+  }
 
   sorted.forEach(function(item){
     var course = item.course;
@@ -1549,11 +1553,17 @@ function openExportModal() {
     (function(c, idx){
       var row = document.createElement('div');
       row.className = 'time-row';
+      row.style.flexDirection = 'column';
+      row.style.alignItems = 'stretch';
+      row.style.gap = '8px';
       var savedTime = c.classTime || '10:00';
       var savedEnd = c.classEndTime || addMinutesToTime(savedTime, 60);
       row.innerHTML =
-        '<div class="time-dot" style="background:'+c.color+'"></div>' +
-        '<span class="time-name">'+c.name+'<br><span style="font-size:11px;color:#a39abb;font-weight:400;">每'+formatWeekdayList(c)+'</span></span>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<div class="time-dot" style="background:'+c.color+';flex-shrink:0;"></div>' +
+          '<span style="font-size:14px;font-weight:600;color:#4a3f73;flex:1;">'+c.name+'</span>' +
+          '<span style="font-size:11px;color:#a39abb;font-weight:500;">每'+formatWeekdayList(c)+'</span>' +
+        '</div>' +
         '<div class="time-range">' +
           '<input class="time-input" type="time" value="'+savedTime+'" onchange="saveClassTime('+idx+',this.value,null)" />' +
           '<span class="time-sep">至</span>' +
@@ -1709,7 +1719,7 @@ function generateICS() {
   }
 
   lines.push('END:VCALENDAR');
-  var blob = new Blob([lines.join('\\r\\n')], {type:'text/calendar;charset=utf-8'});
+  var blob = new Blob([lines.join('\r\n')], {type:'text/calendar;charset=utf-8'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url; a.download = '课时打卡.ics';
