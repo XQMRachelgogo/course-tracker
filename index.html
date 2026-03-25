@@ -264,7 +264,21 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 @media (max-width:380px){.auth-launcher{width:40px;height:40px;font-size:16px}}
 
 
-.version-notes-wrap{max-width:760px;margin:18px auto 32px;padding:0 14px;}
+.fee-summary-card{background:linear-gradient(135deg,#f8f3ff 0%,#fff4ec 100%);border:1px solid rgba(127,119,221,0.14);border-radius:16px;padding:.85rem 1.1rem}
+.fee-summary-total{font-size:26px;font-weight:800;color:#4a3f73;letter-spacing:-0.5px;margin-bottom:8px}
+.fee-summary-breakdown{display:flex;flex-direction:column;gap:5px}
+.fee-breakdown-item{display:flex;align-items:center;gap:8px;font-size:12px}
+.fee-breakdown-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.fee-breakdown-name{flex:1;color:#574e74}
+.fee-breakdown-amt{font-weight:700;color:#4a3f73}
+.fee-rate-note{font-size:11px;color:#b4acc9;margin-top:8px;line-height:1.5}
+.fee-currency-select{font-size:12px;font-family:inherit;color:#6d63a8;background:#f4efff;border:1px solid rgba(127,119,221,0.18);border-radius:999px;padding:4px 10px;cursor:pointer;outline:none;font-weight:600}
+.fee-item-row{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(127,119,221,0.08);border-radius:10px;padding:7px 10px}
+.fee-item-date{font-size:12px;color:#8f86aa;flex:1}
+.fee-item-amt{font-size:13px;font-weight:700;color:#4a3f73}
+.fee-item-del{background:none;border:none;color:#c4bcd8;cursor:pointer;font-size:16px;padding:0 2px;line-height:1}
+.fee-item-del:hover{color:#b33b4d}
+
 .version-notes{background:#fffafc;border:1px solid #ffd8ea;border-radius:18px;box-shadow:0 8px 20px rgba(255,158,203,.10);overflow:hidden;}
 .version-notes summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:700;color:#7b4b94;display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .version-notes summary::-webkit-details-marker{display:none;}
@@ -366,6 +380,25 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
     </div>
   </div>
   <div class="cards" id="cards-container"></div>
+  <div class="divider"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+    <p class="section-label" style="margin-bottom:0;">今年学费分摊</p>
+    <select id="fee-display-currency" class="fee-currency-select" onchange="renderFeeSummary()">
+      <option value="CNY">¥ CNY</option>
+      <option value="USD">$ USD</option>
+      <option value="HKD">HK$ HKD</option>
+      <option value="EUR">€ EUR</option>
+      <option value="GBP">£ GBP</option>
+      <option value="JPY">¥ JPY</option>
+      <option value="CAD">CA$ CAD</option>
+      <option value="AUD">A$ AUD</option>
+    </select>
+  </div>
+  <div id="fee-summary-card" class="fee-summary-card">
+    <div class="fee-summary-total" id="fee-summary-total">—</div>
+    <div class="fee-summary-breakdown" id="fee-summary-breakdown"></div>
+    <div id="fee-rate-note" class="fee-rate-note"></div>
+  </div>
   <div class="divider"></div>
   <p class="section-label">本周课表</p>
   <button class="export-btn" onclick="openScheduleModal()">🗓️ 一键生成课表</button>
@@ -513,6 +546,26 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
         <label class="switch"><input type="checkbox" id="f-pay-alert" /><span class="switch-slider"></span></label>
       </div>
     </div>
+    <div class="form-group">
+      <label class="form-label">学费记录</label>
+      <div style="font-size:12px;color:#a39abb;margin-bottom:8px;line-height:1.5;">每次缴费时记录金额，系统会按<strong style="color:#7a6fa8;">实际上课年份</strong>分摊，统计当年花销。</div>
+      <div id="f-fee-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
+      <div style="display:grid;grid-template-columns:80px 1fr 130px;gap:6px;align-items:center;">
+        <select class="form-input" id="f-fee-currency" style="padding:8px 6px;font-size:13px;">
+          <option value="CNY">¥ 人民币</option>
+          <option value="USD">$ 美元</option>
+          <option value="HKD">HK$ 港币</option>
+          <option value="EUR">€ 欧元</option>
+          <option value="GBP">£ 英镑</option>
+          <option value="JPY">¥ 日元</option>
+          <option value="CAD">CA$ 加元</option>
+          <option value="AUD">A$ 澳元</option>
+        </select>
+        <input class="form-input" id="f-fee-amount" type="number" min="0" step="0.01" placeholder="金额" inputmode="decimal" style="padding:8px 10px;font-size:14px;" />
+        <input class="form-input" id="f-fee-date" type="date" style="padding:8px 8px;font-size:13px;" />
+      </div>
+      <button type="button" class="add-shift-btn" style="margin-top:8px;" onclick="addFeeFromForm()">+ 添加一笔学费</button>
+    </div>
     <div class="form-btns" id="edit-form-btns"></div>
   </div>
 
@@ -642,6 +695,7 @@ function normalizeCourse(course) {
   c.weekday = c.weekdays[0];
   c.history = Array.isArray(c.history) ? c.history : [];
   c.reschedules = Array.isArray(c.reschedules) ? c.reschedules : [];
+  c.fees = Array.isArray(c.fees) ? c.fees : [];
   c.classTime = c.classTime || '10:00';
   c.classEndTime = c.classEndTime || addMinutesToTime(c.classTime, 60);
   c.used = Math.max(0, parseInt(c.used, 10) || 0);
@@ -1063,6 +1117,7 @@ function render() {
   var today = getTodayDate();
   var todayStr = isoDate(today);
   document.getElementById('today-date').textContent = formatDate(today);
+  renderFeeSummary();
 
   if (sorted.length === 0) {
     container.innerHTML =
@@ -1411,6 +1466,10 @@ function openAddForm() {
   document.getElementById('f-shift-from').value = '';
   document.getElementById('f-shift-to').value = '';
   document.getElementById('f-shift-note').value = '';
+  document.getElementById('f-fee-amount').value = '';
+  document.getElementById('f-fee-date').value = isoDate(new Date());
+  document.getElementById('f-fee-currency').value = 'CNY';
+  renderFeeList(null);
   toggleTotalMode(); selectWeekday([1]); buildColorGrid(COLORS[0]); renderRescheduleList(null);
   document.getElementById('edit-form-btns').innerHTML =
     '<button class="form-btn" onclick="closeModal(\'edit-modal\')">取消</button>' +
@@ -1439,6 +1498,11 @@ function openEditForm(idx) {
   document.getElementById('f-shift-from').value = '';
   document.getElementById('f-shift-to').value = '';
   document.getElementById('f-shift-note').value = '';
+  document.getElementById('f-fee-amount').value = '';
+  document.getElementById('f-fee-date').value = isoDate(new Date());
+  var lastCurrency = (course.fees && course.fees.length) ? (course.fees[course.fees.length-1].currency || 'CNY') : 'CNY';
+  document.getElementById('f-fee-currency').value = lastCurrency;
+  renderFeeList(course);
   toggleTotalMode(); selectWeekday(formWeekdays); buildColorGrid(course.color); renderRescheduleList(course);
   document.getElementById('edit-form-btns').innerHTML =
     '<button class="form-btn del" onclick="if(confirm(\'确定删除？\'))deleteCourse('+idx+')">删除</button>' +
@@ -1471,6 +1535,7 @@ function saveForm() {
     c.remaining = remaining;
     c.used = used;
     c.payAlert = document.getElementById('f-pay-alert').checked;
+    c.fees = c.fees || [];
   } else {
     var newId = 'c' + Date.now();
     courses.push({
@@ -1487,6 +1552,7 @@ function saveForm() {
       classEndTime: classEndTime,
       history: [],
       reschedules: [],
+      fees: [],
       payAlert: document.getElementById('f-pay-alert').checked
     });
     expandedIds[newId] = false;
@@ -1496,6 +1562,199 @@ function saveForm() {
   showToast(editingIdx !== null ? '课程已更新' : '课程已添加');
   render();
 }
+
+
+var CURRENCY_SYMBOLS = { CNY:'¥', USD:'$', HKD:'HK$', EUR:'€', GBP:'£', JPY:'¥', CAD:'CA$', AUD:'A$' };
+
+// Approximate rates to CNY (base). User can't edit these here but they're clearly labeled as approximate.
+var RATES_TO_CNY = { CNY:1, USD:7.25, HKD:0.93, EUR:7.85, GBP:9.15, JPY:0.048, CAD:5.25, AUD:4.65 };
+
+function toCNY(amount, currency) {
+  return amount * (RATES_TO_CNY[currency] || 1);
+}
+function fromCNY(amount, targetCurrency) {
+  return amount / (RATES_TO_CNY[targetCurrency] || 1);
+}
+function fmtMoney(amount, currency) {
+  var sym = CURRENCY_SYMBOLS[currency] || currency;
+  var n = Number(amount);
+  if (isNaN(n)) n = 0;
+  if (currency === 'JPY') return sym + Math.round(n).toLocaleString('zh-CN');
+  return sym + (n % 1 < 0.005 ? Math.round(n).toLocaleString('zh-CN') : n.toLocaleString('zh-CN', {minimumFractionDigits:2, maximumFractionDigits:2}));
+}
+
+function renderFeeSummary() {
+  var courses = loadData();
+  var thisYear = new Date().getFullYear();
+  var totalEl = document.getElementById('fee-summary-total');
+  var breakdownEl = document.getElementById('fee-summary-breakdown');
+  var rateNoteEl = document.getElementById('fee-rate-note');
+  var displayCurEl = document.getElementById('fee-display-currency');
+  if (!totalEl || !breakdownEl) return;
+
+  var displayCur = (displayCurEl && displayCurEl.value) || 'CNY';
+  var needsConversion = false;
+
+  var grandTotalCNY = 0;
+  var items = [];
+
+  courses.forEach(function(c) {
+    if (!(c.fees && c.fees.length)) return;
+    var byYear = prorateFeesByYear(c);
+    var thisYearAmts = byYear[thisYear];
+    if (!thisYearAmts) return;
+
+    var courseCNY = 0;
+    Object.keys(thisYearAmts).forEach(function(cur) {
+      courseCNY += toCNY(thisYearAmts[cur], cur);
+      if (cur !== displayCur) needsConversion = true;
+    });
+
+    var converted = fromCNY(courseCNY, displayCur);
+    grandTotalCNY += courseCNY;
+    items.push({ name: c.name, color: c.color, amtCNY: courseCNY, converted: converted });
+  });
+
+  if (!items.length) {
+    totalEl.textContent = '—';
+    breakdownEl.innerHTML = '<div style="font-size:12px;color:#b4acc9;">在课程编辑里添加学费记录后，这里会按实际上课比例分摊显示。</div>';
+    if (rateNoteEl) rateNoteEl.textContent = '';
+    return;
+  }
+
+  var grandConverted = fromCNY(grandTotalCNY, displayCur);
+  totalEl.textContent = fmtMoney(grandConverted, displayCur);
+
+  items.sort(function(a,b){ return b.amtCNY - a.amtCNY; });
+  breakdownEl.innerHTML = items.map(function(item){
+    return '<div class="fee-breakdown-item">' +
+      '<div class="fee-breakdown-dot" style="background:' + item.color + '"></div>' +
+      '<span class="fee-breakdown-name">' + item.name + '</span>' +
+      '<span class="fee-breakdown-amt">' + fmtMoney(item.converted, displayCur) + '</span>' +
+    '</div>';
+  }).join('');
+
+  if (rateNoteEl) {
+    rateNoteEl.textContent = needsConversion
+      ? '* 已按参考汇率换算为 ' + displayCur + '，仅供参考'
+      : '';
+  }
+}
+
+
+function renderFeeList(course) {
+  var list = document.getElementById('f-fee-list');
+  if (!list) return;
+  var fees = (course && course.fees) ? course.fees : [];
+  if (!fees.length) { list.innerHTML = '<div style="font-size:12px;color:#b4acc9;padding:4px 0;">暂无记录</div>'; return; }
+  list.innerHTML = fees.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; }).map(function(f){
+    var origIdx = fees.indexOf(f);
+    var sym = CURRENCY_SYMBOLS[f.currency] || (f.currency || '¥');
+    return '<div class="fee-item-row">' +
+      '<span class="fee-item-date">' + f.date + '</span>' +
+      '<span style="font-size:11px;color:#a39abb;margin-right:2px;">' + (f.currency || 'CNY') + '</span>' +
+      '<span class="fee-item-amt">' + fmtMoney(f.amount, f.currency || 'CNY') + '</span>' +
+      '<button class="fee-item-del" onclick="deleteFee(' + origIdx + ')" title="删除">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function addFeeFromForm() {
+  var amountRaw = document.getElementById('f-fee-amount').value.trim();
+  var date = document.getElementById('f-fee-date').value;
+  var currency = document.getElementById('f-fee-currency').value || 'CNY';
+  if (!amountRaw || isNaN(parseFloat(amountRaw)) || parseFloat(amountRaw) <= 0) { showToast('请填写有效金额'); return; }
+  if (!date) { showToast('请选择缴费日期'); return; }
+  var courses = loadData();
+  var target = editingIdx !== null ? courses[editingIdx] : null;
+  if (!target) { showToast('请先保存课程'); return; }
+  target.fees = target.fees || [];
+  target.fees.push({ id: 'fee' + Date.now(), amount: parseFloat(amountRaw), currency: currency, date: date });
+  saveData(courses);
+  document.getElementById('f-fee-amount').value = '';
+  renderFeeList(target);
+  renderFeeSummary();
+  showToast('已添加学费记录');
+}
+
+function deleteFee(feeIdx) {
+  if (editingIdx === null) return;
+  var courses = loadData();
+  var c = courses[editingIdx];
+  c.fees = c.fees || [];
+  c.fees.splice(feeIdx, 1);
+  saveData(courses);
+  renderFeeList(c);
+  renderFeeSummary();
+}
+
+// Get all dates of actual classes taken (history status='done'), grouped by year
+function getClassDatesByYear(course) {
+  var byYear = {};
+  (course.history || []).forEach(function(h) {
+    if (h.status !== 'done') return;
+    var yr = h.date ? parseInt(String(h.date).slice(0, 4), 10) : null;
+    if (!yr) return;
+    byYear[yr] = (byYear[yr] || 0) + 1;
+  });
+  return byYear;
+}
+
+function prorateFeesByYear(course) {
+  var result = {};
+  var fees = course.fees || [];
+  if (!fees.length) return result;
+
+  var classByYear = getClassDatesByYear(course);
+  var totalHistorySessions = Object.keys(classByYear).reduce(function(a, yr) { return a + classByYear[yr]; }, 0);
+  var thisYear = new Date().getFullYear();
+
+  // If we have actual history, prorate by real attendance
+  if (totalHistorySessions > 0) {
+    fees.forEach(function(f) {
+      var currency = f.currency || 'CNY';
+      var amount = parseFloat(f.amount) || 0;
+      if (!amount) return;
+      Object.keys(classByYear).forEach(function(yr) {
+        var share = amount * classByYear[yr] / totalHistorySessions;
+        if (!result[yr]) result[yr] = {};
+        result[yr][currency] = (result[yr][currency] || 0) + share;
+      });
+    });
+    return result;
+  }
+
+  // No history yet — estimate using course.used and start date
+  // Strategy: spread sessions across years based on startDate and used count
+  var used = course.used || 0;
+  var startYear = course.startDate ? parseInt(String(course.startDate).slice(0,4), 10) : thisYear;
+
+  fees.forEach(function(f) {
+    var currency = f.currency || 'CNY';
+    var amount = parseFloat(f.amount) || 0;
+    if (!amount) return;
+
+    var targetYear;
+    if (used === 0) {
+      // Nothing attended yet — show in current year (course is future/ongoing)
+      targetYear = thisYear;
+    } else if (startYear === thisYear) {
+      // All classes in this year
+      targetYear = thisYear;
+    } else {
+      // Course spans years but no history — attribute to this year
+      // (conservative: show cost as current-year expense)
+      targetYear = thisYear;
+    }
+
+    if (!result[targetYear]) result[targetYear] = {};
+    result[targetYear][currency] = (result[targetYear][currency] || 0) + amount;
+  });
+
+  return result;
+}
+
+
 
 
 function getWeekMonday(dateObj) {
