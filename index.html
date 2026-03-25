@@ -152,34 +152,34 @@ body{
   .summary-title{font-size:15px}.summary-count{font-size:12px;padding:6px 8px}.stats-row{grid-template-columns:1fr}.actions{flex-direction:column}
 }
 
-.auth-shell{margin-bottom:14px}
-.auth-panel{background:linear-gradient(180deg,#fffdfd 0%,#fff8ff 100%);border:1px solid rgba(138,126,240,.16);border-radius:24px;padding:16px 14px 14px;box-shadow:0 14px 34px rgba(127,119,221,.10)}
-.auth-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.auth-shell{display:flex;justify-content:flex-end;margin-bottom:8px}
+.auth-launcher{display:inline-flex;align-items:center;justify-content:center;gap:0;width:44px;height:44px;padding:0;border:none;border-radius:999px;background:rgba(255,255,255,.94);color:#6a56d6;font:inherit;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 10px 26px rgba(127,119,221,.12);border:1px solid rgba(138,126,240,.16)}
+.auth-launcher:hover{background:#fff}.auth-launcher small,.auth-launcher-label{display:none}
+.auth-launcher.logged-in{background:linear-gradient(180deg,#fff 0%,#f7f2ff 100%);color:#5c4cc8;border-color:rgba(127,119,221,.22)}
+.auth-modal-overlay{display:none;position:fixed;inset:0;background:rgba(70,55,101,.26);z-index:120;align-items:center;justify-content:center;padding:18px}
+.auth-modal-overlay.open{display:flex}
+.auth-panel{background:linear-gradient(180deg,#fffdfd 0%,#fff8ff 100%);border:1px solid rgba(138,126,240,.16);border-radius:26px;padding:16px 14px 14px;box-shadow:0 18px 40px rgba(127,119,221,.15);width:100%;max-width:360px;position:relative}
+.auth-close{position:absolute;right:12px;top:12px;width:32px;height:32px;border:none;border-radius:999px;background:#f7f2ff;color:#8d84aa;font:inherit;font-size:16px;font-weight:700;cursor:pointer}
+.auth-close:hover{background:#efe8ff;color:#6a56d6}
+.auth-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;padding-right:34px}
 .auth-title{font-size:17px;font-weight:800;color:#5d5194;margin-bottom:5px}
 .auth-desc{font-size:12px;color:#8d84aa;line-height:1.65}
 .auth-bubble{flex-shrink:0;font-size:22px;line-height:1;background:#fff3c6;border-radius:16px;padding:10px 11px;box-shadow:0 6px 14px rgba(255,196,84,.18)}
 .auth-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;background:#f6f1ff;border-radius:16px;padding:5px;margin-bottom:12px}
 .auth-tab{border:none;background:transparent;color:#7d74a8;border-radius:12px;padding:9px 6px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
 .auth-tab.active{background:#fff;color:#6a56d6;box-shadow:0 4px 10px rgba(127,119,221,.10)}
-.auth-mode{display:none}
-.auth-mode.active{display:block}
-.auth-stack{display:grid;gap:8px}
-.auth-actions{display:flex;gap:8px;margin-top:12px}
+.auth-mode{display:none}.auth-mode.active{display:block}.auth-stack{display:grid;gap:8px}.auth-actions{display:flex;gap:8px;margin-top:12px}
 .auth-btn{flex:1;padding:11px 12px;border:none;border-radius:13px;background:#7F77DD;color:#fff;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(127,119,221,.18)}
 .auth-btn.secondary{background:#fff;color:#7F77DD;border:1px solid rgba(127,119,221,.25);box-shadow:none}
 .auth-btn.ghost{background:#fff1f7;color:#d15b93;border:1px solid rgba(209,91,147,.18);box-shadow:none}
-.auth-link-row{display:flex;justify-content:center;margin-top:10px}
-.auth-link{background:none;border:none;color:#8a7ef0;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
-.auth-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid rgba(138,126,240,.18);border-radius:16px;padding:11px 12px;margin-bottom:14px;box-shadow:0 8px 24px rgba(127,119,221,.08)}
-.auth-status strong{font-size:14px;color:#5d5194}
-.auth-status span{font-size:12px;color:#8d84aa}
-.sync-pill{margin-left:auto;font-size:11px;padding:4px 8px;border-radius:999px;background:#f7f2ff;color:#7F77DD}
-.sync-pill.error{background:#fff1f1;color:#c75151}
-.sync-pill.ok{background:#eefaf5;color:#2d8b63}
-.hidden{display:none!important}
-.setup-box{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff8ed;color:#8b5d10;font-size:12px;line-height:1.6}
-.setup-box code{display:block;white-space:pre-wrap;background:#fff;border-radius:8px;padding:8px;margin-top:8px;color:#704b0b}
-.auth-mini{font-size:11px;color:#a095bc;line-height:1.6;margin-top:8px;text-align:center}
+.auth-link-row{display:flex;justify-content:center;margin-top:10px}.auth-link{background:none;border:none;color:#8a7ef0;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.auth-account{display:flex;align-items:center;gap:8px;background:#f8f4ff;border:1px solid rgba(138,126,240,.12);border-radius:16px;padding:10px 12px;margin:10px 0 12px}
+.auth-account-badge{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;color:#6a56d6;font-size:16px;box-shadow:0 4px 10px rgba(127,119,221,.08)}
+.auth-account strong{font-size:13px;color:#5d5194;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.auth-account span{font-size:11px;color:#8d84aa}
+.sync-pill{font-size:11px;padding:4px 8px;border-radius:999px;background:#f7f2ff;color:#7F77DD}.sync-pill.error{background:#fff1f1;color:#c75151}.sync-pill.ok{background:#eefaf5;color:#2d8b63}
+.hidden{display:none!important}.setup-box{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff8ed;color:#8b5d10;font-size:12px;line-height:1.6}.setup-box code{display:block;white-space:pre-wrap;background:#fff;border-radius:8px;padding:8px;margin-top:8px;color:#704b0b}.auth-mini{font-size:11px;color:#a095bc;line-height:1.6;margin-top:8px;text-align:center}
+@media (max-width:380px){.auth-launcher{width:40px;height:40px;font-size:16px}}
 
 </style>
 </head>
@@ -187,13 +187,30 @@ body{
 <div class="app">
 
   <div id="auth-shell" class="auth-shell">
+    <button id="auth-launcher" class="auth-launcher" onclick="openAuthModal()" aria-label="登录与同步">☁️<span class="auth-launcher-label">登录同步</span><small>不占地方</small></button>
+  </div>
+
+  <div id="auth-modal" class="auth-modal-overlay">
     <div id="auth-panel" class="auth-panel">
+      <button class="auth-close" onclick="closeAuthModal()">✕</button>
       <div class="auth-top">
         <div>
           <div class="auth-title">登录后自动同步</div>
           <div class="auth-desc">课程和打卡记录会保存到云端。未登录时也会先保存在当前浏览器。</div>
         </div>
-        <div class="auth-bubble">🧸</div>
+        <div style="display:flex;align-items:flex-start;gap:8px">
+          <button id="auth-signout-top" class="auth-close hidden" style="position:static;width:auto;height:auto;padding:7px 10px;border-radius:12px;font-size:12px" onclick="signOutUser()">退出</button>
+          <div class="auth-bubble">🧸</div>
+        </div>
+      </div>
+
+      <div id="auth-account" class="auth-account hidden">
+        <div class="auth-account-badge">☁️</div>
+        <div style="flex:1;min-width:0">
+          <strong id="user-email">已登录</strong>
+          <span>课程数据会自动同步到云端</span>
+        </div>
+        <span class="sync-pill" id="sync-pill">未同步</span>
       </div>
 
       <div class="auth-tabs">
@@ -241,15 +258,6 @@ body{
         <code id="setup-sql"></code>
       </div>
     </div>
-  </div>
-
-  <div id="auth-status" class="auth-status hidden">
-    <div>
-      <strong id="user-email">已登录</strong><br>
-      <span>课程数据会自动同步到云端</span>
-    </div>
-    <span class="sync-pill" id="sync-pill">未同步</span>
-    <button class="auth-btn ghost" style="flex:0 0 auto;padding:8px 12px;margin-left:auto" onclick="signOutUser()">退出</button>
   </div>
 
   <div class="header">
@@ -527,17 +535,37 @@ function queueRemoteSave() {
     });
   }, 350);
 }
+function openAuthModal() {
+  document.getElementById('auth-modal').classList.add('open');
+}
+function closeAuthModal() {
+  document.getElementById('auth-modal').classList.remove('open');
+}
 function updateAuthUI() {
-  var panel = document.getElementById('auth-panel');
-  var status = document.getElementById('auth-status');
+  var launcher = document.getElementById('auth-launcher');
+  var account = document.getElementById('auth-account');
+  var signoutTop = document.getElementById('auth-signout-top');
   if (currentUser) {
-    panel.classList.add('hidden');
-    status.classList.remove('hidden');
+    if (account) account.classList.remove('hidden');
+    if (signoutTop) signoutTop.classList.remove('hidden');
+    if (launcher) {
+      launcher.classList.add('logged-in');
+      launcher.innerHTML = '☁️';
+      launcher.setAttribute('aria-label','账户与同步');
+      launcher.title = '账户与同步';
+    }
+    closeAuthModal();
     document.getElementById('user-email').textContent = currentUser.email || '已登录';
     setSyncPill('已同步', 'ok');
   } else {
-    status.classList.add('hidden');
-    panel.classList.remove('hidden');
+    if (account) account.classList.add('hidden');
+    if (signoutTop) signoutTop.classList.add('hidden');
+    if (launcher) {
+      launcher.classList.remove('logged-in');
+      launcher.innerHTML = '☁️<span class="auth-launcher-label">登录同步</span><small>不占地方</small>';
+      launcher.setAttribute('aria-label','登录与同步');
+      launcher.title = '';
+    }
   }
 }
 async function hydrateDataForUser() {
@@ -594,8 +622,10 @@ async function signInWithPassword() {
   if (!email || !password) { showToast('请填写邮箱和密码'); return; }
   var result = await supabase.auth.signInWithPassword({ email: email, password: password });
   if (result.error) { showToast('登录失败：' + result.error.message); return; }
+  closeAuthModal();
   showToast('登录成功');
 }
+
 async function signUpWithPassword() {
   var email = document.getElementById('signup-email').value.trim();
   var password = document.getElementById('signup-password').value;
@@ -1107,6 +1137,8 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 document.querySelectorAll('.modal-overlay').forEach(function(overlay){
   overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.classList.remove('open'); });
 });
+var authModalEl = document.getElementById('auth-modal');
+if (authModalEl) { authModalEl.addEventListener('click', function(e){ if (e.target === authModalEl) closeAuthModal(); }); }
 initAuth();
 </script>
 </body>
