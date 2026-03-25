@@ -147,8 +147,52 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
 .add-course-btn{width:100%;padding:11px;font-size:14px;border-radius:14px;border:1px dashed rgba(127,119,221,0.25);background:#fff;color:#8d84aa;cursor:pointer;font-family:inherit;font-weight:600}
 .add-course-btn:hover{background:#f9f5ff}
 .form-group{margin-bottom:14px}.form-label{font-size:12px;color:#938cae;margin-bottom:6px;display:block}
-.form-input,.time-input,.reminder-select{width:100%;max-width:100%;min-width:0;box-sizing:border-box;padding:12px 12px;font-size:16px;border:1px solid rgba(127,119,221,0.15);border-radius:12px;background:#fff;color:#433b64;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none}
+.form-input,.time-input,.reminder-select{width:100%;padding:12px 12px;font-size:16px;border:1px solid rgba(127,119,221,0.15);border-radius:12px;background:#fff;color:#433b64;font-family:inherit;outline:none}
 .form-input:focus,.time-input:focus,.reminder-select:focus{border-color:#8b7af1}
+
+input[type="date"],input[type="time"]{
+  -webkit-appearance:none;
+  appearance:none;
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  min-height:54px;
+  line-height:1.2;
+}
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value{
+  text-align:center;
+  min-height:1.4em;
+}
+input[type="date"]::-webkit-datetime-edit,
+input[type="time"]::-webkit-datetime-edit{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:1.4em;
+  padding:0;
+}
+input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+input[type="time"]::-webkit-datetime-edit-fields-wrapper{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator{
+  opacity:.72;
+  margin:0;
+  padding:0;
+}
+.reschedule-grid > *,
+.time-range > *{
+  min-width:0;
+}
+
 .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
 .wd-btn{padding:8px 2px;font-size:12px;border-radius:10px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#6d6586;cursor:pointer;font-family:inherit;text-align:center}
 .wd-btn.selected{background:#8a7ef0;border-color:#8a7ef0;color:#fff}
@@ -157,8 +201,7 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
 .reschedule-grid-labels{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 6px;font-size:12px;font-weight:700;color:#6f6889}
 .reschedule-grid-labels span:first-child{text-align:left}
 .reschedule-grid-labels span:last-child{text-align:right}
-.reschedule-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;width:100%}
-.reschedule-grid > *{min-width:0;max-width:100%}
+.reschedule-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .reschedule-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .reschedule-item{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(127,119,221,0.08);border-radius:12px;padding:9px 10px}
 .reschedule-item-main{flex:1;min-width:0}
@@ -166,7 +209,6 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
 .reschedule-item-sub{font-size:11px;color:#a39abb;margin-top:2px;line-height:1.5}
 .add-shift-btn{width:100%;margin-top:8px;padding:10px 12px;border-radius:12px;border:1px dashed rgba(127,119,221,0.22);background:#fff;color:#7b71a2;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
 .add-shift-btn:hover{background:#f8f4ff}
-@media (max-width:480px){.modal{padding-left:1rem;padding-right:1rem}.form-input,.time-input,.reminder-select{font-size:16px;padding:11px 10px}.time-range{grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr);gap:6px}.reschedule-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}.reschedule-box{padding:10px}.weekday-grid{gap:4px}}
 @media (max-width:380px){.reschedule-grid-labels,.reschedule-grid{grid-template-columns:1fr}.reschedule-grid-labels span:first-child,.reschedule-grid-labels span:last-child{text-align:left}.header-actions{gap:6px}.manage-btn{padding:8px 10px;font-size:12px}}
 .color-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
 .color-swatch{width:100%;aspect-ratio:1;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .1s}.color-swatch.selected{border-color:#433b64;transform:scale(1.12)}
@@ -183,9 +225,8 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
 .export-btn{width:100%;padding:14px;font-size:14px;border-radius:18px;border:1px solid rgba(127,119,221,0.12);background:linear-gradient(180deg,#ffffff 0%,#faf6ff 100%);color:#4a3f73;cursor:pointer;font-family:inherit;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--shadow)}
 .export-btn:hover{background:#f8f3ff}.export-hint{font-size:11px;color:#aaa1bf;margin-top:8px;text-align:center;line-height:1.5}
 .time-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:14px;margin-bottom:8px}.time-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.time-name{font-size:14px;font-weight:600;color:#4a3f73;flex:1}
-.time-range{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;width:100%;min-width:0}
-.time-range > *{min-width:0;max-width:100%}
-.time-sep{font-size:12px;color:#a39abb;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.time-range{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;min-width:150px}
+.time-sep{font-size:12px;color:#a39abb;font-weight:700}
 .schedule-week{display:flex;flex-direction:column;gap:10px}
 .schedule-day{background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:18px;padding:12px}
 .schedule-day-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
