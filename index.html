@@ -6,119 +6,252 @@
 <title>课时打卡</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;background:#f5f4f0;min-height:100vh;padding:1.5rem 1rem 3rem}
+:root{
+  --bg:#fff8f3;
+  --paper:#ffffff;
+  --ink:#3a3550;
+  --sub:#8d88a6;
+  --line:rgba(120,102,164,0.14);
+  --soft:#f8f3ff;
+  --soft-2:#fff4ec;
+  --today:#fff7d9;
+  --shadow:0 10px 30px rgba(151,119,215,0.10);
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;
+  background:linear-gradient(180deg,#fff9f4 0%,#fff4fb 46%,#f8f8ff 100%);
+  min-height:100vh;
+  padding:1.25rem 0.95rem 3rem;
+  color:var(--ink);
+}
 .app{max-width:480px;margin:0 auto}
-.header{display:flex;align-items:center;margin-bottom:1.5rem}
+.header{
+  display:flex;align-items:center;margin-bottom:1.1rem;
+  background:rgba(255,255,255,0.72);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.6);box-shadow:var(--shadow);
+  border-radius:22px;padding:1rem 1rem .95rem;
+}
 .header-text{flex:1}
-.header h1{font-size:22px;font-weight:600;color:#1a1a1a}
-.header p{font-size:13px;color:#888;margin-top:4px}
-.manage-btn{padding:7px 14px;font-size:13px;border-radius:8px;border:0.5px solid rgba(0,0,0,0.15);background:#fff;color:#555;cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap}
-.manage-btn:hover{background:#f0efe9}
+.header h1{font-size:22px;font-weight:700;color:#4a3f73}
+.header p{font-size:13px;color:var(--sub);margin-top:4px}
+.manage-btn{
+  padding:8px 14px;font-size:13px;border-radius:999px;border:1px solid rgba(127,119,221,0.18);
+  background:#fff;color:#6d63a8;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;
+  box-shadow:0 4px 14px rgba(127,119,221,0.08)
+}
+.manage-btn:hover{background:#f7f3ff}
 .cards{display:flex;flex-direction:column;gap:12px}
-.card{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:14px;padding:1rem 1.25rem}
-.card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.card-wrap{
+  background:rgba(255,255,255,0.95);border:1px solid var(--line);border-radius:22px;
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.card-wrap.today{
+  background:linear-gradient(180deg,#fffdf4 0%,#fff7df 100%);
+  border-color:rgba(255,194,65,0.3);
+}
+.card-wrap.urgent{border-color:rgba(244,128,128,0.35)}
+.card-summary{
+  display:flex;align-items:center;gap:12px;padding:14px 15px;cursor:pointer;
+  background:linear-gradient(180deg,rgba(255,255,255,0.95) 0%,rgba(248,243,255,0.82) 100%);
+}
+.card-wrap.today .card-summary{cursor:default;background:transparent}
+.summary-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 4px rgba(0,0,0,0.03)}
+.summary-main{flex:1;min-width:0}
+.summary-title-row{display:flex;align-items:center;gap:8px}
+.summary-title{font-size:16px;font-weight:700;color:#4b426f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.summary-meta{font-size:13px;color:var(--sub);margin-top:3px}
+.summary-count{
+  font-size:13px;font-weight:700;color:#6c5db5;background:#f4efff;border-radius:999px;
+  padding:7px 10px;white-space:nowrap
+}
+.summary-chevron{
+  font-size:16px;color:#a399c9;transition:transform 0.24s ease;line-height:1;
+  width:22px;text-align:center;flex-shrink:0
+}
+.card-wrap.expanded .summary-chevron{transform:rotate(180deg)}
+.badge{font-size:11px;padding:4px 8px;border-radius:999px;font-weight:700}
+.badge-ok{background:#eef8e7;color:#4d7f20}
+.badge-warn{background:#fff1dd;color:#a05e10}
+.badge-alert{background:#ffe9eb;color:#b33b4d}
+.badge-today{background:#fff0b8;color:#9d6a00}
+.card-body{display:none;padding:0 15px 15px}
+.card-wrap.expanded .card-body,.card-wrap.today .card-body{display:block}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-top:2px}
 .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.card-title{font-size:15px;font-weight:600;color:#1a1a1a;flex:1}
-.badge{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:500}
-.badge-ok{background:#EAF3DE;color:#3B6D11}
-.badge-warn{background:#FAEEDA;color:#854F0B}
-.badge-alert{background:#FCEBEB;color:#A32D2D}
+.card-title{font-size:15px;font-weight:700;color:#4a3f73;flex:1}
 .stats-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
-.stat{background:#f5f4f0;border-radius:8px;padding:8px 10px}
-.stat-label{font-size:11px;color:#999;margin-bottom:2px}
-.stat-value{font-size:18px;font-weight:600;color:#1a1a1a}
-.progress-bar{height:6px;background:#ebebeb;border-radius:3px;margin-bottom:12px;overflow:hidden}
-.progress-fill{height:100%;border-radius:3px;transition:width 0.4s ease}
-.next-info{font-size:12px;color:#888;margin-bottom:12px}
-.next-info strong{color:#333}
-.actions{display:flex;gap:8px}
-.btn{flex:1;padding:9px;font-size:13px;border-radius:8px;border:0.5px solid rgba(0,0,0,0.15);background:transparent;color:#333;cursor:pointer;font-family:inherit;font-weight:500}
-.btn:hover{background:#f5f4f0}
-.btn:active{transform:scale(0.98)}
-.btn-primary{background:#e8f0fe;border-color:#aac4f5;color:#1a56cc}
-.btn-primary:hover{background:#dce8fd}
-.btn-skip{color:#999}
-.history-toggle{font-size:12px;color:#aaa;cursor:pointer;text-decoration:underline;margin-top:10px;display:block}
-.history{margin-top:10px;border-top:0.5px solid rgba(0,0,0,0.08);padding-top:10px;display:none}
+.stat{background:linear-gradient(180deg,#fbf8ff 0%,#fff 100%);border:1px solid rgba(127,119,221,0.09);border-radius:14px;padding:10px 10px}
+.card-wrap.today .stat{background:rgba(255,255,255,0.82)}
+.stat-label{font-size:11px;color:#9a93b6;margin-bottom:3px}
+.stat-value{font-size:18px;font-weight:700;color:#433b64}
+.progress-bar{height:8px;background:#efeaf7;border-radius:99px;margin-bottom:12px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width .35s ease}
+.next-info{
+  font-size:12px;color:#8f86aa;margin-bottom:12px;background:rgba(248,243,255,0.75);
+  border-radius:12px;padding:9px 10px
+}
+.card-wrap.today .next-info{background:rgba(255,255,255,0.75)}
+.next-info strong{color:#4a3f73}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{
+  flex:1;padding:10px;font-size:13px;border-radius:12px;border:1px solid rgba(127,119,221,0.16);
+  background:#fff;color:#51476f;cursor:pointer;font-family:inherit;font-weight:600;min-width:112px
+}
+.btn:hover{background:#faf7ff}.btn:active{transform:scale(.98)}
+.btn-primary{background:#f0ecff;border-color:#c8bcff;color:#5b49be}
+.btn-primary:hover{background:#e7e0ff}
+.btn-skip{color:#9f95ba}
+.history-toggle{font-size:12px;color:#968eb5;cursor:pointer;text-decoration:underline;margin-top:11px;display:inline-block}
+.history{margin-top:10px;border-top:1px dashed rgba(127,119,221,0.14);padding-top:10px;display:none}
 .history.open{display:block}
-.history-item{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#999;padding:4px 0}
-.status-done{color:#3B6D11}
-.status-skip{color:#bbb}
-.history-undo{font-size:11px;color:#ccc;cursor:pointer;text-decoration:underline;margin-left:8px}
-.history-undo:hover{color:#999}
-.checked-label{font-size:13px;color:#888;padding:6px 0}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;white-space:nowrap}
+.history-item{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#8f86aa;padding:5px 0;gap:8px}
+.status-done{color:#4d7f20}.status-skip{color:#b4acc9}
+.history-undo{font-size:11px;color:#b0a7ca;cursor:pointer;text-decoration:underline;margin-left:8px;white-space:nowrap}
+.history-undo:hover{color:#8b82a6}
+.checked-label{font-size:13px;color:#73689d;padding:7px 0;font-weight:600}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#4d4568;color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap;box-shadow:0 8px 22px rgba(77,69,104,.26)}
 .toast.show{opacity:1}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:100;align-items:flex-end;justify-content:center}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(70,55,101,0.28);z-index:100;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:1.5rem 1.25rem 2.5rem;max-height:88vh;overflow-y:auto}
-.modal-header{display:flex;align-items:center;margin-bottom:1.25rem}
-.modal-title{font-size:17px;font-weight:600;color:#1a1a1a;flex:1}
-.modal-close{font-size:20px;color:#aaa;cursor:pointer;padding:0 4px;line-height:1;background:none;border:none;font-family:inherit}
-.modal-close:hover{color:#555}
+.modal{background:#fffdfd;border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:1.4rem 1.15rem 2.35rem;max-height:88vh;overflow-y:auto;box-shadow:0 -12px 30px rgba(72,50,125,0.12)}
+.modal-header{display:flex;align-items:center;margin-bottom:1.25rem}.modal-title{font-size:17px;font-weight:700;color:#4a3f73;flex:1}
+.modal-close{font-size:20px;color:#b0a7ca;cursor:pointer;padding:0 4px;line-height:1;background:none;border:none;font-family:inherit}
+.modal-close:hover{color:#6e658c}
 .course-list{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem}
-.course-row{display:flex;align-items:center;gap:10px;background:#f9f8f5;border-radius:10px;padding:10px 12px}
-.course-row-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.course-row-name{font-size:14px;font-weight:500;color:#1a1a1a;flex:1}
-.course-row-info{font-size:12px;color:#999}
-.icon-btn{width:30px;height:30px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.12);background:#fff;color:#555;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.icon-btn:hover{background:#f0efe9}
-.icon-btn.danger:hover{background:#FCEBEB;color:#A32D2D;border-color:#F09595}
-.add-course-btn{width:100%;padding:10px;font-size:14px;border-radius:10px;border:1px dashed rgba(0,0,0,0.18);background:transparent;color:#888;cursor:pointer;font-family:inherit}
-.add-course-btn:hover{background:#f5f4f0}
-.form-group{margin-bottom:14px}
-.form-label{font-size:12px;color:#888;margin-bottom:6px;display:block}
-.form-input{width:100%;padding:9px 12px;font-size:14px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;background:#fff;color:#1a1a1a;font-family:inherit;outline:none}
-.form-input:focus{border-color:#7F77DD}
+.course-row{display:flex;align-items:center;gap:10px;background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:14px;padding:10px 12px}
+.course-row-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.course-row-name{font-size:14px;font-weight:600;color:#4a3f73;flex:1}.course-row-info{font-size:12px;color:#9a93b6}
+.icon-btn{width:30px;height:30px;border-radius:10px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#6f6691;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon-btn:hover{background:#f7f3ff}.icon-btn.danger:hover{background:#ffe9eb;color:#b33b4d;border-color:#f4aab1}
+.add-course-btn{width:100%;padding:11px;font-size:14px;border-radius:14px;border:1px dashed rgba(127,119,221,0.25);background:#fff;color:#8d84aa;cursor:pointer;font-family:inherit;font-weight:600}
+.add-course-btn:hover{background:#f9f5ff}
+.form-group{margin-bottom:14px}.form-label{font-size:12px;color:#938cae;margin-bottom:6px;display:block}
+.form-input,.time-input,.reminder-select{width:100%;padding:10px 12px;font-size:14px;border:1px solid rgba(127,119,221,0.15);border-radius:12px;background:#fff;color:#433b64;font-family:inherit;outline:none}
+.form-input:focus,.time-input:focus,.reminder-select:focus{border-color:#8b7af1}
 .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.wd-btn{padding:7px 2px;font-size:12px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.15);background:#fff;color:#555;cursor:pointer;font-family:inherit;text-align:center}
-.wd-btn.selected{background:#7F77DD;border-color:#7F77DD;color:#fff}
+.wd-btn{padding:8px 2px;font-size:12px;border-radius:10px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#6d6586;cursor:pointer;font-family:inherit;text-align:center}
+.wd-btn.selected{background:#8a7ef0;border-color:#8a7ef0;color:#fff}
 .color-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
-.color-swatch{width:100%;aspect-ratio:1;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform 0.1s}
-.color-swatch.selected{border-color:#1a1a1a;transform:scale(1.15)}
-.form-switch-row{display:flex;align-items:center;gap:10px}
-.form-switch-label{font-size:13px;color:#444;flex:1}
-.switch{position:relative;width:40px;height:24px;flex-shrink:0}
-.switch input{opacity:0;width:0;height:0}
-.switch-slider{position:absolute;inset:0;background:#ddd;border-radius:12px;cursor:pointer;transition:background 0.2s}
-.switch-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform 0.2s}
-.switch input:checked+.switch-slider{background:#7F77DD}
-.switch input:checked+.switch-slider:before{transform:translateX(16px)}
-.adjust-row{display:flex;align-items:center;gap:10px}
-.adjust-label{font-size:13px;color:#444;flex:1}
-.counter{display:flex;align-items:center;gap:8px}
-.counter-btn{width:32px;height:32px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.15);background:#fff;font-size:18px;color:#333;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
-.counter-btn:hover{background:#f0efe9}
-.counter-val{font-size:16px;font-weight:600;color:#1a1a1a;min-width:28px;text-align:center}
-.form-btns{display:flex;gap:8px;margin-top:1.5rem}
-.form-btn{flex:1;padding:11px;font-size:14px;border-radius:10px;border:0.5px solid rgba(0,0,0,0.15);background:transparent;color:#333;cursor:pointer;font-family:inherit;font-weight:500}
-.form-btn.save{background:#7F77DD;border-color:#7F77DD;color:#fff}
-.form-btn.save:hover{background:#6d65c8}
-.form-btn:hover{background:#f0efe9}
-.form-btn.del{color:#A32D2D;border-color:#F09595}
-.form-btn.del:hover{background:#FCEBEB}
-.divider{height:0.5px;background:rgba(0,0,0,0.08);margin:1.5rem 0}
-.section-label{font-size:11px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
-.export-btn{width:100%;padding:12px;font-size:14px;border-radius:10px;border:0.5px solid rgba(0,0,0,0.15);background:#fff;color:#1a1a1a;cursor:pointer;font-family:inherit;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px}
-.export-btn:hover{background:#f0efe9}
-.export-hint{font-size:11px;color:#aaa;margin-top:8px;text-align:center;line-height:1.5}
-.time-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f9f8f5;border-radius:10px;margin-bottom:8px}
-.time-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.time-name{font-size:14px;font-weight:500;color:#1a1a1a;flex:1}
-.time-input{padding:6px 10px;font-size:13px;border:0.5px solid rgba(0,0,0,0.18);border-radius:7px;background:#fff;color:#1a1a1a;font-family:inherit;width:110px}
-.export-options{margin:1rem 0}
-.export-option{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid rgba(0,0,0,0.06)}
-.export-option:last-child{border-bottom:none}
-.export-option-label{font-size:13px;color:#444}
-.export-option-desc{font-size:11px;color:#aaa;margin-top:2px}
-.download-btn{width:100%;padding:13px;font-size:15px;border-radius:10px;border:none;background:#7F77DD;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;margin-top:1rem}
-.download-btn:hover{background:#6d65c8}
-.reminder-select{padding:6px 10px;font-size:13px;border:0.5px solid rgba(0,0,0,0.18);border-radius:7px;background:#fff;color:#1a1a1a;font-family:inherit}
+.color-swatch{width:100%;aspect-ratio:1;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .1s}.color-swatch.selected{border-color:#433b64;transform:scale(1.12)}
+.form-switch-row{display:flex;align-items:center;gap:10px}.form-switch-label{font-size:13px;color:#574e74;flex:1}
+.switch{position:relative;width:40px;height:24px;flex-shrink:0}.switch input{opacity:0;width:0;height:0}
+.switch-slider{position:absolute;inset:0;background:#e3dff0;border-radius:12px;cursor:pointer;transition:background .2s}.switch-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.switch input:checked+.switch-slider{background:#8a7ef0}.switch input:checked+.switch-slider:before{transform:translateX(16px)}
+.adjust-row{display:flex;align-items:center;gap:10px}.adjust-label{font-size:13px;color:#574e74;flex:1}.counter{display:flex;align-items:center;gap:8px}
+.counter-btn{width:32px;height:32px;border-radius:10px;border:1px solid rgba(127,119,221,0.12);background:#fff;font-size:18px;color:#50476c;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}.counter-btn:hover{background:#f8f4ff}
+.counter-val{font-size:16px;font-weight:700;color:#433b64;min-width:28px;text-align:center}
+.form-btns{display:flex;gap:8px;margin-top:1.5rem}.form-btn{flex:1;padding:12px;font-size:14px;border-radius:14px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#51476f;cursor:pointer;font-family:inherit;font-weight:700}
+.form-btn.save,.download-btn{background:#8a7ef0;border-color:#8a7ef0;color:#fff}.form-btn.save:hover,.download-btn:hover{background:#7769e7}.form-btn:hover{background:#f8f4ff}.form-btn.del{color:#b33b4d;border-color:#f4b5bc}.form-btn.del:hover{background:#ffe9eb}
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(127,119,221,0.14),transparent);margin:1.45rem 0 1rem}.section-label{font-size:11px;color:#a39abb;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.export-btn{width:100%;padding:14px;font-size:14px;border-radius:18px;border:1px solid rgba(127,119,221,0.12);background:linear-gradient(180deg,#ffffff 0%,#faf6ff 100%);color:#4a3f73;cursor:pointer;font-family:inherit;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--shadow)}
+.export-btn:hover{background:#f8f3ff}.export-hint{font-size:11px;color:#aaa1bf;margin-top:8px;text-align:center;line-height:1.5}
+.time-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:14px;margin-bottom:8px}.time-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.time-name{font-size:14px;font-weight:600;color:#4a3f73;flex:1}
+.export-options{margin:1rem 0}.export-option{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(127,119,221,0.06)}.export-option:last-child{border-bottom:none}.export-option-label{font-size:13px;color:#574e74;font-weight:600}.export-option-desc{font-size:11px;color:#a39abb;margin-top:2px}
+.download-btn{width:100%;padding:14px;font-size:15px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-weight:700;margin-top:1rem}
+.today-chip{font-size:11px;padding:4px 8px;border-radius:999px;background:#fff3c0;color:#a56d00;font-weight:700}
+@media (max-width:380px){
+  .summary-title{font-size:15px}.summary-count{font-size:12px;padding:6px 8px}.stats-row{grid-template-columns:1fr}.actions{flex-direction:column}
+}
+
+.auth-shell{margin-bottom:14px}
+.auth-panel{background:linear-gradient(180deg,#fffdfd 0%,#fff8ff 100%);border:1px solid rgba(138,126,240,.16);border-radius:24px;padding:16px 14px 14px;box-shadow:0 14px 34px rgba(127,119,221,.10)}
+.auth-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.auth-title{font-size:17px;font-weight:800;color:#5d5194;margin-bottom:5px}
+.auth-desc{font-size:12px;color:#8d84aa;line-height:1.65}
+.auth-bubble{flex-shrink:0;font-size:22px;line-height:1;background:#fff3c6;border-radius:16px;padding:10px 11px;box-shadow:0 6px 14px rgba(255,196,84,.18)}
+.auth-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;background:#f6f1ff;border-radius:16px;padding:5px;margin-bottom:12px}
+.auth-tab{border:none;background:transparent;color:#7d74a8;border-radius:12px;padding:9px 6px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.auth-tab.active{background:#fff;color:#6a56d6;box-shadow:0 4px 10px rgba(127,119,221,.10)}
+.auth-mode{display:none}
+.auth-mode.active{display:block}
+.auth-stack{display:grid;gap:8px}
+.auth-actions{display:flex;gap:8px;margin-top:12px}
+.auth-btn{flex:1;padding:11px 12px;border:none;border-radius:13px;background:#7F77DD;color:#fff;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(127,119,221,.18)}
+.auth-btn.secondary{background:#fff;color:#7F77DD;border:1px solid rgba(127,119,221,.25);box-shadow:none}
+.auth-btn.ghost{background:#fff1f7;color:#d15b93;border:1px solid rgba(209,91,147,.18);box-shadow:none}
+.auth-link-row{display:flex;justify-content:center;margin-top:10px}
+.auth-link{background:none;border:none;color:#8a7ef0;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.auth-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid rgba(138,126,240,.18);border-radius:16px;padding:11px 12px;margin-bottom:14px;box-shadow:0 8px 24px rgba(127,119,221,.08)}
+.auth-status strong{font-size:14px;color:#5d5194}
+.auth-status span{font-size:12px;color:#8d84aa}
+.sync-pill{margin-left:auto;font-size:11px;padding:4px 8px;border-radius:999px;background:#f7f2ff;color:#7F77DD}
+.sync-pill.error{background:#fff1f1;color:#c75151}
+.sync-pill.ok{background:#eefaf5;color:#2d8b63}
+.hidden{display:none!important}
+.setup-box{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff8ed;color:#8b5d10;font-size:12px;line-height:1.6}
+.setup-box code{display:block;white-space:pre-wrap;background:#fff;border-radius:8px;padding:8px;margin-top:8px;color:#704b0b}
+.auth-mini{font-size:11px;color:#a095bc;line-height:1.6;margin-top:8px;text-align:center}
+
 </style>
 </head>
 <body>
-
 <div class="app">
+
+  <div id="auth-shell" class="auth-shell">
+    <div id="auth-panel" class="auth-panel">
+      <div class="auth-top">
+        <div>
+          <div class="auth-title">登录后自动同步</div>
+          <div class="auth-desc">课程和打卡记录会保存到云端。未登录时也会先保存在当前浏览器。</div>
+        </div>
+        <div class="auth-bubble">🧸</div>
+      </div>
+
+      <div class="auth-tabs">
+        <button id="tab-signin" class="auth-tab active" onclick="switchAuthMode('signin')">登录</button>
+        <button id="tab-signup" class="auth-tab" onclick="switchAuthMode('signup')">注册</button>
+        <button id="tab-reset" class="auth-tab" onclick="switchAuthMode('reset')">忘记密码</button>
+      </div>
+
+      <div id="mode-signin" class="auth-mode active">
+        <div class="auth-stack">
+          <input class="form-input" id="auth-email" type="email" placeholder="邮箱" />
+          <input class="form-input" id="auth-password" type="password" placeholder="密码" />
+        </div>
+        <div class="auth-actions">
+          <button class="auth-btn" onclick="signInWithPassword()">登录</button>
+          <button class="auth-btn secondary" onclick="switchAuthMode('signup')">去注册</button>
+        </div>
+        <div class="auth-link-row"><button class="auth-link" onclick="switchAuthMode('reset')">忘记密码？</button></div>
+      </div>
+
+      <div id="mode-signup" class="auth-mode">
+        <div class="auth-stack">
+          <input class="form-input" id="signup-email" type="email" placeholder="邮箱" />
+          <input class="form-input" id="signup-password" type="password" placeholder="密码（至少 6 位）" />
+        </div>
+        <div class="auth-actions">
+          <button class="auth-btn" onclick="signUpWithPassword()">注册并开始使用</button>
+          <button class="auth-btn secondary" onclick="switchAuthMode('signin')">已有账号</button>
+        </div>
+      </div>
+
+      <div id="mode-reset" class="auth-mode">
+        <div class="auth-stack">
+          <input class="form-input" id="reset-email" type="email" placeholder="输入注册邮箱" />
+        </div>
+        <div class="auth-actions">
+          <button class="auth-btn ghost" onclick="requestPasswordReset()">发送重置邮件</button>
+          <button class="auth-btn secondary" onclick="switchAuthMode('signin')">返回登录</button>
+        </div>
+        <div class="auth-mini">点开邮件里的链接后，会回到这个页面设置新密码。</div>
+      </div>
+
+      <div class="setup-box hidden" id="setup-box">
+        Supabase 还没有建好数据表，当前会先继续保存在本地。请在 Supabase SQL Editor 执行：
+        <code id="setup-sql"></code>
+      </div>
+    </div>
+  </div>
+
+  <div id="auth-status" class="auth-status hidden">
+    <div>
+      <strong id="user-email">已登录</strong><br>
+      <span>课程数据会自动同步到云端</span>
+    </div>
+    <span class="sync-pill" id="sync-pill">未同步</span>
+    <button class="auth-btn ghost" style="flex:0 0 auto;padding:8px 12px;margin-left:auto" onclick="signOutUser()">退出</button>
+  </div>
+
   <div class="header">
     <div class="header-text">
       <h1>课时打卡</h1>
@@ -133,7 +266,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
   <p class="export-hint">生成 .ics 文件，包含每周上课提醒 + 续费提醒，iPhone 打开即可导入</p>
 </div>
 
-<!-- Manager Modal -->
+<div class="modal-overlay" id="reset-password-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">重设密码</span>
+      <button class="modal-close" onclick="closeModal('reset-password-modal')">✕</button>
+    </div>
+    <p style="font-size:13px;color:#8f86aa;margin-bottom:1rem;line-height:1.6;">请输入新密码。保存成功后，你可以直接用新密码登录。</p>
+    <div class="form-group">
+      <label class="form-label">新密码</label>
+      <input class="form-input" id="reset-password" type="password" placeholder="至少 6 位" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">确认新密码</label>
+      <input class="form-input" id="reset-password-confirm" type="password" placeholder="再次输入新密码" />
+    </div>
+    <div class="form-btns">
+      <button class="form-btn save" onclick="updateRecoveredPassword()">保存新密码</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="manager-modal">
   <div class="modal">
     <div class="modal-header">
@@ -145,7 +298,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
   </div>
 </div>
 
-<!-- Edit/Add Modal -->
 <div class="modal-overlay" id="edit-modal">
   <div class="modal">
     <div class="modal-header">
@@ -226,14 +378,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
   </div>
 </div>
 
-<!-- Export Modal -->
 <div class="modal-overlay" id="export-modal">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title">导出到 Apple Calendar</span>
       <button class="modal-close" onclick="closeModal('export-modal')">✕</button>
     </div>
-    <p style="font-size:13px;color:#888;margin-bottom:1rem;line-height:1.6;">为每门课设置上课时间，下载 .ics 文件后用 iPhone 打开即可导入日历。</p>
+    <p style="font-size:13px;color:#8f86aa;margin-bottom:1rem;line-height:1.6;">为每门课设置上课时间，下载 .ics 文件后用 iPhone 打开即可导入日历。</p>
     <label class="form-label">每门课的上课时间</label>
     <div id="export-time-list"></div>
     <div class="export-options">
@@ -265,68 +416,303 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
       </div>
     </div>
     <button class="download-btn" onclick="generateICS()">下载 .ics 文件</button>
-    <p style="font-size:11px;color:#aaa;text-align:center;margin-top:10px;line-height:1.6;">导入后日历会显示每周重复的上课事件。<br>时间变了重新导出覆盖即可。</p>
+    <p style="font-size:11px;color:#a39abb;text-align:center;margin-top:10px;line-height:1.6;">导入后日历会显示每周重复的上课事件。<br>时间变了重新导出覆盖即可。</p>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-var STORAGE_KEY = 'course_tracker_v1';
-var COLORS = ['#7F77DD','#1D9E75','#D85A30','#378ADD','#D4537E','#BA7517','#639922','#E24B4A','#555555','#0F6E56'];
+var STORAGE_KEY = 'course_tracker_v2';
+var SUPABASE_URL = 'https://sdcxjbkkbytcujlqxcxp.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkY3hqYmtrYnl0Y3VqbHF4Y3hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MTY1NzEsImV4cCI6MjA4OTk5MjU3MX0.8gbLamzNXhYELjqgdK5o1dABNBoY0LOv0i8LVYKG85s';
+var TABLE_NAME = 'course_tracker_state';
+var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+var COLORS = ['#8A7EF0','#5BC7A5','#FF9E6B','#6FA8FF','#FF93B5','#FFC663','#A6D96A','#FF7D8D','#8D8D9A','#35B8A6'];
 var WEEKDAYS = ['周日','周一','周二','周三','周四','周五','周六'];
 var editingIdx = null;
 var formWeekday = 1;
 var formColor = COLORS[0];
+var expandedIds = {};
 
 var defaultCourses = [
-  {id:'xingti',name:'形体课',weekday:1,color:'#7F77DD',total:10,used:3,remaining:null,startDate:'2025-03-09',classTime:'10:00',history:[{date:'2025-03-09',status:'done'},{date:'2025-03-16',status:'done'},{date:'2025-03-23',status:'done'}],payAlert:false},
-  {id:'sumiao',name:'素描课',weekday:2,color:'#1D9E75',total:10,used:3,remaining:null,startDate:'2025-03-10',classTime:'10:00',history:[{date:'2025-03-10',status:'done'},{date:'2025-03-17',status:'done'},{date:'2025-03-24',status:'done'}],payAlert:false},
-  {id:'meishu',name:'美术课',weekday:3,color:'#D85A30',total:null,used:0,remaining:16,startDate:'2025-03-25',classTime:'10:00',history:[],payAlert:false},
-  {id:'zhongwen',name:'中文阅读',weekday:4,color:'#378ADD',total:null,used:0,remaining:null,startDate:'2025-04-16',classTime:'10:00',history:[],payAlert:false},
-  {id:'jita',name:'吉他课',weekday:0,color:'#D4537E',total:null,used:0,remaining:2,startDate:'2025-03-29',classTime:'10:00',history:[],payAlert:true}
+  {id:'xingti',name:'形体课',weekday:1,color:'#8A7EF0',total:10,used:3,remaining:null,startDate:'2025-03-09',classTime:'10:00',history:[{date:'2025-03-09',status:'done'},{date:'2025-03-16',status:'done'},{date:'2025-03-23',status:'done'}],payAlert:false},
+  {id:'sumiao',name:'素描课',weekday:2,color:'#5BC7A5',total:10,used:3,remaining:null,startDate:'2025-03-10',classTime:'10:00',history:[{date:'2025-03-10',status:'done'},{date:'2025-03-17',status:'done'},{date:'2025-03-24',status:'done'}],payAlert:false},
+  {id:'meishu',name:'美术课',weekday:3,color:'#FF9E6B',total:null,used:0,remaining:16,startDate:'2025-03-25',classTime:'10:00',history:[],payAlert:false},
+  {id:'zhongwen',name:'中文阅读',weekday:4,color:'#6FA8FF',total:null,used:0,remaining:null,startDate:'2025-04-16',classTime:'10:00',history:[],payAlert:false},
+  {id:'jita',name:'吉他课',weekday:0,color:'#FF93B5',total:null,used:0,remaining:2,startDate:'2025-03-29',classTime:'10:00',history:[],payAlert:true}
 ];
+var currentCourses = [];
+var currentUser = null;
+var saveTimer = null;
+var setupSQL = [
+  "create table if not exists public.course_tracker_state (",
+  "  user_id uuid primary key references auth.users(id) on delete cascade,",
+  "  payload jsonb not null default '[]'::jsonb,",
+  "  updated_at timestamptz not null default now()",
+  ");",
+  "",
+  "alter table public.course_tracker_state enable row level security;",
+  "",
+  "create policy \"read own state\" on public.course_tracker_state",
+  "for select using (auth.uid() = user_id);",
+  "",
+  "create policy \"insert own state\" on public.course_tracker_state",
+  "for insert with check (auth.uid() = user_id);",
+  "",
+  "create policy \"update own state\" on public.course_tracker_state",
+  "for update using (auth.uid() = user_id);"
+].join('\n');
 
-function loadData() {
+function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+function getLocalBackup() {
   try {
     var r = localStorage.getItem(STORAGE_KEY);
     if (r) return JSON.parse(r);
   } catch(e) {}
-  return JSON.parse(JSON.stringify(defaultCourses));
+  return deepClone(defaultCourses);
+}
+function writeLocalBackup(courses) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(courses)); } catch(e) {}
+}
+function loadData() { return deepClone(currentCourses); }
+function saveData(courses) {
+  currentCourses = deepClone(courses);
+  writeLocalBackup(currentCourses);
+  queueRemoteSave();
+}
+function setSyncPill(text, cls) {
+  var el = document.getElementById('sync-pill');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'sync-pill' + (cls ? ' ' + cls : '');
+}
+function showSetupBox(show) {
+  var box = document.getElementById('setup-box');
+  if (!box) return;
+  document.getElementById('setup-sql').textContent = setupSQL;
+  box.classList.toggle('hidden', !show);
+}
+async function fetchRemoteState() {
+  if (!currentUser) return null;
+  var result = await supabase.from(TABLE_NAME).select('payload').eq('user_id', currentUser.id).maybeSingle();
+  if (result.error) throw result.error;
+  return result.data ? result.data.payload : null;
+}
+async function persistRemoteState() {
+  if (!currentUser) { setSyncPill('本地模式', ''); return; }
+  setSyncPill('同步中...', '');
+  var payload = deepClone(currentCourses);
+  var result = await supabase.from(TABLE_NAME).upsert({
+    user_id: currentUser.id,
+    payload: payload,
+    updated_at: new Date().toISOString()
+  });
+  if (result.error) throw result.error;
+  setSyncPill('已同步', 'ok');
+  showSetupBox(false);
+}
+function queueRemoteSave() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(function(){
+    persistRemoteState().catch(function(err){
+      console.error(err);
+      if (err && String(err.message || '').toLowerCase().indexOf('relation') >= 0) {
+        showSetupBox(true);
+        setSyncPill('缺少数据表', 'error');
+      } else if (currentUser) {
+        setSyncPill('同步失败', 'error');
+      }
+    });
+  }, 350);
+}
+function updateAuthUI() {
+  var panel = document.getElementById('auth-panel');
+  var status = document.getElementById('auth-status');
+  if (currentUser) {
+    panel.classList.add('hidden');
+    status.classList.remove('hidden');
+    document.getElementById('user-email').textContent = currentUser.email || '已登录';
+    setSyncPill('已同步', 'ok');
+  } else {
+    status.classList.add('hidden');
+    panel.classList.remove('hidden');
+  }
+}
+async function hydrateDataForUser() {
+  var local = getLocalBackup();
+  if (!currentUser) {
+    currentCourses = deepClone(local);
+    render();
+    return;
+  }
+  try {
+    var remote = await fetchRemoteState();
+    if (remote && remote.length) {
+      currentCourses = deepClone(remote);
+      writeLocalBackup(currentCourses);
+      showSetupBox(false);
+      setSyncPill('已同步', 'ok');
+    } else {
+      currentCourses = deepClone(local);
+      await persistRemoteState();
+    }
+  } catch(err) {
+    console.error(err);
+    currentCourses = deepClone(local);
+    if (err && String(err.message || '').toLowerCase().indexOf('relation') >= 0) {
+      showSetupBox(true);
+      setSyncPill('缺少数据表', 'error');
+    } else {
+      setSyncPill('本地模式', 'error');
+    }
+  }
+  render();
 }
 
-function saveData(c) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); } catch(e) {}
+function switchAuthMode(mode) {
+  ['signin','signup','reset'].forEach(function(name){
+    var panel = document.getElementById('mode-' + name);
+    var tab = document.getElementById('tab-' + name);
+    if (panel) panel.classList.toggle('active', name === mode);
+    if (tab) tab.classList.toggle('active', name === mode);
+  });
+  if (mode === 'signup') {
+    var email = document.getElementById('auth-email').value.trim();
+    if (email && !document.getElementById('signup-email').value) document.getElementById('signup-email').value = email;
+  }
+  if (mode === 'reset') {
+    var email2 = document.getElementById('auth-email').value.trim() || document.getElementById('signup-email').value.trim();
+    if (email2 && !document.getElementById('reset-email').value) document.getElementById('reset-email').value = email2;
+  }
 }
 
-function isoDate(d) {
-  var y = d.getFullYear();
-  var m = String(d.getMonth()+1).padStart(2,'0');
-  var dd = String(d.getDate()).padStart(2,'0');
-  return y+'-'+m+'-'+dd;
+async function signInWithPassword() {
+  var email = document.getElementById('auth-email').value.trim();
+  var password = document.getElementById('auth-password').value;
+  if (!email || !password) { showToast('请填写邮箱和密码'); return; }
+  var result = await supabase.auth.signInWithPassword({ email: email, password: password });
+  if (result.error) { showToast('登录失败：' + result.error.message); return; }
+  showToast('登录成功');
+}
+async function signUpWithPassword() {
+  var email = document.getElementById('signup-email').value.trim();
+  var password = document.getElementById('signup-password').value;
+  if (!email || !password) { showToast('请填写邮箱和密码'); return; }
+  var result = await supabase.auth.signUp({ email: email, password: password });
+  if (result.error) { showToast('注册失败：' + result.error.message); return; }
+  if (result.data && result.data.session) showToast('注册并登录成功');
+  else { switchAuthMode('signin'); showToast('注册成功，请按邮箱提示完成验证后再登录'); }
+}
+async function requestPasswordReset() {
+  var email = document.getElementById('reset-email').value.trim() || document.getElementById('auth-email').value.trim() || document.getElementById('signup-email').value.trim();
+  if (!email) { showToast('请先填写邮箱'); return; }
+  var redirectTo = window.location.origin + window.location.pathname;
+  var result = await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirectTo });
+  if (result.error) { showToast('发送失败：' + result.error.message); return; }
+  showToast('重置邮件已发送，请去邮箱打开链接');
+}
+function maybeShowRecoveryUI(event) {
+  var hash = window.location.hash || '';
+  var search = window.location.search || '';
+  var looksLikeRecovery = event === 'PASSWORD_RECOVERY' || /type=recovery/.test(hash) || /type=recovery/.test(search);
+  if (!looksLikeRecovery) return;
+  document.getElementById('reset-password').value = '';
+  document.getElementById('reset-password-confirm').value = '';
+  openModal('reset-password-modal');
+  showToast('请设置新密码');
+}
+async function updateRecoveredPassword() {
+  var pwd = document.getElementById('reset-password').value;
+  var confirmPwd = document.getElementById('reset-password-confirm').value;
+  if (!pwd || !confirmPwd) { showToast('请填写完整'); return; }
+  if (pwd.length < 6) { showToast('密码至少 6 位'); return; }
+  if (pwd !== confirmPwd) { showToast('两次输入的密码不一致'); return; }
+  var result = await supabase.auth.updateUser({ password: pwd });
+  if (result.error) { showToast('修改失败：' + result.error.message); return; }
+  closeModal('reset-password-modal');
+  if (window.location.hash && /type=recovery/.test(window.location.hash)) {
+    history.replaceState({}, document.title, window.location.pathname + window.location.search);
+  }
+  switchAuthMode('signin');
+  showToast('密码已更新，请用新密码登录');
+}
+async function signOutUser() {
+  await supabase.auth.signOut();
+  showToast('已退出登录');
+}
+async function initAuth() {
+  switchAuthMode('signin');
+  updateAuthUI();
+  showSetupBox(false);
+  var sessionResult = await supabase.auth.getSession();
+  currentUser = sessionResult.data.session ? sessionResult.data.session.user : null;
+  updateAuthUI();
+  maybeShowRecoveryUI();
+  await hydrateDataForUser();
+  supabase.auth.onAuthStateChange(function(event, session){
+    currentUser = session ? session.user : null;
+    updateAuthUI();
+    maybeShowRecoveryUI(event);
+    hydrateDataForUser();
+  });
 }
 
-function formatDate(d) {
-  return d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'});
-}
+function isoDate(d) { return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function formatDate(d) { return d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'}); }
+function formatShortDate(d) { return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}); }
+function getTodayDate(){ var t = new Date(); t.setHours(0,0,0,0); return t; }
 
 function getNextClassDate(course) {
-  var today = new Date(); today.setHours(0,0,0,0);
+  var today = getTodayDate();
   var start = new Date(course.startDate); start.setHours(0,0,0,0);
-  var base = start > today ? start : today;
-  var d = new Date(base);
-  var diff = (course.weekday - d.getDay() + 7) % 7;
-  if (diff === 0 && d.getTime() === today.getTime()) diff = 0;
-  else if (diff === 0) diff = 7;
-  d.setDate(d.getDate() + diff);
-  if (d < start) d = new Date(start);
-  return d;
+  var base = start > today ? new Date(start) : new Date(today);
+  var diff = (course.weekday - base.getDay() + 7) % 7;
+  base.setDate(base.getDate() + diff);
+  if (base < start) base = new Date(start);
+  return base;
+}
+
+function isCourseToday(course) {
+  var today = getTodayDate();
+  var startDate = new Date(course.startDate); startDate.setHours(0,0,0,0);
+  return course.weekday === today.getDay() && startDate <= today;
 }
 
 function getRemainingCount(course) {
   if (course.total !== null && course.total !== undefined) return course.total - course.used;
-  if (course.remaining !== null && course.remaining !== undefined) return course.remaining - course.used;
+  if (course.remaining !== null && course.remaining !== undefined) return course.remaining;
   return null;
+}
+
+function getTotalDisplay(course) {
+  if (course.total !== null && course.total !== undefined) return course.total;
+  if (course.remaining !== null && course.remaining !== undefined) return course.used + course.remaining;
+  return null;
+}
+
+function getProgressPercent(course) {
+  var total = getTotalDisplay(course);
+  return total ? Math.max(0, Math.min(100, Math.round((course.used/total)*100))) : 0;
+}
+
+function getSortedCourses() {
+  var courses = loadData();
+  return courses.map(function(course, idx){
+    var nextDate = getNextClassDate(course);
+    return {
+      course: course,
+      idx: idx,
+      nextDate: nextDate,
+      isToday: isCourseToday(course)
+    };
+  }).sort(function(a,b){
+    if (a.isToday && !b.isToday) return -1;
+    if (!a.isToday && b.isToday) return 1;
+    if (a.nextDate.getTime() !== b.nextDate.getTime()) return a.nextDate - b.nextDate;
+    return a.course.name.localeCompare(b.course.name,'zh-CN');
+  });
 }
 
 function showToast(msg) {
@@ -336,85 +722,98 @@ function showToast(msg) {
   setTimeout(function(){ t.classList.remove('show'); }, 2400);
 }
 
+function toggleCard(id) {
+  expandedIds[id] = !expandedIds[id];
+  render();
+}
+
 function render() {
-  var courses = loadData();
+  var sorted = getSortedCourses();
   var container = document.getElementById('cards-container');
   container.innerHTML = '';
-  var today = new Date(); today.setHours(0,0,0,0);
+  var today = getTodayDate();
   var todayStr = isoDate(today);
   document.getElementById('today-date').textContent = formatDate(today);
 
-  for (var idx = 0; idx < courses.length; idx++) {
-    (function(course, idx){
-      var remaining = getRemainingCount(course);
-      var nextDate = getNextClassDate(course);
-      var nextStr = isoDate(nextDate);
-      var startDate = new Date(course.startDate); startDate.setHours(0,0,0,0);
-      var isClassToday = course.weekday === today.getDay() && startDate <= today;
-      var alreadyToday = course.history.some(function(h){ return h.date === todayStr; });
+  sorted.forEach(function(item){
+    var course = item.course;
+    var idx = item.idx;
+    var remaining = getRemainingCount(course);
+    var totalDisplay = getTotalDisplay(course);
+    var nextDate = item.nextDate;
+    var alreadyToday = course.history.some(function(h){ return h.date === todayStr; });
+    var isToday = item.isToday;
+    var expanded = isToday || !!expandedIds[course.id];
 
-      var badgeClass = 'badge-ok', badgeText = '正常';
-      if (course.payAlert && remaining !== null && remaining <= 2) { badgeClass='badge-alert'; badgeText='需续费'; }
-      else if (remaining !== null && remaining <= 2) { badgeClass='badge-warn'; badgeText='剩'+remaining+'次'; }
-      else if (remaining !== null) { badgeText='剩'+remaining+'次'; }
+    var badgeClass = 'badge-ok', badgeText = '正常';
+    if (isToday) { badgeClass = 'badge-today'; badgeText = '今天上课'; }
+    else if (course.payAlert && remaining !== null && remaining <= 2) { badgeClass='badge-alert'; badgeText='需续费'; }
+    else if (remaining !== null && remaining <= 2) { badgeClass='badge-warn'; badgeText='剩'+remaining+'次'; }
+    else if (remaining !== null) { badgeText='剩'+remaining+'次'; }
 
-      var totalForBar = null;
-      if (course.total !== null && course.total !== undefined) totalForBar = course.total;
-      else if (course.remaining !== null && course.remaining !== undefined) totalForBar = course.used + course.remaining;
-      var pct = totalForBar ? Math.round((course.used/totalForBar)*100) : 0;
-      var nextDisplay = nextStr === todayStr ? '今天' : formatDate(nextDate);
-
-      var historyHTML = '';
-      if (course.history.length > 0) {
-        var rev = course.history.slice().reverse().slice(0,6);
-        for (var i = 0; i < rev.length; i++) {
-          var h = rev[i];
-          var label = h.status === 'done' ? '✓ 已上课' : '— 请假';
-          var cls = h.status === 'done' ? 'status-done' : 'status-skip';
-          var realIdx = course.history.length - 1 - i;
-          historyHTML += '<div class="history-item"><span>'+h.date+'</span><span class="'+cls+'">'+label+'</span><span class="history-undo" onclick="undoRecord('+idx+','+realIdx+')">撤销</span></div>';
-        }
-      } else {
-        historyHTML = '<div class="history-item"><span style="color:#ccc">暂无记录</span></div>';
+    var historyHTML = '';
+    if (course.history.length > 0) {
+      var rev = course.history.slice().reverse().slice(0,6);
+      for (var i = 0; i < rev.length; i++) {
+        var h = rev[i];
+        var label = h.status === 'done' ? '✓ 已上课' : '— 请假';
+        var cls = h.status === 'done' ? 'status-done' : 'status-skip';
+        var realIdx = course.history.length - 1 - i;
+        historyHTML += '<div class="history-item"><span>'+h.date+'</span><span class="'+cls+'">'+label+'</span><span class="history-undo" onclick="undoRecord('+idx+','+realIdx+')">撤销</span></div>';
       }
+    } else {
+      historyHTML = '<div class="history-item"><span style="color:#c2bbd7">暂无记录</span></div>';
+    }
 
-      var actionBtns;
-      if (alreadyToday) {
-        actionBtns = '<div class="checked-label">今天已打卡 ✓</div>';
-      } else if (isClassToday) {
-        actionBtns = '<button class="btn btn-primary" onclick="markClass('+idx+',\'done\')">今天上课了 ✓</button><button class="btn btn-skip" onclick="markClass('+idx+',\'skip\')">今天请假</button>';
-      } else {
-        actionBtns = '<button class="btn" onclick="markClass('+idx+',\'done\')" style="font-size:12px;color:#888;">手动补打卡</button>';
-      }
+    var actionBtns;
+    if (alreadyToday) {
+      actionBtns = '<div class="checked-label">今天已打卡 ✓</div>';
+    } else if (isToday) {
+      actionBtns = '<button class="btn btn-primary" onclick="markClass('+idx+',\'done\')">今天上课了 ✓</button><button class="btn btn-skip" onclick="markClass('+idx+',\'skip\')">今天请假</button>';
+    } else {
+      actionBtns = '<button class="btn" onclick="markClass('+idx+',\'done\')" style="font-size:12px;color:#8d84aa;">手动补打卡</button>';
+    }
 
-      var totalLabel = totalForBar ? '共'+totalForBar+'次' : '课时不限';
-      var card = document.createElement('div');
-      card.className = 'card';
-      if (course.payAlert && remaining !== null && remaining <= 2) card.style.borderColor = '#F09595';
+    var nextDisplay = isToday ? '今天' : formatDate(nextDate);
+    var compactCount = totalDisplay ? (remaining !== null ? remaining : '—') + '/' + totalDisplay : (remaining !== null ? '剩'+remaining+'次' : '不限次');
 
-      var progressBar = totalForBar ? '<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%;background:'+course.color+'"></div></div>' : '';
+    var wrap = document.createElement('div');
+    wrap.className = 'card-wrap' + (isToday ? ' today' : '') + (expanded ? ' expanded' : '') + ((course.payAlert && remaining !== null && remaining <= 2) ? ' urgent' : '');
 
-      card.innerHTML =
-        '<div class="card-header">' +
-          '<div class="dot" style="background:'+course.color+'"></div>' +
-          '<span class="card-title">'+course.name+'</span>' +
-          '<span class="badge '+badgeClass+'">'+badgeText+'</span>' +
-          '<button class="icon-btn" onclick="openEditForm('+idx+')" style="font-size:13px;">✎</button>' +
-        '</div>' +
-        '<div class="stats-row">' +
-          '<div class="stat"><div class="stat-label">已上</div><div class="stat-value">'+course.used+'</div></div>' +
-          '<div class="stat"><div class="stat-label">剩余</div><div class="stat-value">'+(remaining!==null?remaining:'—')+'</div></div>' +
-          '<div class="stat"><div class="stat-label">'+(totalForBar?'总课时':'类型')+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+totalLabel+'</div></div>' +
-        '</div>' +
-        progressBar +
-        '<div class="next-info">下次上课：<strong>'+nextDisplay+'</strong>（每'+WEEKDAYS[course.weekday]+'）</div>' +
-        '<div class="actions">'+actionBtns+'</div>' +
-        '<span class="history-toggle" onclick="toggleHistory(\'hist-'+idx+'\')">查看近期记录</span>' +
-        '<div class="history" id="hist-'+idx+'">'+historyHTML+'</div>';
+    wrap.innerHTML =
+      '<div class="card-summary" '+(isToday ? '' : 'onclick="toggleCard(\''+course.id+'\')"')+'>'+
+        '<div class="summary-dot" style="background:'+course.color+'"></div>'+
+        '<div class="summary-main">'+
+          '<div class="summary-title-row">'+
+            '<span class="summary-title">'+course.name+'</span>'+
+            (isToday ? '<span class="today-chip">今日打卡</span>' : '<span class="badge '+badgeClass+'">'+badgeText+'</span>')+
+          '</div>'+
+          '<div class="summary-meta">'+(isToday ? '今天是上课日，展开即可直接打卡' : '下次：'+formatShortDate(nextDate)+' · 每'+WEEKDAYS[course.weekday])+'</div>'+
+        '</div>'+
+        '<div class="summary-count">'+compactCount+'</div>'+
+        (isToday ? '' : '<div class="summary-chevron">⌄</div>')+
+      '</div>'+
+      '<div class="card-body">'+
+        '<div class="card-header">'+
+          '<div class="dot" style="background:'+course.color+'"></div>'+
+          '<span class="card-title">'+course.name+'</span>'+
+          '<span class="badge '+badgeClass+'">'+badgeText+'</span>'+
+          '<button class="icon-btn" onclick="openEditForm('+idx+')" style="font-size:13px;">✎</button>'+
+        '</div>'+
+        '<div class="stats-row">'+
+          '<div class="stat"><div class="stat-label">已上</div><div class="stat-value">'+course.used+'</div></div>'+
+          '<div class="stat"><div class="stat-label">剩余</div><div class="stat-value">'+(remaining!==null?remaining:'—')+'</div></div>'+
+          '<div class="stat"><div class="stat-label">'+(totalDisplay?'总课时':'类型')+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+(totalDisplay?'共'+totalDisplay+'次':'课时不限')+'</div></div>'+
+        '</div>'+
+        (totalDisplay ? '<div class="progress-bar"><div class="progress-fill" style="width:'+getProgressPercent(course)+'%;background:'+course.color+'"></div></div>' : '')+
+        '<div class="next-info">下次上课：<strong>'+nextDisplay+'</strong>（每'+WEEKDAYS[course.weekday]+'）</div>'+
+        '<div class="actions">'+actionBtns+'</div>'+
+        '<span class="history-toggle" onclick="toggleHistory(\'hist-'+idx+'\')">查看近期记录</span>'+
+        '<div class="history" id="hist-'+idx+'">'+historyHTML+'</div>'+
+      '</div>';
 
-      container.appendChild(card);
-    })(courses[idx], idx);
-  }
+    container.appendChild(wrap);
+  });
 }
 
 function markClass(idx, status) {
@@ -425,7 +824,9 @@ function markClass(idx, status) {
   course.history.push({date:todayStr, status:status});
   if (status === 'done') {
     course.used += 1;
-    if (course.remaining !== null && course.remaining !== undefined) course.remaining -= 1;
+    if (course.total === null && course.remaining !== null && course.remaining !== undefined) {
+      course.remaining = Math.max(0, course.remaining - 1);
+    }
     showToast(course.name+' 打卡成功！已上 '+course.used+' 次');
     var rem = getRemainingCount(course);
     if (rem !== null && rem <= 2 && rem > 0) {
@@ -434,7 +835,8 @@ function markClass(idx, status) {
   } else {
     showToast(course.name+' 已记录请假，课时顺延');
   }
-  saveData(courses); render();
+  saveData(courses);
+  render();
 }
 
 function undoRecord(courseIdx, histIdx) {
@@ -444,7 +846,7 @@ function undoRecord(courseIdx, histIdx) {
   if (!record) return;
   if (record.status === 'done') {
     course.used = Math.max(0, course.used - 1);
-    if (course.remaining !== null && course.remaining !== undefined) course.remaining += 1;
+    if (course.total === null && course.remaining !== null && course.remaining !== undefined) course.remaining += 1;
   }
   course.history.splice(histIdx, 1);
   saveData(courses); showToast('已撤销打卡记录'); render();
@@ -464,7 +866,7 @@ function openManager() {
       row.innerHTML =
         '<div class="course-row-dot" style="background:'+c.color+'"></div>' +
         '<span class="course-row-name">'+c.name+'</span>' +
-        '<span class="course-row-info">'+WEEKDAYS[c.weekday]+' · 剩'+(rem!==null?rem+'次':'?')+'</span>' +
+        '<span class="course-row-info">'+WEEKDAYS[c.weekday]+' · '+(rem!==null?('剩'+rem+'次'):'不限')+'</span>' +
         '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" style="font-size:13px;">✎</button>' +
         '<button class="icon-btn danger" onclick="deleteCourse('+idx+')">✕</button>';
       list.appendChild(row);
@@ -476,7 +878,8 @@ function openManager() {
 function deleteCourse(idx) {
   if (!confirm('确定删除这门课程？打卡记录也会一起删除。')) return;
   var courses = loadData();
-  courses.splice(idx, 1);
+  var removed = courses.splice(idx, 1)[0];
+  if (removed && expandedIds[removed.id]) delete expandedIds[removed.id];
   saveData(courses);
   openManager(); render();
 }
@@ -492,20 +895,17 @@ function buildColorGrid(selected) {
     grid.appendChild(sw);
   });
 }
-
 function selectWeekday(day) {
   formWeekday = day;
   document.querySelectorAll('.wd-btn').forEach(function(b){
     b.classList.toggle('selected', parseInt(b.dataset.day) === day);
   });
 }
-
 function toggleTotalMode() {
   var hasTot = document.getElementById('f-has-total').checked;
   document.getElementById('f-total-section').style.display = hasTot ? 'block' : 'none';
   document.getElementById('f-remaining-section').style.display = hasTot ? 'none' : 'block';
 }
-
 function adjustVal(id, delta) {
   var el = document.getElementById(id);
   el.textContent = Math.max(0, parseInt(el.textContent) + delta);
@@ -565,10 +965,12 @@ function saveForm() {
     c.total=total; c.remaining=remaining; c.used=used;
     c.payAlert=document.getElementById('f-pay-alert').checked;
   } else {
-    courses.push({id:'c'+Date.now(),name:name,weekday:formWeekday,color:formColor,
+    var newId = 'c'+Date.now();
+    courses.push({id:newId,name:name,weekday:formWeekday,color:formColor,
       startDate:document.getElementById('f-start').value,
       total:total,used:used,remaining:remaining,classTime:'10:00',history:[],
       payAlert:document.getElementById('f-pay-alert').checked});
+    expandedIds[newId] = false;
   }
   saveData(courses);
   closeModal('edit-modal');
@@ -587,25 +989,16 @@ function openExportModal() {
       var savedTime = c.classTime || '10:00';
       row.innerHTML =
         '<div class="time-dot" style="background:'+c.color+'"></div>' +
-        '<span class="time-name">'+c.name+'<br><span style="font-size:11px;color:#aaa;font-weight:400;">每'+WEEKDAYS[c.weekday]+'</span></span>' +
+        '<span class="time-name">'+c.name+'<br><span style="font-size:11px;color:#a39abb;font-weight:400;">每'+WEEKDAYS[c.weekday]+'</span></span>' +
         '<input class="time-input" type="time" value="'+savedTime+'" onchange="saveClassTime('+idx+',this.value)" />';
       list.appendChild(row);
     })(courses[idx], idx);
   }
   document.getElementById('export-modal').classList.add('open');
 }
-
-function saveClassTime(idx, val) {
-  var courses = loadData();
-  courses[idx].classTime = val;
-  saveData(courses);
-}
-
+function saveClassTime(idx, val) { var courses = loadData(); courses[idx].classTime = val; saveData(courses); }
 function padZ(n) { return String(n).padStart(2,'0'); }
-
-function toICSDate(dateObj, h, m) {
-  return dateObj.getFullYear()+padZ(dateObj.getMonth()+1)+padZ(dateObj.getDate())+'T'+padZ(h)+padZ(m)+'00';
-}
+function toICSDate(dateObj, h, m) { return dateObj.getFullYear()+padZ(dateObj.getMonth()+1)+padZ(dateObj.getDate())+'T'+padZ(h)+padZ(m)+'00'; }
 
 function generateICS() {
   var courses = loadData();
@@ -623,7 +1016,6 @@ function generateICS() {
     var startDate = new Date(c.startDate); startDate.setHours(0,0,0,0);
     var firstDate = new Date(startDate);
     var diff = (c.weekday - firstDate.getDay() + 7) % 7;
-    if (diff === 0) diff = 0;
     firstDate.setDate(firstDate.getDate() + diff);
 
     var totalSessions = null;
@@ -635,10 +1027,7 @@ function generateICS() {
     var untilStr = untilDate.getFullYear()+padZ(untilDate.getMonth()+1)+padZ(untilDate.getDate())+'T000000Z';
 
     var evStart = new Date(firstDate); evStart.setHours(th,tm,0,0);
-    var evEnd = new Date(evStart); evEnd.setHours(th, tm+60, 0, 0);
-    // safer end: +1hr
-    var evEndMs = evStart.getTime() + 3600000;
-    var evEndDate = new Date(evEndMs);
+    var evEndDate = new Date(evStart.getTime() + 3600000);
 
     lines.push('BEGIN:VEVENT');
     lines.push('UID:class-'+c.id+'@keshidaka');
@@ -654,7 +1043,6 @@ function generateICS() {
     lines.push('END:VALARM');
     lines.push('END:VEVENT');
 
-    // 续费提醒
     if (includePayAlert) {
       var rem = getRemainingCount(c);
       if (rem !== null && rem <= 2 && rem > 0) {
@@ -675,7 +1063,6 @@ function generateICS() {
       }
     }
 
-    // 课包到期提醒
     if (includeExpireAlert && totalSessions !== null) {
       var sessionsLeft = totalSessions - c.used;
       if (sessionsLeft > 0) {
@@ -717,12 +1104,10 @@ function generateICS() {
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
 document.querySelectorAll('.modal-overlay').forEach(function(overlay){
   overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.classList.remove('open'); });
 });
-
-render();
+initAuth();
 </script>
 </body>
 </html>
