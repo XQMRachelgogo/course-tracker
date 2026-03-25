@@ -191,7 +191,7 @@ body{
 .schedule-item-note{font-size:11px;color:#a39abb;margin-top:3px;line-height:1.5}
 .schedule-tag{font-size:10px;padding:3px 7px;border-radius:999px;background:#f4efff;color:#6c5db5;font-weight:700;white-space:nowrap}
 .schedule-tag.shift{background:#fff1dd;color:#a05e10}
-.export-options{margin:1rem 0}.export-option{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(127,119,221,0.06)}.export-option:last-child{border-bottom:none}.export-option-copy{flex:1;min-width:0}.export-option-label{font-size:13px;color:#574e74;font-weight:600;line-height:1.4}.export-option-desc{font-size:11px;color:#a39abb;margin-top:2px;line-height:1.5}.export-option .reminder-select{flex:0 0 168px;width:168px;max-width:168px}
+.export-options{margin:1rem 0}.export-option{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(127,119,221,0.06)}.export-option:last-child{border-bottom:none}.export-option-label{font-size:13px;color:#574e74;font-weight:600}.export-option-desc{font-size:11px;color:#a39abb;margin-top:2px}
 .download-btn{width:100%;padding:14px;font-size:15px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-weight:700;margin-top:1rem}
 .today-chip{font-size:11px;padding:4px 8px;border-radius:999px;background:#fff3c0;color:#a56d00;font-weight:700}
 button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.auth-btn,.auth-tab,.history-toggle,.modal-close,.counter-btn,.wd-btn,.color-swatch{
@@ -230,7 +230,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .sync-pill{font-size:11px;padding:4px 8px;border-radius:999px;background:#f7f2ff;color:#7F77DD}.sync-pill.error{background:#fff1f1;color:#c75151}.sync-pill.ok{background:#eefaf5;color:#2d8b63}
 .hidden{display:none!important}.setup-box{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff8ed;color:#8b5d10;font-size:12px;line-height:1.6}.setup-box code{display:block;white-space:pre-wrap;background:#fff;border-radius:8px;padding:8px;margin-top:8px;color:#704b0b}.auth-mini{font-size:11px;color:#a095bc;line-height:1.6;margin-top:8px;text-align:center}
 @media (max-width:380px){.auth-launcher{width:40px;height:40px;font-size:16px}}
-@media (max-width:380px){.export-option{align-items:flex-start;flex-direction:column}.export-option .reminder-select{width:100%;max-width:none;flex:none}}
+
 
 .version-notes-wrap{max-width:760px;margin:18px auto 32px;padding:0 14px;}
 .version-notes{background:#fffafc;border:1px solid #ffd8ea;border-radius:18px;box-shadow:0 8px 20px rgba(255,158,203,.10);overflow:hidden;}
@@ -387,7 +387,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
       <input class="form-input" id="f-name" placeholder="例：形体课" />
     </div>
     <div class="form-group">
-      <label class="form-label">上课星期（可多选）</label>
+      <label class="form-label">上课日（可多选）</label>
       <div class="weekday-grid">
         <button type="button" class="wd-btn" data-day="1" onclick="toggleWeekday(1)">周一</button>
         <button type="button" class="wd-btn" data-day="2" onclick="toggleWeekday(2)">周二</button>
@@ -406,7 +406,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
     <div class="form-group">
       <label class="form-label">上课时间</label>
       <div class="time-range">
-        <input class="time-input" id="f-time-start" type="time" value="10:00" />
+        <input class="time-input" id="f-time-start" type="time" value="10:00" onchange="syncEndTimeFromStart()" />
         <span class="time-sep">至</span>
         <input class="time-input" id="f-time-end" type="time" value="11:00" />
       </div>
@@ -416,6 +416,11 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
       <div class="reschedule-box">
         <div id="f-reschedule-empty" class="mini-tip">先保存课程后，再添加调课安排。</div>
         <div id="f-reschedule-editor" class="hidden">
+          <div class="mini-tip">如果这次课程临时改时间，不用改固定上课日；左边填原计划，右边填调课后日期，到新日期时就可以正常打卡。</div>
+          <div class="reschedule-grid-labels">
+            <span>原计划</span>
+            <span>调课后</span>
+          </div>
           <div class="reschedule-grid">
             <input class="form-input" id="f-shift-from" type="date" />
             <input class="form-input" id="f-shift-to" type="date" />
@@ -503,7 +508,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
     <div id="export-time-list"></div>
     <div class="export-options">
       <div class="export-option">
-        <div class="export-option-copy">
+        <div style="flex:1">
           <div class="export-option-label">每周上课提醒</div>
           <div class="export-option-desc">课前推送，含打卡提示</div>
         </div>
@@ -515,14 +520,14 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
         </select>
       </div>
       <div class="export-option">
-        <div class="export-option-copy">
+        <div style="flex:1">
           <div class="export-option-label">续费提醒</div>
           <div class="export-option-desc">剩余 ≤ 2 次时，在下一个上课日提醒</div>
         </div>
         <label class="switch"><input type="checkbox" id="exp-pay-alert" checked /><span class="switch-slider"></span></label>
       </div>
       <div class="export-option">
-        <div class="export-option-copy">
+        <div style="flex:1">
           <div class="export-option-label">课包到期提醒</div>
           <div class="export-option-desc">最后一节课当天 + 提前3天各提醒一次</div>
         </div>
