@@ -520,7 +520,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
       <label class="form-label">收费方式</label>
       <select class="form-input" id="f-course-type" onchange="updateCourseTypeFields()">
         <option value="package">课包制（多少钱 / 多少次）</option>
-        <option value="monthly">包月制（按日期范围）</option>
+        <option value="monthly">订阅制（按日期范围）</option>
       </select>
     </div>
     <div id="f-package-fields">
@@ -548,12 +548,12 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
     </div>
     <div id="f-monthly-fields" class="hidden">
       <div class="form-group">
-        <label class="form-label">包月周期</label>
+        <label class="form-label">订阅周期</label>
         <div class="reschedule-grid">
           <input class="form-input" id="f-monthly-from" type="date" />
           <input class="form-input" id="f-monthly-to" type="date" />
         </div>
-        <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">包月制用日期范围管理，例如 3/1 到 3/31。</div>
+        <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">订阅制用日期范围管理，例如 3/1 到 3/31。</div>
       </div>
     </div>
     <div class="form-group">
@@ -581,7 +581,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
         <div id="f-fee-sessions-wrap"><input class="form-input" id="f-fee-sessions" type="number" min="0" step="1" placeholder="购买课时" inputmode="numeric" style="padding:8px 10px;font-size:13px;width:100%;" /></div>
         <input class="form-input" id="f-fee-date" type="date" style="padding:8px 8px;font-size:13px;" />
       </div>
-      <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">课包制可填写购买课时；包月制只需要金额和付款日期。</div>
+      <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">课包制可填写购买课时；订阅制只需要金额和付款日期。</div>
       <button type="button" class="add-shift-btn" style="margin-top:8px;" onclick="addFeeFromForm()">+ 添加一笔学费</button>
     </div>
     <div class="form-btns" id="edit-form-btns"></div>
@@ -1329,7 +1329,7 @@ function openManager() {
       row.innerHTML =
         '<div class="course-row-dot" style="background:'+c.color+'"></div>' +
         '<span class="course-row-name">'+c.name+'</span>' +
-        '<span class="course-row-info">'+(c.courseType === 'monthly' ? '包月制' : ((rem!==null?('剩'+rem+'次'):'课包制')))+' · '+formatWeekdayList(c)+' · '+formatTimeRange(c)+'</span>' +
+        '<span class="course-row-info">'+(c.courseType === 'monthly' ? '订阅制' : ((rem!==null?('剩'+rem+'次'):'课包制')))+' · '+formatWeekdayList(c)+' · '+formatTimeRange(c)+'</span>' +
         '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" >✏️</button>' +
         '<button class="icon-btn danger" onclick="deleteCourse('+idx+', \'manager\', this)">✕</button>';
       list.appendChild(row);
@@ -1397,7 +1397,7 @@ function updateCourseTypeFields() {
   if (type !== 'package' && feeSessionsInput) feeSessionsInput.value = '';
   if (feeHint) {
     feeHint.innerHTML = type === 'monthly'
-      ? '包月制只记录金额和覆盖日期；学费会按付款日期归入对应年份，如有跨年，可按日期范围再做调整。'
+      ? '订阅制会按周期内的上课周数分摊；如果不跨年，则整笔计入当年。'
       : '新建课程时可直接填写首笔付费和购买课时，点保存后会一起创建；已有课程再买课包时，新增购买课时会自动并入课包总数。';
   }
 }
@@ -1562,8 +1562,8 @@ function saveForm() {
   if (courseType === 'monthly') {
     var monthlyFrom = document.getElementById('f-monthly-from').value || '';
     var monthlyTo = document.getElementById('f-monthly-to').value || '';
-    if (!monthlyFrom || !monthlyTo) { showToast('请填写包月周期'); return; }
-    if (monthlyTo < monthlyFrom) { showToast('包月结束日期不能早于开始日期'); return; }
+    if (!monthlyFrom || !monthlyTo) { showToast('请填写订阅周期'); return; }
+    if (monthlyTo < monthlyFrom) { showToast('订阅结束日期不能早于开始日期'); return; }
   }
   var courses = loadData();
   if (editingIdx !== null) {
@@ -1836,6 +1836,65 @@ function weeksRemainingInYearForCourse(course, fromDateStr) {
   return count;
 }
 
+
+function countCourseOccurrencesInRange(course, startStr, endStr, yearFilter) {
+  var start = startStr ? new Date(startStr + 'T00:00:00') : null;
+  var end = endStr ? new Date(endStr + 'T00:00:00') : null;
+  if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return 0;
+  start.setHours(0,0,0,0);
+  end.setHours(0,0,0,0);
+  var weekdays = getCourseWeekdays(course);
+  var count = 0;
+  var cursor = new Date(start);
+  while (cursor <= end) {
+    if ((!yearFilter || cursor.getFullYear() === yearFilter) && weekdays.indexOf(cursor.getDay()) !== -1) count += 1;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return count;
+}
+
+function allocateSubscriptionFeeByYear(course, fee, result) {
+  var currency = fee.currency || 'CNY';
+  var amount = parseFloat(fee.amount) || 0;
+  if (!amount) return;
+  var feeYear = fee.date ? parseInt(String(fee.date).slice(0,4), 10) : new Date().getFullYear();
+  var fromStr = course.monthlyFrom || fee.date || '';
+  var toStr = course.monthlyTo || fromStr;
+  if (!fromStr || !toStr) {
+    if (!result[feeYear]) result[feeYear] = {};
+    result[feeYear][currency] = (result[feeYear][currency] || 0) + amount;
+    return;
+  }
+  var fromYear = parseInt(String(fromStr).slice(0,4), 10);
+  var toYear = parseInt(String(toStr).slice(0,4), 10);
+  if (!fromYear || !toYear || fromYear === toYear) {
+    var oneYear = fromYear || feeYear;
+    if (!result[oneYear]) result[oneYear] = {};
+    result[oneYear][currency] = (result[oneYear][currency] || 0) + amount;
+    return;
+  }
+  var totalOccurrences = countCourseOccurrencesInRange(course, fromStr, toStr);
+  if (!totalOccurrences) {
+    if (!result[feeYear]) result[feeYear] = {};
+    result[feeYear][currency] = (result[feeYear][currency] || 0) + amount;
+    return;
+  }
+  var allocated = 0;
+  for (var y = fromYear; y <= toYear; y++) {
+    var occurrences = countCourseOccurrencesInRange(course, fromStr, toStr, y);
+    if (!occurrences) continue;
+    var part = amount * occurrences / totalOccurrences;
+    allocated += part;
+    if (!result[y]) result[y] = {};
+    result[y][currency] = (result[y][currency] || 0) + part;
+  }
+  var roundingDiff = amount - allocated;
+  if (Math.abs(roundingDiff) > 0.000001) {
+    if (!result[toYear]) result[toYear] = {};
+    result[toYear][currency] = (result[toYear][currency] || 0) + roundingDiff;
+  }
+}
+
 function prorateFeesByYear(course) {
   var result = {};
   var fees = (course.fees || []).slice().sort(function(a,b){ return (a.date || '') > (b.date || '') ? 1 : -1; });
@@ -1847,8 +1906,7 @@ function prorateFeesByYear(course) {
     if (!amount) return;
     var feeYear = f.date ? parseInt(String(f.date).slice(0,4), 10) : new Date().getFullYear();
     if (course.courseType === 'monthly') {
-      if (!result[feeYear]) result[feeYear] = {};
-      result[feeYear][currency] = (result[feeYear][currency] || 0) + amount;
+      allocateSubscriptionFeeByYear(course, f, result);
       return;
     }
     var sessions = Math.max(0, parseInt(f.sessions, 10) || 0);
