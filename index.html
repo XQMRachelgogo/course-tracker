@@ -868,10 +868,27 @@ async function initAuth() {
 function isoDate(d) { return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function formatDate(d) { return d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'}); }
 function formatShortDate(d) { return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}); }
+function parseLocalDate(value) {
+  if (!value) return null;
+  if (value instanceof Date) {
+    var clone = new Date(value);
+    clone.setHours(0,0,0,0);
+    return clone;
+  }
+  var str = String(value).trim();
+  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) {
+    return new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10));
+  }
+  var d = new Date(str);
+  if (isNaN(d.getTime())) return null;
+  d.setHours(0,0,0,0);
+  return d;
+}
 function formatShortDateFromIso(iso) {
   if (!iso) return '';
-  var d = new Date(iso);
-  return isNaN(d.getTime()) ? iso : formatShortDate(d);
+  var d = parseLocalDate(iso);
+  return !d || isNaN(d.getTime()) ? iso : formatShortDate(d);
 }
 function getTodayDate(){ var t = new Date(); t.setHours(0,0,0,0); return t; }
 function getCourseWeekdays(course) {
@@ -881,27 +898,25 @@ function formatWeekdayList(course) {
   return getCourseWeekdays(course).map(function(day){ return WEEKDAYS[day]; }).join(' / ');
 }
 function isRegularCourseOnDate(course, dateObj) {
-  var current = new Date(dateObj || getTodayDate());
-  current.setHours(0,0,0,0);
-  var startDate = new Date(course.startDate);
-  startDate.setHours(0,0,0,0);
+  var current = parseLocalDate(dateObj || getTodayDate());
+  var startDate = parseLocalDate(course.startDate);
+  if (!current || !startDate) return false;
   return startDate <= current && getCourseWeekdays(course).indexOf(current.getDay()) >= 0;
 }
 function getNextRegularClassDate(course, fromDate) {
-  var base = new Date(fromDate || getTodayDate());
-  base.setHours(0,0,0,0);
-  var start = new Date(course.startDate);
-  start.setHours(0,0,0,0);
+  var base = parseLocalDate(fromDate || getTodayDate()) || getTodayDate();
+  var start = parseLocalDate(course.startDate) || base;
   if (base < start) base = new Date(start);
   var best = null;
   getCourseWeekdays(course).forEach(function(day){
     var candidate = new Date(base);
     var diff = (day - candidate.getDay() + 7) % 7;
     candidate.setDate(candidate.getDate() + diff);
+    candidate.setHours(0,0,0,0);
     if (candidate < start) candidate.setDate(candidate.getDate() + 7);
     if (!best || candidate < best) best = candidate;
   });
-  return best || new Date(base);
+  return best || new Date(start);
 }
 function getPendingReschedulesForDate(course, dateStr) {
   return (course.reschedules || []).filter(function(plan){
@@ -950,9 +965,8 @@ function getNextSessionInfo(course) {
   var best = { date: nextRegular, type: 'regular', note: '每' + formatWeekdayList(course) };
   (course.reschedules || []).forEach(function(plan){
     if (plan.used) return;
-    var d = new Date(plan.toDate);
-    d.setHours(0,0,0,0);
-    if (d < today) return;
+    var d = parseLocalDate(plan.toDate);
+    if (!d || d < today) return;
     if (!best || d < best.date) {
       best = { date: d, type: 'reschedule', note: '调课：' + formatShortDateFromIso(plan.fromDate) + ' → ' + formatShortDateFromIso(plan.toDate) };
     }
@@ -1610,8 +1624,7 @@ function generateICS() {
   var rrDays = ['SU','MO','TU','WE','TH','FR','SA'];
 
   function estimateLastRegularDate(course, sessionsLeft) {
-    var cursor = new Date(course.startDate);
-    cursor.setHours(0,0,0,0);
+    var cursor = parseLocalDate(course.startDate) || getTodayDate();
     var count = 0;
     for (var i = 0; i < 4000; i++) {
       if (isRegularCourseOnDate(course, cursor)) {
@@ -1620,7 +1633,7 @@ function generateICS() {
       }
       cursor.setDate(cursor.getDate() + 1);
     }
-    return getNextRegularClassDate(course, new Date(course.startDate));
+    return getNextRegularClassDate(course, parseLocalDate(course.startDate) || getTodayDate());
   }
 
   for (var i = 0; i < courses.length; i++) {
@@ -1638,7 +1651,7 @@ function generateICS() {
     var weeksToRun = totalSessions ? Math.ceil(totalSessions / weeklySlots) + 6 : 60;
 
     getCourseWeekdays(c).forEach(function(day){
-      var startDate = new Date(c.startDate); startDate.setHours(0,0,0,0);
+      var startDate = parseLocalDate(c.startDate) || getTodayDate();
       var firstDate = new Date(startDate);
       var diff = (day - firstDate.getDay() + 7) % 7;
       firstDate.setDate(firstDate.getDate() + diff);
