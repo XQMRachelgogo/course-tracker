@@ -2,7 +2,15 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#fff4fb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="课时打卡">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <title>课时打卡</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -17,14 +25,23 @@
   --today:#fff7d9;
   --shadow:0 10px 30px rgba(151,119,215,0.10);
 }
+html{
+  height:100%;
+  -webkit-text-size-adjust:100%;
+  overflow-x:hidden;
+  background:#fff7fb;
+}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;
   background:linear-gradient(180deg,#fff9f4 0%,#fff4fb 46%,#f8f8ff 100%);
   min-height:100vh;
-  padding:1.25rem 0.95rem 3rem;
+  min-height:100dvh;
+  padding:calc(env(safe-area-inset-top, 0px) + 1rem) 0.95rem calc(env(safe-area-inset-bottom, 0px) + 3rem);
   color:var(--ink);
+  overflow-x:hidden;
+  touch-action:manipulation;
 }
-.app{max-width:480px;margin:0 auto}
+.app{width:100%;max-width:480px;margin:0 auto}
 .header{
   display:flex;align-items:center;margin-bottom:1.1rem;
   background:rgba(255,255,255,0.72);backdrop-filter:blur(10px);
@@ -118,14 +135,14 @@ body{
 .modal-close{font-size:20px;color:#b0a7ca;cursor:pointer;padding:0 4px;line-height:1;background:none;border:none;font-family:inherit}
 .modal-close:hover{color:#6e658c}
 .course-list{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem}
-.course-row{display:flex;align-items:center;gap:10px;background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:14px;padding:10px 12px}
+.course-row{display:flex;align-items:center;gap:12px;background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:16px;padding:12px 12px}
 .course-row-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.course-row-name{font-size:14px;font-weight:600;color:#4a3f73;flex:1}.course-row-info{font-size:12px;color:#9a93b6}
-.icon-btn{width:30px;height:30px;border-radius:10px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#6f6691;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon-btn{width:44px;height:44px;min-width:44px;min-height:44px;border-radius:12px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#6f6691;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .icon-btn:hover{background:#f7f3ff}.icon-btn.danger:hover{background:#ffe9eb;color:#b33b4d;border-color:#f4aab1}
 .add-course-btn{width:100%;padding:11px;font-size:14px;border-radius:14px;border:1px dashed rgba(127,119,221,0.25);background:#fff;color:#8d84aa;cursor:pointer;font-family:inherit;font-weight:600}
 .add-course-btn:hover{background:#f9f5ff}
 .form-group{margin-bottom:14px}.form-label{font-size:12px;color:#938cae;margin-bottom:6px;display:block}
-.form-input,.time-input,.reminder-select{width:100%;padding:10px 12px;font-size:14px;border:1px solid rgba(127,119,221,0.15);border-radius:12px;background:#fff;color:#433b64;font-family:inherit;outline:none}
+.form-input,.time-input,.reminder-select{width:100%;padding:12px 12px;font-size:16px;border:1px solid rgba(127,119,221,0.15);border-radius:12px;background:#fff;color:#433b64;font-family:inherit;outline:none}
 .form-input:focus,.time-input:focus,.reminder-select:focus{border-color:#8b7af1}
 .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
 .wd-btn{padding:8px 2px;font-size:12px;border-radius:10px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#6d6586;cursor:pointer;font-family:inherit;text-align:center}
@@ -148,6 +165,10 @@ body{
 .export-options{margin:1rem 0}.export-option{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(127,119,221,0.06)}.export-option:last-child{border-bottom:none}.export-option-label{font-size:13px;color:#574e74;font-weight:600}.export-option-desc{font-size:11px;color:#a39abb;margin-top:2px}
 .download-btn{width:100%;padding:14px;font-size:15px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-weight:700;margin-top:1rem}
 .today-chip{font-size:11px;padding:4px 8px;border-radius:999px;background:#fff3c0;color:#a56d00;font-weight:700}
+button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.auth-btn,.auth-tab,.history-toggle,.modal-close,.counter-btn,.wd-btn,.color-swatch{
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
 @media (max-width:380px){
   .summary-title{font-size:15px}.summary-count{font-size:12px;padding:6px 8px}.stats-row{grid-template-columns:1fr}.actions{flex-direction:column}
 }
@@ -833,7 +854,7 @@ function render() {
           '<div class="dot" style="background:'+course.color+'"></div>'+
           '<span class="card-title">'+course.name+'</span>'+
           '<span class="badge '+badgeClass+'">'+badgeText+'</span>'+
-          '<button class="icon-btn" onclick="openEditForm('+idx+')" style="font-size:13px;">✎</button>'+
+          '<button class="icon-btn" onclick="openEditForm('+idx+')" >✎</button>'+
         '</div>'+
         '<div class="stats-row">'+
           '<div class="stat"><div class="stat-label">已上</div><div class="stat-value">'+course.used+'</div></div>'+
@@ -902,7 +923,7 @@ function openManager() {
         '<div class="course-row-dot" style="background:'+c.color+'"></div>' +
         '<span class="course-row-name">'+c.name+'</span>' +
         '<span class="course-row-info">'+WEEKDAYS[c.weekday]+' · '+(rem!==null?('剩'+rem+'次'):'不限')+'</span>' +
-        '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" style="font-size:13px;">✎</button>' +
+        '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" >✎</button>' +
         '<button class="icon-btn danger" onclick="deleteCourse('+idx+')">✕</button>';
       list.appendChild(row);
     })(courses[idx], idx);
@@ -1144,6 +1165,12 @@ document.querySelectorAll('.modal-overlay').forEach(function(overlay){
 });
 var authModalEl = document.getElementById('auth-modal');
 if (authModalEl) { authModalEl.addEventListener('click', function(e){ if (e.target === authModalEl) closeAuthModal(); }); }
+var lastTouchEnd = 0;
+document.addEventListener('touchend', function(e){
+  var now = Date.now();
+  if (now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, {passive:false});
 initAuth();
 </script>
 </body>
