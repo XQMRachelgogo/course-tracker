@@ -434,7 +434,7 @@ body{
 <script>
 var STORAGE_KEY = 'course_tracker_v2';
 var SUPABASE_URL = 'https://sdcxjbkkbytcujlqxcxp.supabase.co';
-var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkY3hqYmtrYnl0Y3VqbHF4Y3hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MTY1NzEsImV4cCI6MjA4OTk5MjU3MX0.8gbLamzNXhYELjqgdK5o1dABNBoY0LOv0i8LVYKG85s';
+var SUPABASE_ANON_KEY = 'sb_publishable_NNrQXaKRsT_8GVatoflfQw_ZfjxWANh';
 var TABLE_NAME = 'course_tracker_state';
 var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var COLORS = ['#8A7EF0','#5BC7A5','#FF9E6B','#6FA8FF','#FF93B5','#FFC663','#A6D96A','#FF7D8D','#8D8D9A','#35B8A6'];
@@ -630,7 +630,12 @@ async function signUpWithPassword() {
   var email = document.getElementById('signup-email').value.trim();
   var password = document.getElementById('signup-password').value;
   if (!email || !password) { showToast('请填写邮箱和密码'); return; }
-  var result = await supabase.auth.signUp({ email: email, password: password });
+  var emailRedirectTo = 'https://xqmrachelgogo.github.io/course-tracker/';
+  var result = await supabase.auth.signUp({
+    email: email,
+    password: password,
+    options: { emailRedirectTo: emailRedirectTo }
+  });
   if (result.error) { showToast('注册失败：' + result.error.message); return; }
   if (result.data && result.data.session) showToast('注册并登录成功');
   else { switchAuthMode('signin'); showToast('注册成功，请按邮箱提示完成验证后再登录'); }
@@ -638,7 +643,7 @@ async function signUpWithPassword() {
 async function requestPasswordReset() {
   var email = document.getElementById('reset-email').value.trim() || document.getElementById('auth-email').value.trim() || document.getElementById('signup-email').value.trim();
   if (!email) { showToast('请先填写邮箱'); return; }
-  var redirectTo = window.location.origin + window.location.pathname;
+  var redirectTo = 'https://xqmrachelgogo.github.io/course-tracker/';
   var result = await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirectTo });
   if (result.error) { showToast('发送失败：' + result.error.message); return; }
   showToast('重置邮件已发送，请去邮箱打开链接');
@@ -650,7 +655,7 @@ function maybeShowRecoveryUI(event) {
   if (!looksLikeRecovery) return;
   document.getElementById('reset-password').value = '';
   document.getElementById('reset-password-confirm').value = '';
-  openModal('reset-password-modal');
+  document.getElementById('reset-password-modal').classList.add('open');
   showToast('请设置新密码');
 }
 async function updateRecoveredPassword() {
