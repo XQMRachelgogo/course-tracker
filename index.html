@@ -137,7 +137,7 @@ body{
 .course-list{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem}
 .course-row{display:flex;align-items:center;gap:12px;background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:16px;padding:12px 12px}
 .course-row-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.course-row-name{font-size:14px;font-weight:600;color:#4a3f73;flex:1}.course-row-info{font-size:12px;color:#9a93b6}
-.icon-btn{width:44px;height:44px;min-width:44px;min-height:44px;border-radius:12px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#6f6691;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.icon-btn{width:44px;height:44px;min-width:44px;min-height:44px;border-radius:12px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#6f6691;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;line-height:1;font-weight:700}.icon-btn.edit-btn{font-size:26px}
 .icon-btn:hover{background:#f7f3ff}.icon-btn.danger:hover{background:#ffe9eb;color:#b33b4d;border-color:#f4aab1}
 .add-course-btn{width:100%;padding:11px;font-size:14px;border-radius:14px;border:1px dashed rgba(127,119,221,0.25);background:#fff;color:#8d84aa;cursor:pointer;font-family:inherit;font-weight:600}
 .add-course-btn:hover{background:#f9f5ff}
@@ -871,7 +871,7 @@ function render() {
           '<div class="dot" style="background:'+course.color+'"></div>'+
           '<span class="card-title">'+course.name+'</span>'+
           '<span class="badge '+badgeClass+'">'+badgeText+'</span>'+
-          '<button class="icon-btn" onclick="openEditForm('+idx+')" >✎</button>'+
+          '<button class="icon-btn edit-btn" aria-label="编辑课程" onclick="openEditForm('+idx+')">✏️</button>'+
         '</div>'+
         '<div class="stats-row">'+
           '<div class="stat"><div class="stat-label">已上</div><div class="stat-value">'+course.used+'</div></div>'+
