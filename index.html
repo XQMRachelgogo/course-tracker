@@ -44,7 +44,8 @@ body{
   overscroll-behavior-x:none;
   touch-action:manipulation;
 }
-body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-behavior:none;}
+html,body{max-width:100%;overflow-x:hidden;}
+body.modal-open{position:fixed;left:0;right:0;width:100%;max-width:100%;overflow:hidden;overscroll-behavior:none;}
 .app{width:100%;max-width:480px;margin:0 auto}
 .header{
   display:flex;align-items:center;margin-bottom:1.1rem;
@@ -133,9 +134,10 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
 .checked-label{font-size:13px;color:#73689d;padding:7px 0;font-weight:600}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#4d4568;color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap;box-shadow:0 8px 22px rgba(77,69,104,.26)}
 .toast.show{opacity:1}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(70,55,101,0.28);z-index:100;align-items:flex-end;justify-content:center;padding:0 .5rem;overflow:hidden}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(70,55,101,0.28);z-index:100;align-items:flex-end;justify-content:center;padding:0 8px env(safe-area-inset-bottom) 8px;overflow:hidden;box-sizing:border-box}
 .modal-overlay.open{display:flex}
-.modal{background:#fffdfd;border-radius:24px 24px 0 0;width:min(100%,480px);max-width:480px;box-sizing:border-box;padding:1.4rem 1.15rem 2.35rem;max-height:88vh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;box-shadow:0 -12px 30px rgba(72,50,125,0.12)}
+.modal{background:#fffdfd;border-radius:24px 24px 0 0;width:min(calc(100vw - 16px),480px);max-width:calc(100vw - 16px);box-sizing:border-box;padding:1.25rem 0.95rem 2.1rem;max-height:88vh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;box-shadow:0 -12px 30px rgba(72,50,125,0.12)}
+.modal *{max-width:100%;box-sizing:border-box;}
 .modal-header{display:flex;align-items:center;margin-bottom:1.25rem}.modal-title{font-size:17px;font-weight:700;color:#4a3f73;flex:1}
 .modal-close{font-size:20px;color:#b0a7ca;cursor:pointer;padding:0 4px;line-height:1;background:none;border:none;font-family:inherit}
 .modal-close:hover{color:#6e658c}
@@ -147,17 +149,17 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
 .add-course-btn{width:100%;padding:11px;font-size:14px;border-radius:14px;border:1px dashed rgba(127,119,221,0.25);background:#fff;color:#8d84aa;cursor:pointer;font-family:inherit;font-weight:600}
 .add-course-btn:hover{background:#f9f5ff}
 .form-group{margin-bottom:14px}.form-label{font-size:12px;color:#938cae;margin-bottom:6px;display:block}
-.form-input,.time-input,.reminder-select{width:100%;max-width:100%;box-sizing:border-box;padding:12px 12px;font-size:16px;border:1px solid rgba(127,119,221,0.15);border-radius:12px;background:#fff;color:#433b64;font-family:inherit;outline:none;min-width:0}
+.form-input,.time-input,.reminder-select{width:100%;padding:12px 12px;font-size:16px;border:1px solid rgba(127,119,221,0.15);border-radius:12px;background:#fff;color:#433b64;font-family:inherit;outline:none}
 .form-input:focus,.time-input:focus,.reminder-select:focus{border-color:#8b7af1}
 .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
 .wd-btn{padding:8px 2px;font-size:12px;border-radius:10px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#6d6586;cursor:pointer;font-family:inherit;text-align:center}
 .wd-btn.selected{background:#8a7ef0;border-color:#8a7ef0;color:#fff}
 .mini-tip{font-size:11px;color:#a39abb;line-height:1.6;margin-top:6px}
 .reschedule-box{background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:14px;padding:10px 12px}
-.reschedule-grid-labels{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:8px 0 6px;font-size:12px;font-weight:700;color:#6f6889;width:100%;box-sizing:border-box}
+.reschedule-grid-labels{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 6px;font-size:12px;font-weight:700;color:#6f6889}
 .reschedule-grid-labels span:first-child{text-align:left}
 .reschedule-grid-labels span:last-child{text-align:right}
-.reschedule-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;width:100%;box-sizing:border-box}.reschedule-grid > *{min-width:0}
+.reschedule-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .reschedule-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .reschedule-item{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(127,119,221,0.08);border-radius:12px;padding:9px 10px}
 .reschedule-item-main{flex:1;min-width:0}
@@ -181,8 +183,8 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
 .export-btn{width:100%;padding:14px;font-size:14px;border-radius:18px;border:1px solid rgba(127,119,221,0.12);background:linear-gradient(180deg,#ffffff 0%,#faf6ff 100%);color:#4a3f73;cursor:pointer;font-family:inherit;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--shadow)}
 .export-btn:hover{background:#f8f3ff}.export-hint{font-size:11px;color:#aaa1bf;margin-top:8px;text-align:center;line-height:1.5}
 .time-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:14px;margin-bottom:8px}.time-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.time-name{font-size:14px;font-weight:600;color:#4a3f73;flex:1}
-.time-range{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;width:100%;box-sizing:border-box}.time-range > *{min-width:0}
-.time-sep{font-size:12px;color:#a39abb;font-weight:700;justify-self:center;align-self:center;white-space:nowrap;padding:0 2px}
+.time-range{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;min-width:150px}
+.time-sep{font-size:12px;color:#a39abb;font-weight:700}
 .schedule-week{display:flex;flex-direction:column;gap:10px}
 .schedule-day{background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:18px;padding:12px}
 .schedule-day-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
@@ -248,7 +250,10 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .version-notes-body h3{margin:8px 0 8px;font-size:15px;color:#5a3b73;}
 .version-notes-body ul{margin:6px 0 12px 18px;padding:0;}
 .version-notes-body li{margin:4px 0;}
+.version-tag{display:inline-block;margin-top:4px;padding:4px 10px;border-radius:999px;background:#ffe7f3;color:#8a4f73;font-size:12px;font-weight:700;}
 
+
+@media (max-width:430px){.modal{padding-left:12px;padding-right:12px}.time-range{grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:4px}.time-sep{width:24px;min-width:24px}.reschedule-grid-labels,.reschedule-grid{gap:6px}.form-input,.time-input,.reminder-select{padding-left:10px;padding-right:10px}}
 </style>
 </head>
 <body>
@@ -650,6 +655,7 @@ function setSyncPill(text, cls) {
 function showSetupBox(show) {
   var box = document.getElementById('setup-box');
   if (!box) return;
+  document.getElementById('setup-sql').textContent = setupSQL;
   box.classList.toggle('hidden', !show);
 }
 async function fetchRemoteState() {
@@ -1777,18 +1783,61 @@ initAuth();
 <section class="version-notes-wrap">
   <details class="version-notes">
     <summary>
-      <span>✨ 功能介绍</span>
-      <span class="sub">点开查看当前可用功能</span>
+      <span>✨ 功能版本说明</span>
+      <span class="sub">点开查看目前已经做好的功能</span>
     </summary>
     <div class="version-notes-body">
+      <div class="version-tag">当前版本：课程管理 + 云同步 + 课表生成</div>
+      <h3>1. 课程管理</h3>
       <ul>
-        <li>课程卡片默认折叠，当天课程优先显示并可直接打卡。</li>
-        <li>支持课程新增、编辑、删除，课时数可直接输入。</li>
-        <li>上课日支持多选，并可设置开始时间和结束时间。</li>
-        <li>支持调课安排，记录原计划日期和调课后日期。</li>
-        <li>课时用完时可直接续课，已上次数会继续累计。</li>
-        <li>支持邮箱登录、云端同步和忘记密码。</li>
-        <li>支持一键生成周课表，并可导出到 Apple Calendar。</li>
+        <li>课程卡片默认折叠，只显示课程名和剩余次数 / 总次数。</li>
+        <li>当天有课的课程会自动排在最上面，并默认展开，方便直接打卡。</li>
+        <li>课程可编辑总课时、剩余次数、已上次数、到期日、提醒设置。</li>
+        <li>编辑按钮和移动端点击区域已放大，更方便手指操作。</li>
+      </ul>
+
+      <h3>2. 打卡与扣课时</h3>
+      <ul>
+        <li>上课当天可直接打卡，打卡后自动扣 1 次课时。</li>
+        <li>支持撤销打卡，避免误操作。</li>
+        <li>支持多上课日设置，一门课一周可以按多个上课日多次扣课时。</li>
+        <li>支持调课：比如原本周二上课，改到周三后，可在周三正常打卡一次。</li>
+      </ul>
+
+      <h3>3. 续费 / 延期逻辑</h3>
+      <ul>
+        <li>当打完最后一节课、剩余课时变为 0 时，会弹出确认。</li>
+        <li>可选择确认这是最后一次，或确认已续费 / 延期。</li>
+        <li>续费默认增加 10 次，也可改成其他次数。</li>
+        <li>续费后已上次数不会清零，会继续累计；剩余次数则自动增加后继续递减。</li>
+      </ul>
+
+      <h3>4. 账号与同步</h3>
+      <ul>
+        <li>支持邮箱注册、登录、退出登录、忘记密码、重设密码。</li>
+        <li>未登录时可先使用本地保存；登录后会同步到 Supabase 云端。</li>
+        <li>登录入口已缩成右上角小按钮，登录后不再显示注册 / 登录 / 找回密码表单。</li>
+      </ul>
+
+      <h3>5. 课表与时间</h3>
+      <ul>
+        <li>编辑课程时可设置上课开始时间和结束时间。</li>
+        <li>首页支持“一键生成课表”，按周一到周日直观展示每周课程安排。</li>
+        <li>课表中会显示课程名、时间段、固定课 / 调课，并高亮当天。</li>
+      </ul>
+
+      <h3>6. 移动端优化</h3>
+      <ul>
+        <li>页面已做移动端优化，尽量减少误触、乱缩放和双击放大。</li>
+        <li>已加入更适合手机桌面的图标和网页图标。</li>
+        <li>整体界面改成了更柔和、偏童趣的风格。</li>
+      </ul>
+
+      <h3>7. 其他</h3>
+      <ul>
+        <li>支持导出日历（.ics）。</li>
+        <li>支持课时不足时提醒续费。</li>
+        <li>支持查看历史记录，方便核对机构是否正确扣课时。</li>
       </ul>
     </div>
   </details>
