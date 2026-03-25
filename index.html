@@ -1704,15 +1704,32 @@ function prorateFeesByYear(course) {
   var classByYear = getClassDatesByYear(course);
   var totalHistorySessions = Object.keys(classByYear).reduce(function(a, yr) { return a + classByYear[yr]; }, 0);
   var thisYear = new Date().getFullYear();
+  var used = Math.max(0, parseInt(course.used, 10) || 0);
+  var startYear = course.startDate ? parseInt(String(course.startDate).slice(0,4), 10) : null;
+  var earliestFeeYear = null;
 
-  // If we have actual history, prorate by real attendance
-  if (totalHistorySessions > 0) {
+  fees.forEach(function(f) {
+    var feeYear = f.date ? parseInt(String(f.date).slice(0,4), 10) : null;
+    if (!feeYear) return;
+    if (earliestFeeYear === null || feeYear < earliestFeeYear) earliestFeeYear = feeYear;
+  });
+
+  var fallbackYear = startYear || earliestFeeYear || thisYear;
+  var manualSessions = Math.max(0, used - totalHistorySessions);
+
+  if (manualSessions > 0) {
+    classByYear[fallbackYear] = (classByYear[fallbackYear] || 0) + manualSessions;
+  }
+
+  var totalSessions = Object.keys(classByYear).reduce(function(a, yr) { return a + classByYear[yr]; }, 0);
+
+  if (totalSessions > 0) {
     fees.forEach(function(f) {
       var currency = f.currency || 'CNY';
       var amount = parseFloat(f.amount) || 0;
       if (!amount) return;
       Object.keys(classByYear).forEach(function(yr) {
-        var share = amount * classByYear[yr] / totalHistorySessions;
+        var share = amount * classByYear[yr] / totalSessions;
         if (!result[yr]) result[yr] = {};
         result[yr][currency] = (result[yr][currency] || 0) + share;
       });
@@ -1720,29 +1737,11 @@ function prorateFeesByYear(course) {
     return result;
   }
 
-  // No history yet — estimate using course.used and start date
-  // Strategy: spread sessions across years based on startDate and used count
-  var used = course.used || 0;
-  var startYear = course.startDate ? parseInt(String(course.startDate).slice(0,4), 10) : thisYear;
-
   fees.forEach(function(f) {
     var currency = f.currency || 'CNY';
     var amount = parseFloat(f.amount) || 0;
     if (!amount) return;
-
-    var targetYear;
-    if (used === 0) {
-      // Nothing attended yet — show in current year (course is future/ongoing)
-      targetYear = thisYear;
-    } else if (startYear === thisYear) {
-      // All classes in this year
-      targetYear = thisYear;
-    } else {
-      // Course spans years but no history — attribute to this year
-      // (conservative: show cost as current-year expense)
-      targetYear = thisYear;
-    }
-
+    var targetYear = thisYear;
     if (!result[targetYear]) result[targetYear] = {};
     result[targetYear][currency] = (result[targetYear][currency] || 0) + amount;
   });
