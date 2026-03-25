@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#fff4fb">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="课时打卡">
@@ -57,6 +58,7 @@ body{
   box-shadow:0 4px 14px rgba(127,119,221,0.08)
 }
 .manage-btn:hover{background:#f7f3ff}
+.header-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
 .cards{display:flex;flex-direction:column;gap:12px}
 .card-wrap{
   background:rgba(255,255,255,0.95);border:1px solid var(--line);border-radius:22px;
@@ -147,6 +149,17 @@ body{
 .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
 .wd-btn{padding:8px 2px;font-size:12px;border-radius:10px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#6d6586;cursor:pointer;font-family:inherit;text-align:center}
 .wd-btn.selected{background:#8a7ef0;border-color:#8a7ef0;color:#fff}
+.mini-tip{font-size:11px;color:#a39abb;line-height:1.6;margin-top:6px}
+.reschedule-box{background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:14px;padding:10px 12px}
+.reschedule-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.reschedule-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.reschedule-item{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(127,119,221,0.08);border-radius:12px;padding:9px 10px}
+.reschedule-item-main{flex:1;min-width:0}
+.reschedule-item-title{font-size:12px;color:#564d73;font-weight:700}
+.reschedule-item-sub{font-size:11px;color:#a39abb;margin-top:2px;line-height:1.5}
+.add-shift-btn{width:100%;margin-top:8px;padding:10px 12px;border-radius:12px;border:1px dashed rgba(127,119,221,0.22);background:#fff;color:#7b71a2;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.add-shift-btn:hover{background:#f8f4ff}
+@media (max-width:380px){.reschedule-grid{grid-template-columns:1fr}.header-actions{gap:6px}.manage-btn{padding:8px 10px;font-size:12px}}
 .color-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
 .color-swatch{width:100%;aspect-ratio:1;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .1s}.color-swatch.selected{border-color:#433b64;transform:scale(1.12)}
 .form-switch-row{display:flex;align-items:center;gap:10px}.form-switch-label{font-size:13px;color:#574e74;flex:1}
@@ -162,6 +175,22 @@ body{
 .export-btn{width:100%;padding:14px;font-size:14px;border-radius:18px;border:1px solid rgba(127,119,221,0.12);background:linear-gradient(180deg,#ffffff 0%,#faf6ff 100%);color:#4a3f73;cursor:pointer;font-family:inherit;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--shadow)}
 .export-btn:hover{background:#f8f3ff}.export-hint{font-size:11px;color:#aaa1bf;margin-top:8px;text-align:center;line-height:1.5}
 .time-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:14px;margin-bottom:8px}.time-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.time-name{font-size:14px;font-weight:600;color:#4a3f73;flex:1}
+.time-range{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;min-width:150px}
+.time-sep{font-size:12px;color:#a39abb;font-weight:700}
+.schedule-week{display:flex;flex-direction:column;gap:10px}
+.schedule-day{background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:18px;padding:12px}
+.schedule-day-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.schedule-day-title{font-size:14px;font-weight:700;color:#4a3f73}
+.schedule-day-sub{font-size:11px;color:#a39abb}
+.schedule-day.today{background:linear-gradient(180deg,#fffdf4 0%,#fff7df 100%);border-color:rgba(255,194,65,0.3)}
+.schedule-empty{font-size:12px;color:#aaa1bf;padding:8px 2px}
+.schedule-item{display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid rgba(127,119,221,0.08);border-radius:14px;padding:10px 11px;margin-top:8px}
+.schedule-item-main{flex:1;min-width:0}
+.schedule-item-title{font-size:13px;font-weight:700;color:#4a3f73}
+.schedule-item-time{font-size:12px;color:#7f76a3;margin-top:2px}
+.schedule-item-note{font-size:11px;color:#a39abb;margin-top:3px;line-height:1.5}
+.schedule-tag{font-size:10px;padding:3px 7px;border-radius:999px;background:#f4efff;color:#6c5db5;font-weight:700;white-space:nowrap}
+.schedule-tag.shift{background:#fff1dd;color:#a05e10}
 .export-options{margin:1rem 0}.export-option{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(127,119,221,0.06)}.export-option:last-child{border-bottom:none}.export-option-label{font-size:13px;color:#574e74;font-weight:600}.export-option-desc{font-size:11px;color:#a39abb;margin-top:2px}
 .download-btn{width:100%;padding:14px;font-size:15px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-weight:700;margin-top:1rem}
 .today-chip{font-size:11px;padding:4px 8px;border-radius:999px;background:#fff3c0;color:#a56d00;font-weight:700}
@@ -201,6 +230,19 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .sync-pill{font-size:11px;padding:4px 8px;border-radius:999px;background:#f7f2ff;color:#7F77DD}.sync-pill.error{background:#fff1f1;color:#c75151}.sync-pill.ok{background:#eefaf5;color:#2d8b63}
 .hidden{display:none!important}.setup-box{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff8ed;color:#8b5d10;font-size:12px;line-height:1.6}.setup-box code{display:block;white-space:pre-wrap;background:#fff;border-radius:8px;padding:8px;margin-top:8px;color:#704b0b}.auth-mini{font-size:11px;color:#a095bc;line-height:1.6;margin-top:8px;text-align:center}
 @media (max-width:380px){.auth-launcher{width:40px;height:40px;font-size:16px}}
+
+
+.version-notes-wrap{max-width:760px;margin:18px auto 32px;padding:0 14px;}
+.version-notes{background:#fffafc;border:1px solid #ffd8ea;border-radius:18px;box-shadow:0 8px 20px rgba(255,158,203,.10);overflow:hidden;}
+.version-notes summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:700;color:#7b4b94;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.version-notes summary::-webkit-details-marker{display:none;}
+.version-notes summary .sub{font-weight:600;font-size:12px;color:#b06f91;}
+.version-notes[open] summary{border-bottom:1px solid #ffe2ef;background:#fff6fa;}
+.version-notes-body{padding:16px 18px 18px;color:#6b5a86;line-height:1.7;font-size:14px;}
+.version-notes-body h3{margin:8px 0 8px;font-size:15px;color:#5a3b73;}
+.version-notes-body ul{margin:6px 0 12px 18px;padding:0;}
+.version-notes-body li{margin:4px 0;}
+.version-tag{display:inline-block;margin-top:4px;padding:4px 10px;border-radius:999px;background:#ffe7f3;color:#8a4f73;font-size:12px;font-weight:700;}
 
 </style>
 </head>
@@ -286,9 +328,16 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
       <h1>课时打卡</h1>
       <p id="today-date"></p>
     </div>
-    <button class="manage-btn" onclick="openManager()">管理课程</button>
+    <div class="header-actions">
+      <button class="manage-btn" onclick="openScheduleModal()">一键课表</button>
+      <button class="manage-btn" onclick="openManager()">管理课程</button>
+    </div>
   </div>
   <div class="cards" id="cards-container"></div>
+  <div class="divider"></div>
+  <p class="section-label">本周课表</p>
+  <button class="export-btn" onclick="openScheduleModal()">🗓️ 一键生成课表</button>
+  <p class="export-hint">按周一到周日查看全部课程，含上课时间和调课安排</p>
   <div class="divider"></div>
   <p class="section-label">日历提醒</p>
   <button class="export-btn" onclick="openExportModal()">📅 导出到 Apple Calendar</button>
@@ -338,20 +387,44 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
       <input class="form-input" id="f-name" placeholder="例：形体课" />
     </div>
     <div class="form-group">
-      <label class="form-label">上课日</label>
+      <label class="form-label">上课星期（可多选）</label>
       <div class="weekday-grid">
-        <button class="wd-btn" data-day="1" onclick="selectWeekday(1)">周一</button>
-        <button class="wd-btn" data-day="2" onclick="selectWeekday(2)">周二</button>
-        <button class="wd-btn" data-day="3" onclick="selectWeekday(3)">周三</button>
-        <button class="wd-btn" data-day="4" onclick="selectWeekday(4)">周四</button>
-        <button class="wd-btn" data-day="5" onclick="selectWeekday(5)">周五</button>
-        <button class="wd-btn" data-day="6" onclick="selectWeekday(6)">周六</button>
-        <button class="wd-btn" data-day="0" onclick="selectWeekday(0)">周日</button>
+        <button type="button" class="wd-btn" data-day="1" onclick="toggleWeekday(1)">周一</button>
+        <button type="button" class="wd-btn" data-day="2" onclick="toggleWeekday(2)">周二</button>
+        <button type="button" class="wd-btn" data-day="3" onclick="toggleWeekday(3)">周三</button>
+        <button type="button" class="wd-btn" data-day="4" onclick="toggleWeekday(4)">周四</button>
+        <button type="button" class="wd-btn" data-day="5" onclick="toggleWeekday(5)">周五</button>
+        <button type="button" class="wd-btn" data-day="6" onclick="toggleWeekday(6)">周六</button>
+        <button type="button" class="wd-btn" data-day="0" onclick="toggleWeekday(0)">周日</button>
       </div>
+      <div class="mini-tip">一门课可以选多个上课日；每轮到一次上课日，就能扣 1 次课时。</div>
     </div>
     <div class="form-group">
       <label class="form-label">开始日期</label>
       <input class="form-input" id="f-start" type="date" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">上课时间</label>
+      <div class="time-range">
+        <input class="time-input" id="f-time-start" type="time" value="10:00" />
+        <span class="time-sep">至</span>
+        <input class="time-input" id="f-time-end" type="time" value="11:00" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">调课安排</label>
+      <div class="reschedule-box">
+        <div id="f-reschedule-empty" class="mini-tip">先保存课程后，再添加调课安排。</div>
+        <div id="f-reschedule-editor" class="hidden">
+          <div class="reschedule-grid">
+            <input class="form-input" id="f-shift-from" type="date" />
+            <input class="form-input" id="f-shift-to" type="date" />
+          </div>
+          <input class="form-input" id="f-shift-note" placeholder="备注（可选）" style="margin-top:8px;" />
+          <button type="button" class="add-shift-btn" onclick="addRescheduleFromForm()">+ 添加调课</button>
+          <div class="reschedule-list" id="f-reschedule-list"></div>
+        </div>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">颜色</label>
@@ -404,6 +477,18 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
       </div>
     </div>
     <div class="form-btns" id="edit-form-btns"></div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="schedule-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">一周课表</span>
+      <button class="modal-close" onclick="closeModal('schedule-modal')">✕</button>
+    </div>
+    <p style="font-size:13px;color:#8f86aa;margin-bottom:1rem;line-height:1.6;">按周一到周日查看固定上课和调课安排。当天课程会自动高亮显示。</p>
+    <div class="schedule-week" id="schedule-week"></div>
   </div>
 </div>
 
@@ -461,16 +546,16 @@ var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var COLORS = ['#8A7EF0','#5BC7A5','#FF9E6B','#6FA8FF','#FF93B5','#FFC663','#A6D96A','#FF7D8D','#8D8D9A','#35B8A6'];
 var WEEKDAYS = ['周日','周一','周二','周三','周四','周五','周六'];
 var editingIdx = null;
-var formWeekday = 1;
+var formWeekdays = [1];
 var formColor = COLORS[0];
 var expandedIds = {};
 
 var defaultCourses = [
-  {id:'xingti',name:'形体课',weekday:1,color:'#8A7EF0',total:10,used:3,remaining:null,startDate:'2025-03-09',classTime:'10:00',history:[{date:'2025-03-09',status:'done'},{date:'2025-03-16',status:'done'},{date:'2025-03-23',status:'done'}],payAlert:false},
-  {id:'sumiao',name:'素描课',weekday:2,color:'#5BC7A5',total:10,used:3,remaining:null,startDate:'2025-03-10',classTime:'10:00',history:[{date:'2025-03-10',status:'done'},{date:'2025-03-17',status:'done'},{date:'2025-03-24',status:'done'}],payAlert:false},
-  {id:'meishu',name:'美术课',weekday:3,color:'#FF9E6B',total:null,used:0,remaining:16,startDate:'2025-03-25',classTime:'10:00',history:[],payAlert:false},
-  {id:'zhongwen',name:'中文阅读',weekday:4,color:'#6FA8FF',total:null,used:0,remaining:null,startDate:'2025-04-16',classTime:'10:00',history:[],payAlert:false},
-  {id:'jita',name:'吉他课',weekday:0,color:'#FF93B5',total:null,used:0,remaining:2,startDate:'2025-03-29',classTime:'10:00',history:[],payAlert:true}
+  {id:'xingti',name:'形体课',weekdays:[1],weekday:1,color:'#8A7EF0',total:10,used:3,remaining:null,startDate:'2025-03-09',classTime:'10:00',classEndTime:'11:00',history:[{date:'2025-03-09',status:'done'},{date:'2025-03-16',status:'done'},{date:'2025-03-23',status:'done'}],reschedules:[],payAlert:false},
+  {id:'sumiao',name:'素描课',weekdays:[2],weekday:2,color:'#5BC7A5',total:10,used:3,remaining:null,startDate:'2025-03-10',classTime:'10:00',classEndTime:'11:00',history:[{date:'2025-03-10',status:'done'},{date:'2025-03-17',status:'done'},{date:'2025-03-24',status:'done'}],reschedules:[],payAlert:false},
+  {id:'meishu',name:'美术课',weekdays:[2,4],weekday:2,color:'#FF9E6B',total:null,used:0,remaining:16,startDate:'2025-03-25',classTime:'10:00',classEndTime:'11:00',history:[],reschedules:[],payAlert:false},
+  {id:'zhongwen',name:'中文阅读',weekdays:[4],weekday:4,color:'#6FA8FF',total:null,used:0,remaining:null,startDate:'2025-04-16',classTime:'10:00',classEndTime:'11:00',history:[],reschedules:[],payAlert:false},
+  {id:'jita',name:'吉他课',weekdays:[0],weekday:0,color:'#FF93B5',total:null,used:0,remaining:2,startDate:'2025-03-29',classTime:'10:00',classEndTime:'11:00',history:[],reschedules:[],payAlert:true}
 ];
 var currentCourses = [];
 var currentUser = null;
@@ -495,19 +580,60 @@ var setupSQL = [
 ].join('\n');
 
 function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+function pad2(n) { return String(n).padStart(2,'0'); }
+function addMinutesToTime(timeStr, minutes) {
+  var parts = String(timeStr || '10:00').split(':');
+  var h = parseInt(parts[0], 10);
+  var m = parseInt(parts[1], 10);
+  if (isNaN(h)) h = 10;
+  if (isNaN(m)) m = 0;
+  var total = h * 60 + m + (parseInt(minutes, 10) || 0);
+  total = ((total % 1440) + 1440) % 1440;
+  return pad2(Math.floor(total / 60)) + ':' + pad2(total % 60);
+}
+function formatTimeRange(course) {
+  var start = course.classTime || '10:00';
+  var end = course.classEndTime || addMinutesToTime(start, 60);
+  return start + ' - ' + end;
+}
+function sortWeekdays(days) {
+  return (days || []).map(function(day){ return parseInt(day, 10); }).filter(function(day){
+    return !isNaN(day) && day >= 0 && day <= 6;
+  }).sort(function(a, b){
+    var av = a === 0 ? 7 : a;
+    var bv = b === 0 ? 7 : b;
+    return av - bv;
+  }).filter(function(day, idx, arr){ return arr.indexOf(day) === idx; });
+}
+function normalizeCourse(course) {
+  var c = deepClone(course || {});
+  c.weekdays = sortWeekdays(Array.isArray(c.weekdays) && c.weekdays.length ? c.weekdays : [typeof c.weekday === 'number' ? c.weekday : 1]);
+  c.weekday = c.weekdays[0];
+  c.history = Array.isArray(c.history) ? c.history : [];
+  c.reschedules = Array.isArray(c.reschedules) ? c.reschedules : [];
+  c.classTime = c.classTime || '10:00';
+  c.classEndTime = c.classEndTime || addMinutesToTime(c.classTime, 60);
+  c.used = Math.max(0, parseInt(c.used, 10) || 0);
+  c.total = (c.total === null || c.total === undefined || c.total === '') ? null : Math.max(0, parseInt(c.total, 10) || 0);
+  c.remaining = (c.remaining === null || c.remaining === undefined || c.remaining === '') ? null : Math.max(0, parseInt(c.remaining, 10) || 0);
+  return c;
+}
+function normalizeCourses(courses) {
+  return (Array.isArray(courses) ? courses : []).map(normalizeCourse);
+}
 function getLocalBackup() {
   try {
     var r = localStorage.getItem(STORAGE_KEY);
-    if (r) return JSON.parse(r);
+    if (r) return normalizeCourses(JSON.parse(r));
   } catch(e) {}
-  return deepClone(defaultCourses);
+  return normalizeCourses(deepClone(defaultCourses));
 }
 function writeLocalBackup(courses) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(courses)); } catch(e) {}
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeCourses(courses))); } catch(e) {}
 }
-function loadData() { return deepClone(currentCourses); }
+function loadData() { return deepClone(normalizeCourses(currentCourses)); }
 function saveData(courses) {
-  currentCourses = deepClone(courses);
+  currentCourses = normalizeCourses(deepClone(courses));
   writeLocalBackup(currentCourses);
   queueRemoteSave();
 }
@@ -609,24 +735,24 @@ function updateAuthUI() {
 async function hydrateDataForUser() {
   var local = getLocalBackup();
   if (!currentUser) {
-    currentCourses = deepClone(local);
+    currentCourses = normalizeCourses(deepClone(local));
     render();
     return;
   }
   try {
     var remote = await fetchRemoteState();
     if (remote && remote.length) {
-      currentCourses = deepClone(remote);
+      currentCourses = normalizeCourses(deepClone(remote));
       writeLocalBackup(currentCourses);
       showSetupBox(false);
       setSyncPill('已同步', 'ok');
     } else {
-      currentCourses = deepClone(local);
+      currentCourses = normalizeCourses(deepClone(local));
       await persistRemoteState();
     }
   } catch(err) {
     console.error(err);
-    currentCourses = deepClone(local);
+    currentCourses = normalizeCourses(deepClone(local));
     if (err && String(err.message || '').toLowerCase().indexOf('relation') >= 0) {
       showSetupBox(true);
       setSyncPill('缺少数据表', 'error');
@@ -735,24 +861,97 @@ async function initAuth() {
 function isoDate(d) { return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function formatDate(d) { return d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'}); }
 function formatShortDate(d) { return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}); }
+function formatShortDateFromIso(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  return isNaN(d.getTime()) ? iso : formatShortDate(d);
+}
 function getTodayDate(){ var t = new Date(); t.setHours(0,0,0,0); return t; }
-
-function getNextClassDate(course) {
-  var today = getTodayDate();
-  var start = new Date(course.startDate); start.setHours(0,0,0,0);
-  var base = start > today ? new Date(start) : new Date(today);
-  var diff = (course.weekday - base.getDay() + 7) % 7;
-  base.setDate(base.getDate() + diff);
+function getCourseWeekdays(course) {
+  return sortWeekdays(Array.isArray(course.weekdays) && course.weekdays.length ? course.weekdays : [typeof course.weekday === 'number' ? course.weekday : 1]);
+}
+function formatWeekdayList(course) {
+  return getCourseWeekdays(course).map(function(day){ return WEEKDAYS[day]; }).join(' / ');
+}
+function isRegularCourseOnDate(course, dateObj) {
+  var current = new Date(dateObj || getTodayDate());
+  current.setHours(0,0,0,0);
+  var startDate = new Date(course.startDate);
+  startDate.setHours(0,0,0,0);
+  return startDate <= current && getCourseWeekdays(course).indexOf(current.getDay()) >= 0;
+}
+function getNextRegularClassDate(course, fromDate) {
+  var base = new Date(fromDate || getTodayDate());
+  base.setHours(0,0,0,0);
+  var start = new Date(course.startDate);
+  start.setHours(0,0,0,0);
   if (base < start) base = new Date(start);
-  return base;
+  var best = null;
+  getCourseWeekdays(course).forEach(function(day){
+    var candidate = new Date(base);
+    var diff = (day - candidate.getDay() + 7) % 7;
+    candidate.setDate(candidate.getDate() + diff);
+    if (candidate < start) candidate.setDate(candidate.getDate() + 7);
+    if (!best || candidate < best) best = candidate;
+  });
+  return best || new Date(base);
 }
-
-function isCourseToday(course) {
+function getPendingReschedulesForDate(course, dateStr) {
+  return (course.reschedules || []).filter(function(plan){
+    return !plan.used && plan.toDate === dateStr;
+  });
+}
+function getSessionKeyFromPlan(plan) {
+  return 'reschedule:' + plan.id;
+}
+function findRescheduleById(course, planId) {
+  return (course.reschedules || []).find(function(plan){ return plan.id === planId; }) || null;
+}
+function hasTodaySchedule(course) {
   var today = getTodayDate();
-  var startDate = new Date(course.startDate); startDate.setHours(0,0,0,0);
-  return course.weekday === today.getDay() && startDate <= today;
+  return isRegularCourseOnDate(course, today) || getPendingReschedulesForDate(course, isoDate(today)).length > 0;
 }
-
+function getTodayOpportunities(course) {
+  var today = getTodayDate();
+  var todayStr = isoDate(today);
+  var opportunities = [];
+  if (isRegularCourseOnDate(course, today)) {
+    var regularKey = 'regular:' + todayStr;
+    if (!course.history.some(function(h){ return h.sessionKey === regularKey; })) {
+      opportunities.push({ type: 'regular', key: regularKey, label: '今天上课了 ✓' });
+    }
+  }
+  getPendingReschedulesForDate(course, todayStr).forEach(function(plan){
+    var key = getSessionKeyFromPlan(plan);
+    if (!course.history.some(function(h){ return h.sessionKey === key; })) {
+      opportunities.push({ type: 'reschedule', key: key, label: '调课补上 ✓', plan: plan });
+    }
+  });
+  return opportunities;
+}
+function getTodayMeta(course) {
+  var todayStr = isoDate(getTodayDate());
+  var hasRegular = isRegularCourseOnDate(course, getTodayDate());
+  var shiftCount = getPendingReschedulesForDate(course, todayStr).length;
+  if (hasRegular && shiftCount) return '今天有上课和调课安排，点击即可打卡记录';
+  if (hasRegular) return '今天是上课日，点击即可打卡记录';
+  return '今天有调课安排，点击即可打卡记录';
+}
+function getNextSessionInfo(course) {
+  var today = getTodayDate();
+  var nextRegular = getNextRegularClassDate(course, today);
+  var best = { date: nextRegular, type: 'regular', note: '每' + formatWeekdayList(course) };
+  (course.reschedules || []).forEach(function(plan){
+    if (plan.used) return;
+    var d = new Date(plan.toDate);
+    d.setHours(0,0,0,0);
+    if (d < today) return;
+    if (!best || d < best.date) {
+      best = { date: d, type: 'reschedule', note: '调课：' + formatShortDateFromIso(plan.fromDate) + ' → ' + formatShortDateFromIso(plan.toDate) };
+    }
+  });
+  return best;
+}
 function getRemainingCount(course) {
   if (course.total !== null && course.total !== undefined) return course.total - course.used;
   if (course.remaining !== null && course.remaining !== undefined) return course.remaining;
@@ -770,15 +969,39 @@ function getProgressPercent(course) {
   return total ? Math.max(0, Math.min(100, Math.round((course.used/total)*100))) : 0;
 }
 
+function handleRenewalAfterLastClass(course, entry) {
+  var remaining = getRemainingCount(course);
+  if (remaining !== 0) return false;
+  var wantsFinal = confirm(course.name + ' 这次已经是最后一次课了。\n\n点“确定”表示确认这是最后一次。\n点“取消”表示已经延期 / 续费。');
+  if (wantsFinal) return false;
+  var raw = prompt('请输入本次续费增加的课时数', '10');
+  if (raw === null) raw = '10';
+  var addCount = Math.max(1, parseInt(raw, 10) || 10);
+  if (course.total !== null && course.total !== undefined) {
+    course.total += addCount;
+  } else if (course.remaining !== null && course.remaining !== undefined) {
+    course.remaining += addCount;
+  } else {
+    course.remaining = addCount;
+  }
+  if (entry) {
+    entry.renewalAdded = addCount;
+    entry.renewalAt = new Date().toISOString();
+  }
+  showToast(course.name + ' 已续费 +' + addCount + ' 次');
+  return true;
+}
+
 function getSortedCourses() {
   var courses = loadData();
   return courses.map(function(course, idx){
-    var nextDate = getNextClassDate(course);
+    var nextInfo = getNextSessionInfo(course);
     return {
       course: course,
       idx: idx,
-      nextDate: nextDate,
-      isToday: isCourseToday(course)
+      nextDate: nextInfo.date,
+      nextInfo: nextInfo,
+      isToday: hasTodaySchedule(course)
     };
   }).sort(function(a,b){
     if (a.isToday && !b.isToday) return -1;
@@ -814,7 +1037,9 @@ function render() {
     var remaining = getRemainingCount(course);
     var totalDisplay = getTotalDisplay(course);
     var nextDate = item.nextDate;
-    var alreadyToday = course.history.some(function(h){ return h.date === todayStr; });
+    var nextInfo = item.nextInfo;
+    var todayOps = getTodayOpportunities(course);
+    var todayHistory = course.history.filter(function(h){ return h.date === todayStr; });
     var isToday = item.isToday;
     var expanded = isToday || !!expandedIds[course.id];
 
@@ -826,23 +1051,42 @@ function render() {
 
     var historyHTML = '';
     if (course.history.length > 0) {
-      var rev = course.history.slice().reverse().slice(0,6);
+      var rev = course.history.slice().reverse().slice(0,8);
       for (var i = 0; i < rev.length; i++) {
         var h = rev[i];
         var label = h.status === 'done' ? '✓ 已上课' : '— 请假';
+        if (h.kind === 'reschedule' && h.status === 'done') label = '✓ 调课补课';
+        else if (h.kind === 'manual' && h.status === 'done') label = '✓ 手动补打卡';
+        else if (h.kind === 'regular' && h.status === 'skip') label = '— 请假 / 顺延';
         var cls = h.status === 'done' ? 'status-done' : 'status-skip';
+        var note = '';
+        if (h.kind === 'reschedule' && h.fromDate && h.toDate) {
+          note = '<span style="color:#b3abc9;margin-left:6px;">(' + formatShortDateFromIso(h.fromDate) + ' → ' + formatShortDateFromIso(h.toDate) + ')</span>';
+        }
+        if (h.renewalAdded) {
+          note += '<span style="color:#9b8fd1;margin-left:6px;">(续费 +' + h.renewalAdded + ')</span>';
+        }
         var realIdx = course.history.length - 1 - i;
-        historyHTML += '<div class="history-item"><span>'+h.date+'</span><span class="'+cls+'">'+label+'</span><span class="history-undo" onclick="undoRecord('+idx+','+realIdx+')">撤销</span></div>';
+        historyHTML += '<div class="history-item"><span>'+h.date+note+'</span><span class="'+cls+'">'+label+'</span><span class="history-undo" onclick="undoRecord('+idx+','+realIdx+')">撤销</span></div>';
       }
     } else {
       historyHTML = '<div class="history-item"><span style="color:#c2bbd7">暂无记录</span></div>';
     }
 
-    var actionBtns;
-    if (alreadyToday) {
-      actionBtns = '<div class="checked-label">今天已打卡 ✓</div>';
-    } else if (isToday) {
-      actionBtns = '<button class="btn btn-primary" onclick="markClass('+idx+',\'done\')">今天上课了 ✓</button><button class="btn btn-skip" onclick="markClass('+idx+',\'skip\')">今天请假</button>';
+    var actionBtns = '';
+    if (isToday) {
+      if (todayOps.length) {
+        todayOps.forEach(function(op){
+          var btnClass = op.type === 'regular' ? 'btn btn-primary' : 'btn';
+          actionBtns += '<button class="'+btnClass+'" onclick="markClass('+idx+',\'done\',\''+op.key+'\')">'+op.label+'</button>';
+        });
+        var regularKey = 'regular:' + todayStr;
+        if (isRegularCourseOnDate(course, today) && !course.history.some(function(h){ return h.sessionKey === regularKey; })) {
+          actionBtns += '<button class="btn btn-skip" onclick="markClass('+idx+',\'skip\',\''+regularKey+'\')">今天请假</button>';
+        }
+      } else {
+        actionBtns = '<div class="checked-label">今天已记录 '+todayHistory.length+' 次 ✓</div>';
+      }
     } else {
       actionBtns = '<button class="btn" onclick="markClass('+idx+',\'done\')" style="font-size:12px;color:#8d84aa;">手动补打卡</button>';
     }
@@ -861,7 +1105,7 @@ function render() {
             '<span class="summary-title">'+course.name+'</span>'+
             (isToday ? '<span class="today-chip">今日打卡</span>' : '<span class="badge '+badgeClass+'">'+badgeText+'</span>')+
           '</div>'+
-          '<div class="summary-meta">'+(isToday ? '今天是上课日，点击即可打卡记录' : '下次：'+formatShortDate(nextDate)+' · 每'+WEEKDAYS[course.weekday])+'</div>'+
+          '<div class="summary-meta">'+(isToday ? getTodayMeta(course) : '下次：'+formatShortDate(nextDate)+' · '+nextInfo.note)+'</div>'+
         '</div>'+
         '<div class="summary-count">'+compactCount+'</div>'+
         (isToday ? '' : '<div class="summary-chevron">⌄</div>')+
@@ -879,7 +1123,7 @@ function render() {
           '<div class="stat"><div class="stat-label">'+(totalDisplay?'总课时':'类型')+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+(totalDisplay?'共'+totalDisplay+'次':'课时不限')+'</div></div>'+
         '</div>'+
         (totalDisplay ? '<div class="progress-bar"><div class="progress-fill" style="width:'+getProgressPercent(course)+'%;background:'+course.color+'"></div></div>' : '')+
-        '<div class="next-info">下次上课：<strong>'+nextDisplay+'</strong>（每'+WEEKDAYS[course.weekday]+'）</div>'+
+        '<div class="next-info">下次上课：<strong>'+nextDisplay+'</strong>（'+nextInfo.note+'）</div>'+
         '<div class="actions">'+actionBtns+'</div>'+
         '<span class="history-toggle" onclick="toggleHistory(\'hist-'+idx+'\')">查看近期记录</span>'+
         '<div class="history" id="hist-'+idx+'">'+historyHTML+'</div>'+
@@ -889,20 +1133,38 @@ function render() {
   });
 }
 
-function markClass(idx, status) {
+function markClass(idx, status, sessionKey) {
   var courses = loadData();
   var course = courses[idx];
   var todayStr = isoDate(new Date());
-  if (course.history.some(function(h){ return h.date === todayStr; })) { showToast('今天已经打卡过了'); return; }
-  course.history.push({date:todayStr, status:status});
+  var key = sessionKey || ('manual:' + todayStr);
+  if (course.history.some(function(h){ return h.sessionKey === key; })) { showToast('这次课程已经记录过了'); return; }
+
+  var entry = { date: todayStr, status: status, sessionKey: key, kind: key.indexOf('manual:') === 0 ? 'manual' : 'regular' };
+
+  if (key.indexOf('reschedule:') === 0) {
+    var planId = key.split(':')[1];
+    var plan = findRescheduleById(course, planId);
+    entry.kind = 'reschedule';
+    entry.planId = planId;
+    if (plan) {
+      entry.fromDate = plan.fromDate;
+      entry.toDate = plan.toDate;
+      entry.note = plan.note || '';
+      if (status === 'done') plan.used = true;
+    }
+  }
+
+  course.history.push(entry);
   if (status === 'done') {
     course.used += 1;
     if (course.total === null && course.remaining !== null && course.remaining !== undefined) {
       course.remaining = Math.max(0, course.remaining - 1);
     }
+    var renewed = handleRenewalAfterLastClass(course, entry);
     showToast(course.name+' 打卡成功！已上 '+course.used+' 次');
     var rem = getRemainingCount(course);
-    if (rem !== null && rem <= 2 && rem > 0) {
+    if (!renewed && rem !== null && rem <= 2 && rem > 0) {
       setTimeout(function(){ showToast('提醒：'+course.name+' 仅剩 '+rem+' 次课！'); }, 2500);
     }
   } else {
@@ -920,6 +1182,17 @@ function undoRecord(courseIdx, histIdx) {
   if (record.status === 'done') {
     course.used = Math.max(0, course.used - 1);
     if (course.total === null && course.remaining !== null && course.remaining !== undefined) course.remaining += 1;
+    if (record.renewalAdded) {
+      if (course.total !== null && course.total !== undefined) {
+        course.total = Math.max(course.used, course.total - record.renewalAdded);
+      } else if (course.remaining !== null && course.remaining !== undefined) {
+        course.remaining = Math.max(0, course.remaining - record.renewalAdded);
+      }
+    }
+    if (record.kind === 'reschedule' && record.planId) {
+      var plan = findRescheduleById(course, record.planId);
+      if (plan) plan.used = false;
+    }
   }
   course.history.splice(histIdx, 1);
   saveData(courses); showToast('已撤销打卡记录'); render();
@@ -939,8 +1212,8 @@ function openManager() {
       row.innerHTML =
         '<div class="course-row-dot" style="background:'+c.color+'"></div>' +
         '<span class="course-row-name">'+c.name+'</span>' +
-        '<span class="course-row-info">'+WEEKDAYS[c.weekday]+' · '+(rem!==null?('剩'+rem+'次'):'不限')+'</span>' +
-        '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" >✎</button>' +
+        '<span class="course-row-info">'+formatWeekdayList(c)+' · '+formatTimeRange(c)+' · '+(rem!==null?('剩'+rem+'次'):'不限')+'</span>' +
+        '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" >✏️</button>' +
         '<button class="icon-btn danger" onclick="deleteCourse('+idx+')">✕</button>';
       list.appendChild(row);
     })(courses[idx], idx);
@@ -968,14 +1241,92 @@ function buildColorGrid(selected) {
     grid.appendChild(sw);
   });
 }
-function selectWeekday(day) {
-  formWeekday = day;
+function refreshWeekdayButtons() {
   document.querySelectorAll('.wd-btn').forEach(function(b){
-    b.classList.toggle('selected', parseInt(b.dataset.day) === day);
+    b.classList.toggle('selected', formWeekdays.indexOf(parseInt(b.dataset.day, 10)) >= 0);
   });
+}
+function selectWeekday(days) {
+  formWeekdays = sortWeekdays(Array.isArray(days) ? days : [days]);
+  refreshWeekdayButtons();
+}
+function toggleWeekday(day) {
+  day = parseInt(day, 10);
+  var idx = formWeekdays.indexOf(day);
+  if (idx >= 0) formWeekdays.splice(idx, 1);
+  else formWeekdays.push(day);
+  formWeekdays = sortWeekdays(formWeekdays);
+  refreshWeekdayButtons();
+}
+function renderRescheduleList(course) {
+  var empty = document.getElementById('f-reschedule-empty');
+  var editor = document.getElementById('f-reschedule-editor');
+  var list = document.getElementById('f-reschedule-list');
+  if (!empty || !editor || !list) return;
+  if (editingIdx === null) {
+    empty.classList.remove('hidden');
+    editor.classList.add('hidden');
+    list.innerHTML = '';
+    return;
+  }
+  empty.classList.add('hidden');
+  editor.classList.remove('hidden');
+  var plans = (course && course.reschedules ? course.reschedules.slice() : []).sort(function(a, b){
+    return String(a.toDate).localeCompare(String(b.toDate));
+  });
+  if (!plans.length) {
+    list.innerHTML = '<div class="mini-tip">暂无调课安排。</div>';
+    return;
+  }
+  list.innerHTML = plans.map(function(plan){
+    var statusText = plan.used ? '已打卡' : '待补课';
+    return '<div class="reschedule-item">' +
+      '<div class="reschedule-item-main">' +
+        '<div class="reschedule-item-title">' + formatShortDateFromIso(plan.fromDate) + ' → ' + formatShortDateFromIso(plan.toDate) + ' · ' + statusText + '</div>' +
+        '<div class="reschedule-item-sub">' + (plan.note || '无备注') + '</div>' +
+      '</div>' +
+      '<button class="icon-btn danger" onclick="removeReschedule(\''+plan.id+'\')" aria-label="删除调课">✕</button>' +
+    '</div>';
+  }).join('');
+}
+function addRescheduleFromForm() {
+  if (editingIdx === null) { showToast('请先保存课程'); return; }
+  var fromDate = document.getElementById('f-shift-from').value;
+  var toDate = document.getElementById('f-shift-to').value;
+  var note = document.getElementById('f-shift-note').value.trim();
+  if (!fromDate || !toDate) { showToast('请先选择原定日期和调课日期'); return; }
+  if (fromDate === toDate) { showToast('调课前后日期不能相同'); return; }
+  var courses = loadData();
+  var course = courses[editingIdx];
+  course.reschedules = course.reschedules || [];
+  course.reschedules.push({ id: 'rs' + Date.now(), fromDate: fromDate, toDate: toDate, note: note, used: false });
+  saveData(courses);
+  document.getElementById('f-shift-from').value = '';
+  document.getElementById('f-shift-to').value = '';
+  document.getElementById('f-shift-note').value = '';
+  renderRescheduleList(courses[editingIdx]);
+  render();
+  showToast('已添加调课安排');
+}
+function removeReschedule(planId) {
+  if (editingIdx === null) return;
+  var courses = loadData();
+  var course = courses[editingIdx];
+  if (course.history.some(function(h){ return h.planId === planId; })) {
+    showToast('这条调课已经打卡，请先撤销对应记录');
+    return;
+  }
+  course.reschedules = (course.reschedules || []).filter(function(plan){ return plan.id !== planId; });
+  saveData(courses);
+  renderRescheduleList(courses[editingIdx]);
+  render();
+  showToast('已删除调课安排');
 }
 function toggleTotalMode() {
   var hasTot = document.getElementById('f-has-total').checked;
+  var classTime = document.getElementById('f-time-start').value || '10:00';
+  var classEndTime = document.getElementById('f-time-end').value || addMinutesToTime(classTime, 60);
+  if (classEndTime <= classTime) { showToast('结束时间要晚于开始时间'); return; }
   document.getElementById('f-total-section').style.display = hasTot ? 'block' : 'none';
   document.getElementById('f-remaining-section').style.display = hasTot ? 'none' : 'block';
 }
@@ -1003,16 +1354,21 @@ function adjustVal(id, delta) {
 }
 
 function openAddForm() {
-  editingIdx = null; formWeekday = 1; formColor = COLORS[0];
+  editingIdx = null; formWeekdays = [1]; formColor = COLORS[0];
   document.getElementById('edit-modal-title').textContent = '新增课程';
   document.getElementById('f-name').value = '';
   document.getElementById('f-start').value = isoDate(new Date());
   document.getElementById('f-has-total').checked = false;
+  document.getElementById('f-time-start').value = '10:00';
+  document.getElementById('f-time-end').value = '11:00';
   setCounterValue('f-total', 10);
   setCounterValue('f-remaining', 10);
   setCounterValue('f-used', 0);
   document.getElementById('f-pay-alert').checked = false;
-  toggleTotalMode(); selectWeekday(1); buildColorGrid(COLORS[0]);
+  document.getElementById('f-shift-from').value = '';
+  document.getElementById('f-shift-to').value = '';
+  document.getElementById('f-shift-note').value = '';
+  toggleTotalMode(); selectWeekday([1]); buildColorGrid(COLORS[0]); renderRescheduleList(null);
   document.getElementById('edit-form-btns').innerHTML =
     '<button class="form-btn" onclick="closeModal(\'edit-modal\')">取消</button>' +
     '<button class="form-btn save" onclick="saveForm()">保存</button>';
@@ -1023,18 +1379,24 @@ function openAddForm() {
 function openEditForm(idx) {
   editingIdx = idx;
   var course = loadData()[idx];
-  formWeekday = course.weekday; formColor = course.color;
+  formWeekdays = getCourseWeekdays(course);
+  formColor = course.color;
   document.getElementById('edit-modal-title').textContent = '编辑课程';
   document.getElementById('f-name').value = course.name;
   document.getElementById('f-start').value = course.startDate;
   var hasTot = course.total !== null && course.total !== undefined;
   document.getElementById('f-has-total').checked = hasTot;
+  document.getElementById('f-time-start').value = course.classTime || '10:00';
+  document.getElementById('f-time-end').value = course.classEndTime || addMinutesToTime(course.classTime || '10:00', 60);
   setCounterValue('f-total', hasTot ? course.total : 10);
   var curRem = getRemainingCount(course);
   setCounterValue('f-remaining', curRem !== null ? curRem : 10);
   setCounterValue('f-used', course.used);
   document.getElementById('f-pay-alert').checked = !!course.payAlert;
-  toggleTotalMode(); selectWeekday(course.weekday); buildColorGrid(course.color);
+  document.getElementById('f-shift-from').value = '';
+  document.getElementById('f-shift-to').value = '';
+  document.getElementById('f-shift-note').value = '';
+  toggleTotalMode(); selectWeekday(formWeekdays); buildColorGrid(course.color); renderRescheduleList(course);
   document.getElementById('edit-form-btns').innerHTML =
     '<button class="form-btn del" onclick="if(confirm(\'确定删除？\'))deleteCourse('+idx+')">删除</button>' +
     '<button class="form-btn save" onclick="saveForm()">保存</button>';
@@ -1044,29 +1406,139 @@ function openEditForm(idx) {
 function saveForm() {
   var name = document.getElementById('f-name').value.trim();
   if (!name) { showToast('请填写课程名称'); return; }
+  if (!formWeekdays.length) { showToast('请至少选择一个上课日'); return; }
   var hasTot = document.getElementById('f-has-total').checked;
+  var classTime = document.getElementById('f-time-start').value || '10:00';
+  var classEndTime = document.getElementById('f-time-end').value || addMinutesToTime(classTime, 60);
+  if (classEndTime <= classTime) { showToast('结束时间要晚于开始时间'); return; }
   var total = hasTot ? getCounterValue('f-total') : null;
   var remaining = hasTot ? null : getCounterValue('f-remaining');
   var used = getCounterValue('f-used');
   var courses = loadData();
   if (editingIdx !== null) {
     var c = courses[editingIdx];
-    c.name=name; c.weekday=formWeekday; c.color=formColor;
-    c.startDate=document.getElementById('f-start').value;
-    c.total=total; c.remaining=remaining; c.used=used;
-    c.payAlert=document.getElementById('f-pay-alert').checked;
+    c.name = name;
+    c.weekdays = formWeekdays.slice();
+    c.weekday = c.weekdays[0];
+    c.color = formColor;
+    c.startDate = document.getElementById('f-start').value;
+    c.classTime = classTime;
+    c.classEndTime = classEndTime;
+    c.total = total;
+    c.remaining = remaining;
+    c.used = used;
+    c.payAlert = document.getElementById('f-pay-alert').checked;
   } else {
-    var newId = 'c'+Date.now();
-    courses.push({id:newId,name:name,weekday:formWeekday,color:formColor,
-      startDate:document.getElementById('f-start').value,
-      total:total,used:used,remaining:remaining,classTime:'10:00',history:[],
-      payAlert:document.getElementById('f-pay-alert').checked});
+    var newId = 'c' + Date.now();
+    courses.push({
+      id: newId,
+      name: name,
+      weekdays: formWeekdays.slice(),
+      weekday: formWeekdays[0],
+      color: formColor,
+      startDate: document.getElementById('f-start').value,
+      total: total,
+      used: used,
+      remaining: remaining,
+      classTime: classTime,
+      classEndTime: classEndTime,
+      history: [],
+      reschedules: [],
+      payAlert: document.getElementById('f-pay-alert').checked
+    });
     expandedIds[newId] = false;
   }
   saveData(courses);
   closeModal('edit-modal');
   showToast(editingIdx !== null ? '课程已更新' : '课程已添加');
   render();
+}
+
+
+function getWeekMonday(dateObj) {
+  var d = new Date(dateObj || getTodayDate());
+  d.setHours(0,0,0,0);
+  var day = d.getDay();
+  var diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d;
+}
+function formatMonthDay(dateObj) {
+  return (dateObj.getMonth() + 1) + '/' + dateObj.getDate();
+}
+function buildWeekScheduleItems() {
+  var weekDays = [];
+  var monday = getWeekMonday(getTodayDate());
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    weekDays.push({ date: d, iso: isoDate(d), items: [] });
+  }
+  var courses = loadData();
+  courses.forEach(function(course){
+    weekDays.forEach(function(dayObj){
+      if (isRegularCourseOnDate(course, dayObj.date)) {
+        dayObj.items.push({
+          type: 'regular',
+          sortTime: course.classTime || '10:00',
+          color: course.color,
+          courseName: course.name,
+          timeText: formatTimeRange(course),
+          note: '固定课程 · 每' + formatWeekdayList(course)
+        });
+      }
+      getPendingReschedulesForDate(course, dayObj.iso).forEach(function(plan){
+        dayObj.items.push({
+          type: 'reschedule',
+          sortTime: course.classTime || '10:00',
+          color: course.color,
+          courseName: course.name,
+          timeText: formatTimeRange(course),
+          note: '调课：' + formatShortDateFromIso(plan.fromDate) + ' → ' + formatShortDateFromIso(plan.toDate) + (plan.note ? ' · ' + plan.note : '')
+        });
+      });
+    });
+  });
+  weekDays.forEach(function(dayObj){
+    dayObj.items.sort(function(a, b){
+      return String(a.sortTime).localeCompare(String(b.sortTime)) || String(a.courseName).localeCompare(String(b.courseName));
+    });
+  });
+  return weekDays;
+}
+function renderScheduleWeek() {
+  var box = document.getElementById('schedule-week');
+  if (!box) return;
+  var todayIso = isoDate(getTodayDate());
+  var weekDays = buildWeekScheduleItems();
+  box.innerHTML = weekDays.map(function(dayObj){
+    var isToday = dayObj.iso === todayIso;
+    var content = dayObj.items.length ? dayObj.items.map(function(item){
+      return '<div class="schedule-item">' +
+        '<div class="time-dot" style="background:'+item.color+'"></div>' +
+        '<div class="schedule-item-main">' +
+          '<div class="schedule-item-title">'+item.courseName+'</div>' +
+          '<div class="schedule-item-time">'+item.timeText+'</div>' +
+          '<div class="schedule-item-note">'+item.note+'</div>' +
+        '</div>' +
+        '<div class="schedule-tag'+(item.type === 'reschedule' ? ' shift' : '')+'">'+(item.type === 'reschedule' ? '调课' : '固定课')+'</div>' +
+      '</div>';
+    }).join('') : '<div class="schedule-empty">这一天没有排课</div>';
+    return '<div class="schedule-day'+(isToday ? ' today' : '')+'">' +
+      '<div class="schedule-day-head">' +
+        '<div>' +
+          '<div class="schedule-day-title">'+WEEKDAYS[dayObj.date.getDay()]+'</div>' +
+          '<div class="schedule-day-sub">'+formatMonthDay(dayObj.date)+(isToday ? ' · 今天' : '')+'</div>' +
+        '</div>' +
+        '<div class="schedule-tag">'+dayObj.items.length+' 节</div>' +
+      '</div>' +
+      content +
+    '</div>';
+  }).join('');
+}
+function openScheduleModal() {
+  renderScheduleWeek();
+  document.getElementById('schedule-modal').classList.add('open');
 }
 
 function openExportModal() {
@@ -1078,67 +1550,122 @@ function openExportModal() {
       var row = document.createElement('div');
       row.className = 'time-row';
       var savedTime = c.classTime || '10:00';
+      var savedEnd = c.classEndTime || addMinutesToTime(savedTime, 60);
       row.innerHTML =
         '<div class="time-dot" style="background:'+c.color+'"></div>' +
-        '<span class="time-name">'+c.name+'<br><span style="font-size:11px;color:#a39abb;font-weight:400;">每'+WEEKDAYS[c.weekday]+'</span></span>' +
-        '<input class="time-input" type="time" value="'+savedTime+'" onchange="saveClassTime('+idx+',this.value)" />';
+        '<span class="time-name">'+c.name+'<br><span style="font-size:11px;color:#a39abb;font-weight:400;">每'+formatWeekdayList(c)+'</span></span>' +
+        '<div class="time-range">' +
+          '<input class="time-input" type="time" value="'+savedTime+'" onchange="saveClassTime('+idx+',this.value,null)" />' +
+          '<span class="time-sep">至</span>' +
+          '<input class="time-input" type="time" value="'+savedEnd+'" onchange="saveClassTime('+idx+',null,this.value)" />' +
+        '</div>';
       list.appendChild(row);
     })(courses[idx], idx);
   }
   document.getElementById('export-modal').classList.add('open');
 }
-function saveClassTime(idx, val) { var courses = loadData(); courses[idx].classTime = val; saveData(courses); }
+function saveClassTime(idx, startVal, endVal) {
+  var courses = loadData();
+  if (startVal) courses[idx].classTime = startVal;
+  if (endVal) courses[idx].classEndTime = endVal;
+  if (!courses[idx].classEndTime) courses[idx].classEndTime = addMinutesToTime(courses[idx].classTime || '10:00', 60);
+  if ((courses[idx].classEndTime || '') <= (courses[idx].classTime || '')) {
+    courses[idx].classEndTime = addMinutesToTime(courses[idx].classTime || '10:00', 60);
+    showToast('结束时间已自动调整到开始时间后 1 小时');
+  }
+  saveData(courses);
+}
 function padZ(n) { return String(n).padStart(2,'0'); }
 function toICSDate(dateObj, h, m) { return dateObj.getFullYear()+padZ(dateObj.getMonth()+1)+padZ(dateObj.getDate())+'T'+padZ(h)+padZ(m)+'00'; }
 
 function generateICS() {
   var courses = loadData();
-  var reminderMins = parseInt(document.getElementById('exp-remind-before').value);
+  var reminderMins = parseInt(document.getElementById('exp-remind-before').value, 10);
   var includePayAlert = document.getElementById('exp-pay-alert').checked;
   var includeExpireAlert = document.getElementById('exp-expire-alert').checked;
   var lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//课时打卡//ZH','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:课时打卡'];
   var rrDays = ['SU','MO','TU','WE','TH','FR','SA'];
 
+  function estimateLastRegularDate(course, sessionsLeft) {
+    var cursor = new Date(course.startDate);
+    cursor.setHours(0,0,0,0);
+    var count = 0;
+    for (var i = 0; i < 4000; i++) {
+      if (isRegularCourseOnDate(course, cursor)) {
+        count += 1;
+        if (count >= sessionsLeft) return new Date(cursor);
+      }
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return getNextRegularClassDate(course, new Date(course.startDate));
+  }
+
   for (var i = 0; i < courses.length; i++) {
     var c = courses[i];
     var time = c.classTime || '10:00';
     var tp = time.split(':');
-    var th = parseInt(tp[0]), tm = parseInt(tp[1]);
-    var startDate = new Date(c.startDate); startDate.setHours(0,0,0,0);
-    var firstDate = new Date(startDate);
-    var diff = (c.weekday - firstDate.getDay() + 7) % 7;
-    firstDate.setDate(firstDate.getDate() + diff);
-
+    var th = parseInt(tp[0], 10), tm = parseInt(tp[1], 10);
+    var endTime = c.classEndTime || addMinutesToTime(time, 60);
+    var ep = endTime.split(':');
+    var eh = parseInt(ep[0], 10), em = parseInt(ep[1], 10);
     var totalSessions = null;
     if (c.total !== null && c.total !== undefined) totalSessions = c.total;
     else if (c.remaining !== null && c.remaining !== undefined) totalSessions = c.used + c.remaining;
-    var weeksToRun = totalSessions ? totalSessions + 4 : 60;
-    var untilDate = new Date(firstDate);
-    untilDate.setDate(untilDate.getDate() + weeksToRun * 7);
-    var untilStr = untilDate.getFullYear()+padZ(untilDate.getMonth()+1)+padZ(untilDate.getDate())+'T000000Z';
+    var weeklySlots = Math.max(1, getCourseWeekdays(c).length);
+    var weeksToRun = totalSessions ? Math.ceil(totalSessions / weeklySlots) + 6 : 60;
 
-    var evStart = new Date(firstDate); evStart.setHours(th,tm,0,0);
-    var evEndDate = new Date(evStart.getTime() + 3600000);
+    getCourseWeekdays(c).forEach(function(day){
+      var startDate = new Date(c.startDate); startDate.setHours(0,0,0,0);
+      var firstDate = new Date(startDate);
+      var diff = (day - firstDate.getDay() + 7) % 7;
+      firstDate.setDate(firstDate.getDate() + diff);
+      var untilDate = new Date(firstDate);
+      untilDate.setDate(untilDate.getDate() + weeksToRun * 7);
+      var untilStr = untilDate.getFullYear()+padZ(untilDate.getMonth()+1)+padZ(untilDate.getDate())+'T000000Z';
 
-    lines.push('BEGIN:VEVENT');
-    lines.push('UID:class-'+c.id+'@keshidaka');
-    lines.push('DTSTART:'+toICSDate(evStart,th,tm));
-    lines.push('DTEND:'+toICSDate(evEndDate, evEndDate.getHours(), evEndDate.getMinutes()));
-    lines.push('RRULE:FREQ=WEEKLY;BYDAY='+rrDays[c.weekday]+';UNTIL='+untilStr);
-    lines.push('SUMMARY:'+c.name);
-    lines.push('DESCRIPTION:记得打卡！');
-    lines.push('BEGIN:VALARM');
-    lines.push('TRIGGER:-PT'+reminderMins+'M');
-    lines.push('ACTION:DISPLAY');
-    lines.push('DESCRIPTION:'+c.name+'要上课了，记得打卡');
-    lines.push('END:VALARM');
-    lines.push('END:VEVENT');
+      var evStart = new Date(firstDate); evStart.setHours(th,tm,0,0);
+      var evEndDate = new Date(firstDate); evEndDate.setHours(eh, em, 0, 0);
+
+      lines.push('BEGIN:VEVENT');
+      lines.push('UID:class-'+c.id+'-'+day+'@keshidaka');
+      lines.push('DTSTART:'+toICSDate(evStart,th,tm));
+      lines.push('DTEND:'+toICSDate(evEndDate, evEndDate.getHours(), evEndDate.getMinutes()));
+      lines.push('RRULE:FREQ=WEEKLY;BYDAY='+rrDays[day]+';UNTIL='+untilStr);
+      lines.push('SUMMARY:'+c.name);
+      lines.push('DESCRIPTION:记得打卡！');
+      lines.push('BEGIN:VALARM');
+      lines.push('TRIGGER:-PT'+reminderMins+'M');
+      lines.push('ACTION:DISPLAY');
+      lines.push('DESCRIPTION:'+c.name+'要上课了，记得打卡');
+      lines.push('END:VALARM');
+      lines.push('END:VEVENT');
+    });
+
+    (c.reschedules || []).forEach(function(plan){
+      if (plan.used) return;
+      var shiftDate = new Date(plan.toDate);
+      shiftDate.setHours(th,tm,0,0);
+      var shiftEnd = new Date(shiftDate); shiftEnd.setHours(eh, em, 0, 0);
+      lines.push('BEGIN:VEVENT');
+      lines.push('UID:shift-'+c.id+'-'+plan.id+'@keshidaka');
+      lines.push('DTSTART:'+toICSDate(shiftDate,th,tm));
+      lines.push('DTEND:'+toICSDate(shiftEnd, shiftEnd.getHours(), shiftEnd.getMinutes()));
+      lines.push('SUMMARY:'+c.name+'（调课）');
+      lines.push('DESCRIPTION:调课：'+formatShortDateFromIso(plan.fromDate)+' → '+formatShortDateFromIso(plan.toDate)+(plan.note ? '；'+plan.note : ''));
+      lines.push('BEGIN:VALARM');
+      lines.push('TRIGGER:-PT'+reminderMins+'M');
+      lines.push('ACTION:DISPLAY');
+      lines.push('DESCRIPTION:'+c.name+'今天是调课日，记得打卡');
+      lines.push('END:VALARM');
+      lines.push('END:VEVENT');
+    });
 
     if (includePayAlert) {
       var rem = getRemainingCount(c);
       if (rem !== null && rem <= 2 && rem > 0) {
-        var alertDate = new Date(firstDate); alertDate.setHours(th,tm,0,0);
-        var alertEnd = new Date(alertDate.getTime()+3600000);
+        var alertDate = getNextRegularClassDate(c, getTodayDate());
+        alertDate.setHours(th,tm,0,0);
+        var alertEnd = new Date(alertDate); alertEnd.setHours(eh, em, 0, 0);
         lines.push('BEGIN:VEVENT');
         lines.push('UID:pay-'+c.id+'@keshidaka');
         lines.push('DTSTART:'+toICSDate(alertDate,th,tm));
@@ -1157,8 +1684,7 @@ function generateICS() {
     if (includeExpireAlert && totalSessions !== null) {
       var sessionsLeft = totalSessions - c.used;
       if (sessionsLeft > 0) {
-        var lastDate = new Date(firstDate);
-        lastDate.setDate(lastDate.getDate() + (sessionsLeft-1)*7);
+        var lastDate = estimateLastRegularDate(c, sessionsLeft);
         lastDate.setHours(th,tm,0,0);
         var lastEnd = new Date(lastDate.getTime()+3600000);
         lines.push('BEGIN:VEVENT');
@@ -1183,7 +1709,7 @@ function generateICS() {
   }
 
   lines.push('END:VCALENDAR');
-  var blob = new Blob([lines.join('\r\n')], {type:'text/calendar;charset=utf-8'});
+  var blob = new Blob([lines.join('\\r\\n')], {type:'text/calendar;charset=utf-8'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url; a.download = '课时打卡.ics';
@@ -1208,5 +1734,69 @@ document.addEventListener('touchend', function(e){
 }, {passive:false});
 initAuth();
 </script>
+
+<section class="version-notes-wrap">
+  <details class="version-notes">
+    <summary>
+      <span>✨ 功能版本说明</span>
+      <span class="sub">点开查看目前已经做好的功能</span>
+    </summary>
+    <div class="version-notes-body">
+      <div class="version-tag">当前版本：课程管理 + 云同步 + 课表生成</div>
+      <h3>1. 课程管理</h3>
+      <ul>
+        <li>课程卡片默认折叠，只显示课程名和剩余次数 / 总次数。</li>
+        <li>当天有课的课程会自动排在最上面，并默认展开，方便直接打卡。</li>
+        <li>课程可编辑总课时、剩余次数、已上次数、到期日、提醒设置。</li>
+        <li>编辑按钮和移动端点击区域已放大，更方便手指操作。</li>
+      </ul>
+
+      <h3>2. 打卡与扣课时</h3>
+      <ul>
+        <li>上课当天可直接打卡，打卡后自动扣 1 次课时。</li>
+        <li>支持撤销打卡，避免误操作。</li>
+        <li>支持多上课日设置，一门课一周可以按多个上课日多次扣课时。</li>
+        <li>支持调课：比如原本周二上课，改到周三后，可在周三正常打卡一次。</li>
+      </ul>
+
+      <h3>3. 续费 / 延期逻辑</h3>
+      <ul>
+        <li>当打完最后一节课、剩余课时变为 0 时，会弹出确认。</li>
+        <li>可选择确认这是最后一次，或确认已续费 / 延期。</li>
+        <li>续费默认增加 10 次，也可改成其他次数。</li>
+        <li>续费后已上次数不会清零，会继续累计；剩余次数则自动增加后继续递减。</li>
+      </ul>
+
+      <h3>4. 账号与同步</h3>
+      <ul>
+        <li>支持邮箱注册、登录、退出登录、忘记密码、重设密码。</li>
+        <li>未登录时可先使用本地保存；登录后会同步到 Supabase 云端。</li>
+        <li>登录入口已缩成右上角小按钮，登录后不再显示注册 / 登录 / 找回密码表单。</li>
+      </ul>
+
+      <h3>5. 课表与时间</h3>
+      <ul>
+        <li>编辑课程时可设置上课开始时间和结束时间。</li>
+        <li>首页支持“一键生成课表”，按周一到周日直观展示每周课程安排。</li>
+        <li>课表中会显示课程名、时间段、固定课 / 调课，并高亮当天。</li>
+      </ul>
+
+      <h3>6. 移动端优化</h3>
+      <ul>
+        <li>页面已做移动端优化，尽量减少误触、乱缩放和双击放大。</li>
+        <li>已加入更适合手机桌面的图标和网页图标。</li>
+        <li>整体界面改成了更柔和、偏童趣的风格。</li>
+      </ul>
+
+      <h3>7. 其他</h3>
+      <ul>
+        <li>支持导出日历（.ics）。</li>
+        <li>支持课时不足时提醒续费。</li>
+        <li>支持查看历史记录，方便核对机构是否正确扣课时。</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
 </body>
 </html>
