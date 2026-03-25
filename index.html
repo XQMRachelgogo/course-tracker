@@ -30,6 +30,7 @@ html{
   height:100%;
   -webkit-text-size-adjust:100%;
   overflow-x:hidden;
+  overscroll-behavior-x:none;
   background:#fff7fb;
 }
 body{
@@ -40,8 +41,10 @@ body{
   padding:calc(env(safe-area-inset-top, 0px) + 1rem) 0.95rem calc(env(safe-area-inset-bottom, 0px) + 3rem);
   color:var(--ink);
   overflow-x:hidden;
+  overscroll-behavior-x:none;
   touch-action:manipulation;
 }
+body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-behavior:none;}
 .app{width:100%;max-width:480px;margin:0 auto}
 .header{
   display:flex;align-items:center;margin-bottom:1.1rem;
@@ -130,9 +133,9 @@ body{
 .checked-label{font-size:13px;color:#73689d;padding:7px 0;font-weight:600}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#4d4568;color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap;box-shadow:0 8px 22px rgba(77,69,104,.26)}
 .toast.show{opacity:1}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(70,55,101,0.28);z-index:100;align-items:flex-end;justify-content:center}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(70,55,101,0.28);z-index:100;align-items:flex-end;justify-content:center;padding:0 .5rem;overflow:hidden}
 .modal-overlay.open{display:flex}
-.modal{background:#fffdfd;border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:1.4rem 1.15rem 2.35rem;max-height:88vh;overflow-y:auto;box-shadow:0 -12px 30px rgba(72,50,125,0.12)}
+.modal{background:#fffdfd;border-radius:24px 24px 0 0;width:min(100%,480px);max-width:480px;box-sizing:border-box;padding:1.4rem 1.15rem 2.35rem;max-height:88vh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;box-shadow:0 -12px 30px rgba(72,50,125,0.12)}
 .modal-header{display:flex;align-items:center;margin-bottom:1.25rem}.modal-title{font-size:17px;font-weight:700;color:#4a3f73;flex:1}
 .modal-close{font-size:20px;color:#b0a7ca;cursor:pointer;padding:0 4px;line-height:1;background:none;border:none;font-family:inherit}
 .modal-close:hover{color:#6e658c}
@@ -151,6 +154,9 @@ body{
 .wd-btn.selected{background:#8a7ef0;border-color:#8a7ef0;color:#fff}
 .mini-tip{font-size:11px;color:#a39abb;line-height:1.6;margin-top:6px}
 .reschedule-box{background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:14px;padding:10px 12px}
+.reschedule-grid-labels{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 6px;font-size:12px;font-weight:700;color:#6f6889}
+.reschedule-grid-labels span:first-child{text-align:left}
+.reschedule-grid-labels span:last-child{text-align:right}
 .reschedule-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .reschedule-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .reschedule-item{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(127,119,221,0.08);border-radius:12px;padding:9px 10px}
@@ -159,7 +165,7 @@ body{
 .reschedule-item-sub{font-size:11px;color:#a39abb;margin-top:2px;line-height:1.5}
 .add-shift-btn{width:100%;margin-top:8px;padding:10px 12px;border-radius:12px;border:1px dashed rgba(127,119,221,0.22);background:#fff;color:#7b71a2;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
 .add-shift-btn:hover{background:#f8f4ff}
-@media (max-width:380px){.reschedule-grid{grid-template-columns:1fr}.header-actions{gap:6px}.manage-btn{padding:8px 10px;font-size:12px}}
+@media (max-width:380px){.reschedule-grid-labels,.reschedule-grid{grid-template-columns:1fr}.reschedule-grid-labels span:first-child,.reschedule-grid-labels span:last-child{text-align:left}.header-actions{gap:6px}.manage-btn{padding:8px 10px;font-size:12px}}
 .color-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
 .color-swatch{width:100%;aspect-ratio:1;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .1s}.color-swatch.selected{border-color:#433b64;transform:scale(1.12)}
 .form-switch-row{display:flex;align-items:center;gap:10px}.form-switch-label{font-size:13px;color:#574e74;flex:1}
@@ -683,9 +689,11 @@ function queueRemoteSave() {
 }
 function openAuthModal() {
   document.getElementById('auth-modal').classList.add('open');
+  syncBodyScrollLock();
 }
 function closeAuthModal() {
   document.getElementById('auth-modal').classList.remove('open');
+  syncBodyScrollLock();
 }
 function updateAuthUI() {
   var launcher = document.getElementById('auth-launcher');
@@ -818,7 +826,7 @@ function maybeShowRecoveryUI(event) {
   if (!looksLikeRecovery) return;
   document.getElementById('reset-password').value = '';
   document.getElementById('reset-password-confirm').value = '';
-  document.getElementById('reset-password-modal').classList.add('open');
+  openModal('reset-password-modal');
   showToast('请设置新密码');
 }
 async function updateRecoveredPassword() {
@@ -1227,7 +1235,7 @@ function openManager() {
       list.appendChild(row);
     })(courses[idx], idx);
   }
-  document.getElementById('manager-modal').classList.add('open');
+  openModal('manager-modal');
 }
 
 function deleteCourse(idx) {
@@ -1382,7 +1390,7 @@ function openAddForm() {
     '<button class="form-btn" onclick="closeModal(\'edit-modal\')">取消</button>' +
     '<button class="form-btn save" onclick="saveForm()">保存</button>';
   closeModal('manager-modal');
-  document.getElementById('edit-modal').classList.add('open');
+  openModal('edit-modal');
 }
 
 function openEditForm(idx) {
@@ -1409,7 +1417,7 @@ function openEditForm(idx) {
   document.getElementById('edit-form-btns').innerHTML =
     '<button class="form-btn del" onclick="if(confirm(\'确定删除？\'))deleteCourse('+idx+')">删除</button>' +
     '<button class="form-btn save" onclick="saveForm()">保存</button>';
-  document.getElementById('edit-modal').classList.add('open');
+  openModal('edit-modal');
 }
 
 function saveForm() {
@@ -1547,7 +1555,7 @@ function renderScheduleWeek() {
 }
 function openScheduleModal() {
   renderScheduleWeek();
-  document.getElementById('schedule-modal').classList.add('open');
+  openModal('schedule-modal');
 }
 
 function openExportModal() {
@@ -1577,7 +1585,7 @@ function openExportModal() {
       list.appendChild(row);
     })(courses[idx], idx);
   }
-  document.getElementById('export-modal').classList.add('open');
+  openModal('export-modal');
 }
 function saveClassTime(idx, startVal, endVal) {
   var courses = loadData();
@@ -1735,9 +1743,27 @@ function generateICS() {
   closeModal('export-modal');
 }
 
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+var bodyScrollTop = 0;
+function lockBodyScroll(){
+  if (document.body.classList.contains('modal-open')) return;
+  bodyScrollTop = window.scrollY || window.pageYOffset || 0;
+  document.body.classList.add('modal-open');
+  document.body.style.top = '-' + bodyScrollTop + 'px';
+}
+function unlockBodyScroll(){
+  if (!document.body.classList.contains('modal-open')) return;
+  document.body.classList.remove('modal-open');
+  document.body.style.top = '';
+  window.scrollTo(0, bodyScrollTop || 0);
+}
+function syncBodyScrollLock(){
+  if (document.querySelector('.modal-overlay.open')) lockBodyScroll();
+  else unlockBodyScroll();
+}
+function openModal(id) { document.getElementById(id).classList.add('open'); syncBodyScrollLock(); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); syncBodyScrollLock(); }
 document.querySelectorAll('.modal-overlay').forEach(function(overlay){
-  overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.classList.remove('open'); });
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) { overlay.classList.remove('open'); syncBodyScrollLock(); } });
 });
 var authModalEl = document.getElementById('auth-modal');
 if (authModalEl) { authModalEl.addEventListener('click', function(e){ if (e.target === authModalEl) closeAuthModal(); }); }
