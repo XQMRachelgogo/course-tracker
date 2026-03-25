@@ -1448,7 +1448,7 @@ function openAddForm() {
   document.getElementById('f-start').value = isoDate(new Date());
   document.getElementById('f-time-start').value = '10:00';
   document.getElementById('f-time-end').value = '11:00';
-  setCounterValue('f-total', 10);
+  setCounterValue('f-total', 0);
   setCounterValue('f-used', 0);
   document.getElementById('f-pay-alert').checked = false;
   document.getElementById('f-shift-from').value = '';
@@ -1474,7 +1474,7 @@ function openEditForm(idx) {
   document.getElementById('f-start').value = course.startDate;
   document.getElementById('f-time-start').value = course.classTime || '10:00';
   document.getElementById('f-time-end').value = course.classEndTime || addMinutesToTime(course.classTime || '10:00', 60);
-  setCounterValue('f-total', course.total !== null && course.total !== undefined ? course.total : (course.used + Math.max(0, getRemainingCount(course) || 0) || 10));
+  setCounterValue('f-total', course.total !== null && course.total !== undefined ? course.total : (course.used + Math.max(0, getRemainingCount(course) || 0)));
   setCounterValue('f-used', course.used);
   document.getElementById('f-pay-alert').checked = !!course.payAlert;
   document.getElementById('f-shift-from').value = '';
@@ -1687,7 +1687,7 @@ function renderFeeList(course) {
       '<span style="font-size:11px;color:#a39abb;margin-right:2px;">' + (f.currency || 'CNY') + '</span>' +
       '<span class="fee-item-amt">' + fmtMoney(f.amount, f.currency || 'CNY') + '</span>' +
       sessionsText +
-      '<button class="fee-item-del" onclick="deleteFee(' + origIdx + ')" title="删除">✕</button>' +
+      '<button class="fee-item-del" onclick="deleteFee(' + origIdx + ', this)" title="删除">✕</button>' +
     '</div>';
   }).join('');
 }
@@ -1710,8 +1710,16 @@ function addFeeFromForm() {
   showToast('已添加学费记录');
 }
 
-function deleteFee(feeIdx) {
+function deleteFee(feeIdx, btnEl) {
   if (editingIdx === null) return;
+  if (btnEl && typeof btnEl.blur === 'function') btnEl.blur();
+  var row = btnEl && btnEl.closest ? btnEl.closest('.fee-item-row') : null;
+  if (row) {
+    row.style.opacity = '0';
+    row.style.transform = 'scale(0.98)';
+    row.style.transition = 'opacity .16s ease, transform .16s ease';
+    row.style.pointerEvents = 'none';
+  }
   var courses = loadData();
   var c = courses[editingIdx];
   c.fees = c.fees || [];
@@ -1721,9 +1729,11 @@ function deleteFee(feeIdx) {
     c.total = Math.max(c.used, Math.max(0, parseInt(c.total, 10) || 0) - qty);
   }
   saveData(courses);
-  renderFeeList(c);
-  renderFeeSummary();
-  render();
+  window.requestAnimationFrame(function(){
+    renderFeeList(c);
+    renderFeeSummary();
+    render();
+  });
 }
 
 // Get all dates of actual classes taken (history status='done'), grouped by year
