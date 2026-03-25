@@ -149,50 +149,6 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
 .form-group{margin-bottom:14px}.form-label{font-size:12px;color:#938cae;margin-bottom:6px;display:block}
 .form-input,.time-input,.reminder-select{width:100%;padding:12px 12px;font-size:16px;border:1px solid rgba(127,119,221,0.15);border-radius:12px;background:#fff;color:#433b64;font-family:inherit;outline:none}
 .form-input:focus,.time-input:focus,.reminder-select:focus{border-color:#8b7af1}
-
-input[type="date"],input[type="time"]{
-  -webkit-appearance:none;
-  appearance:none;
-  display:block;
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  box-sizing:border-box;
-  min-height:54px;
-  line-height:1.2;
-}
-input[type="date"]::-webkit-date-and-time-value,
-input[type="time"]::-webkit-date-and-time-value{
-  text-align:center;
-  min-height:1.4em;
-}
-input[type="date"]::-webkit-datetime-edit,
-input[type="time"]::-webkit-datetime-edit{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:100%;
-  min-height:1.4em;
-  padding:0;
-}
-input[type="date"]::-webkit-datetime-edit-fields-wrapper,
-input[type="time"]::-webkit-datetime-edit-fields-wrapper{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:100%;
-}
-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="time"]::-webkit-calendar-picker-indicator{
-  opacity:.72;
-  margin:0;
-  padding:0;
-}
-.reschedule-grid > *,
-.time-range > *{
-  min-width:0;
-}
-
 .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
 .wd-btn{padding:8px 2px;font-size:12px;border-radius:10px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#6d6586;cursor:pointer;font-family:inherit;text-align:center}
 .wd-btn.selected{background:#8a7ef0;border-color:#8a7ef0;color:#fff}
@@ -227,6 +183,32 @@ input[type="time"]::-webkit-calendar-picker-indicator{
 .time-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:14px;margin-bottom:8px}.time-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.time-name{font-size:14px;font-weight:600;color:#4a3f73;flex:1}
 .time-range{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;min-width:150px}
 .time-sep{font-size:12px;color:#a39abb;font-weight:700}
+/* iPhone date/time input width fix */
+.form-group,.reschedule-box,.time-range,.reschedule-grid{min-width:0}
+.time-range{width:100%;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+.reschedule-grid{width:100%;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.time-range > *,.reschedule-grid > *{min-width:0}
+.form-input[type="date"],.time-input[type="date"],.form-input[type="time"],.time-input[type="time"]{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  inline-size:100%;
+  max-inline-size:100%;
+  min-inline-size:0;
+  -webkit-appearance:none;
+  appearance:none;
+  padding:12px 14px;
+  background-clip:padding-box;
+}
+@supports (-webkit-touch-callout: none) {
+  .form-input[type="date"],.time-input[type="date"],.form-input[type="time"],.time-input[type="time"]{
+    font-size:16px;
+    line-height:1.2;
+  }
+}
+
 .schedule-week{display:flex;flex-direction:column;gap:10px}
 .schedule-day{background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:18px;padding:12px}
 .schedule-day-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
