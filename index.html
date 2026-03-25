@@ -5,119 +5,119 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>课时打卡</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif; background: #f5f4f0; min-height: 100vh; padding: 1.5rem 1rem 3rem; }
-.app { max-width: 480px; margin: 0 auto; }
-.header { display: flex; align-items: center; margin-bottom: 1.5rem; }
-.header-text { flex: 1; }
-.header h1 { font-size: 22px; font-weight: 600; color: #1a1a1a; }
-.header p { font-size: 13px; color: #888; margin-top: 4px; }
-.manage-btn { padding: 7px 14px; font-size: 13px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.15); background: #fff; color: #555; cursor: pointer; font-family: inherit; font-weight: 500; white-space: nowrap; }
-.manage-btn:hover { background: #f0efe9; }
-.cards { display: flex; flex-direction: column; gap: 12px; }
-.card { background: #fff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 14px; padding: 1rem 1.25rem; }
-.card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.card-title { font-size: 15px; font-weight: 600; color: #1a1a1a; flex: 1; }
-.badge { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 500; }
-.badge-ok { background: #EAF3DE; color: #3B6D11; }
-.badge-warn { background: #FAEEDA; color: #854F0B; }
-.badge-alert { background: #FCEBEB; color: #A32D2D; }
-.stats-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
-.stat { background: #f5f4f0; border-radius: 8px; padding: 8px 10px; }
-.stat-label { font-size: 11px; color: #999; margin-bottom: 2px; }
-.stat-value { font-size: 18px; font-weight: 600; color: #1a1a1a; }
-.progress-bar { height: 6px; background: #ebebeb; border-radius: 3px; margin-bottom: 12px; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
-.next-info { font-size: 12px; color: #888; margin-bottom: 12px; }
-.next-info strong { color: #333; }
-.actions { display: flex; gap: 8px; }
-.btn { flex: 1; padding: 9px; font-size: 13px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.15); background: transparent; color: #333; cursor: pointer; font-family: inherit; font-weight: 500; }
-.btn:hover { background: #f5f4f0; }
-.btn:active { transform: scale(0.98); }
-.btn-primary { background: #e8f0fe; border-color: #aac4f5; color: #1a56cc; }
-.btn-primary:hover { background: #dce8fd; }
-.btn-skip { color: #999; }
-.history-toggle { font-size: 12px; color: #aaa; cursor: pointer; text-decoration: underline; margin-top: 10px; display: block; }
-.history { margin-top: 10px; border-top: 0.5px solid rgba(0,0,0,0.08); padding-top: 10px; display: none; }
-.history.open { display: block; }
-.history-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #999; padding: 4px 0; }
-.status-done { color: #3B6D11; }
-.status-skip { color: #bbb; }
-.history-undo { font-size: 11px; color: #ccc; cursor: pointer; text-decoration: underline; margin-left: 8px; }
-.history-undo:hover { color: #999; }
-.checked-label { font-size: 13px; color: #888; padding: 6px 0; }
-.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 9px 18px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
-.toast.show { opacity: 1; }
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; align-items: flex-end; justify-content: center; }
-.modal-overlay.open { display: flex; }
-.modal { background: #fff; border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; padding: 1.5rem 1.25rem 2.5rem; max-height: 88vh; overflow-y: auto; }
-.modal-header { display: flex; align-items: center; margin-bottom: 1.25rem; }
-.modal-title { font-size: 17px; font-weight: 600; color: #1a1a1a; flex: 1; }
-.modal-close { font-size: 20px; color: #aaa; cursor: pointer; padding: 0 4px; line-height: 1; background: none; border: none; font-family: inherit; }
-.modal-close:hover { color: #555; }
-.course-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.25rem; }
-.course-row { display: flex; align-items: center; gap: 10px; background: #f9f8f5; border-radius: 10px; padding: 10px 12px; }
-.course-row-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.course-row-name { font-size: 14px; font-weight: 500; color: #1a1a1a; flex: 1; }
-.course-row-info { font-size: 12px; color: #999; }
-.icon-btn { width: 30px; height: 30px; border-radius: 6px; border: 0.5px solid rgba(0,0,0,0.12); background: #fff; color: #555; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.icon-btn:hover { background: #f0efe9; }
-.icon-btn.danger:hover { background: #FCEBEB; color: #A32D2D; border-color: #F09595; }
-.add-course-btn { width: 100%; padding: 10px; font-size: 14px; border-radius: 10px; border: 1px dashed rgba(0,0,0,0.18); background: transparent; color: #888; cursor: pointer; font-family: inherit; }
-.add-course-btn:hover { background: #f5f4f0; }
-.form-group { margin-bottom: 14px; }
-.form-label { font-size: 12px; color: #888; margin-bottom: 6px; display: block; }
-.form-input { width: 100%; padding: 9px 12px; font-size: 14px; border: 0.5px solid rgba(0,0,0,0.18); border-radius: 8px; background: #fff; color: #1a1a1a; font-family: inherit; outline: none; }
-.form-input:focus { border-color: #7F77DD; }
-.weekday-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-.wd-btn { padding: 7px 2px; font-size: 12px; border-radius: 6px; border: 0.5px solid rgba(0,0,0,0.15); background: #fff; color: #555; cursor: pointer; font-family: inherit; text-align: center; }
-.wd-btn.selected { background: #7F77DD; border-color: #7F77DD; color: #fff; }
-.color-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
-.color-swatch { width: 100%; aspect-ratio: 1; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; }
-.color-swatch.selected { border-color: #1a1a1a; transform: scale(1.15); }
-.form-switch-row { display: flex; align-items: center; gap: 10px; }
-.form-switch-label { font-size: 13px; color: #444; flex: 1; }
-.switch { position: relative; width: 40px; height: 24px; flex-shrink: 0; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.switch-slider { position: absolute; inset: 0; background: #ddd; border-radius: 12px; cursor: pointer; transition: background 0.2s; }
-.switch-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
-.switch input:checked + .switch-slider { background: #7F77DD; }
-.switch input:checked + .switch-slider:before { transform: translateX(16px); }
-.adjust-row { display: flex; align-items: center; gap: 10px; }
-.adjust-label { font-size: 13px; color: #444; flex: 1; }
-.counter { display: flex; align-items: center; gap: 8px; }
-.counter-btn { width: 32px; height: 32px; border-radius: 6px; border: 0.5px solid rgba(0,0,0,0.15); background: #fff; font-size: 18px; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; }
-.counter-btn:hover { background: #f0efe9; }
-.counter-val { font-size: 16px; font-weight: 600; color: #1a1a1a; min-width: 28px; text-align: center; }
-.form-btns { display: flex; gap: 8px; margin-top: 1.5rem; }
-.form-btn { flex: 1; padding: 11px; font-size: 14px; border-radius: 10px; border: 0.5px solid rgba(0,0,0,0.15); background: transparent; color: #333; cursor: pointer; font-family: inherit; font-weight: 500; }
-.form-btn.save { background: #7F77DD; border-color: #7F77DD; color: #fff; }
-.form-btn.save:hover { background: #6d65c8; }
-.form-btn:hover { background: #f0efe9; }
-.form-btn.del { color: #A32D2D; border-color: #F09595; }
-.form-btn.del:hover { background: #FCEBEB; }
-.export-btn { width: 100%; padding: 12px; font-size: 14px; border-radius: 10px; border: 0.5px solid rgba(0,0,0,0.15); background: #fff; color: #1a1a1a; cursor: pointer; font-family: inherit; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.export-btn:hover { background: #f0efe9; }
-.export-icon { font-size: 16px; }
-.export-hint { font-size: 11px; color: #aaa; margin-top: 8px; text-align: center; line-height: 1.5; }
-.divider { height: 0.5px; background: rgba(0,0,0,0.08); margin: 1.5rem 0; }
-.section-label { font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
-.time-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #f9f8f5; border-radius: 10px; margin-bottom: 8px; }
-.time-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.time-name { font-size: 14px; font-weight: 500; color: #1a1a1a; flex: 1; }
-.time-input { padding: 6px 10px; font-size: 13px; border: 0.5px solid rgba(0,0,0,0.18); border-radius: 7px; background: #fff; color: #1a1a1a; font-family: inherit; width: 110px; }
-.export-options { margin: 1rem 0; }
-.export-option { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid rgba(0,0,0,0.06); }
-.export-option:last-child { border-bottom: none; }
-.export-option-label { font-size: 13px; color: #444; flex: 1; }
-.export-option-desc { font-size: 11px; color: #aaa; margin-top: 2px; }
-.download-btn { width: 100%; padding: 13px; font-size: 15px; border-radius: 10px; border: none; background: #7F77DD; color: #fff; cursor: pointer; font-family: inherit; font-weight: 600; margin-top: 1rem; }
-.download-btn:hover { background: #6d65c8; }
-.reminder-select { padding: 6px 10px; font-size: 13px; border: 0.5px solid rgba(0,0,0,0.18); border-radius: 7px; background: #fff; color: #1a1a1a; font-family: inherit; }
-
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;background:#f5f4f0;min-height:100vh;padding:1.5rem 1rem 3rem}
+.app{max-width:480px;margin:0 auto}
+.header{display:flex;align-items:center;margin-bottom:1.5rem}
+.header-text{flex:1}
+.header h1{font-size:22px;font-weight:600;color:#1a1a1a}
+.header p{font-size:13px;color:#888;margin-top:4px}
+.manage-btn{padding:7px 14px;font-size:13px;border-radius:8px;border:0.5px solid rgba(0,0,0,0.15);background:#fff;color:#555;cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap}
+.manage-btn:hover{background:#f0efe9}
+.cards{display:flex;flex-direction:column;gap:12px}
+.card{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:14px;padding:1rem 1.25rem}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.card-title{font-size:15px;font-weight:600;color:#1a1a1a;flex:1}
+.badge{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:500}
+.badge-ok{background:#EAF3DE;color:#3B6D11}
+.badge-warn{background:#FAEEDA;color:#854F0B}
+.badge-alert{background:#FCEBEB;color:#A32D2D}
+.stats-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.stat{background:#f5f4f0;border-radius:8px;padding:8px 10px}
+.stat-label{font-size:11px;color:#999;margin-bottom:2px}
+.stat-value{font-size:18px;font-weight:600;color:#1a1a1a}
+.progress-bar{height:6px;background:#ebebeb;border-radius:3px;margin-bottom:12px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width 0.4s ease}
+.next-info{font-size:12px;color:#888;margin-bottom:12px}
+.next-info strong{color:#333}
+.actions{display:flex;gap:8px}
+.btn{flex:1;padding:9px;font-size:13px;border-radius:8px;border:0.5px solid rgba(0,0,0,0.15);background:transparent;color:#333;cursor:pointer;font-family:inherit;font-weight:500}
+.btn:hover{background:#f5f4f0}
+.btn:active{transform:scale(0.98)}
+.btn-primary{background:#e8f0fe;border-color:#aac4f5;color:#1a56cc}
+.btn-primary:hover{background:#dce8fd}
+.btn-skip{color:#999}
+.history-toggle{font-size:12px;color:#aaa;cursor:pointer;text-decoration:underline;margin-top:10px;display:block}
+.history{margin-top:10px;border-top:0.5px solid rgba(0,0,0,0.08);padding-top:10px;display:none}
+.history.open{display:block}
+.history-item{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#999;padding:4px 0}
+.status-done{color:#3B6D11}
+.status-skip{color:#bbb}
+.history-undo{font-size:11px;color:#ccc;cursor:pointer;text-decoration:underline;margin-left:8px}
+.history-undo:hover{color:#999}
+.checked-label{font-size:13px;color:#888;padding:6px 0}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:100;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:1.5rem 1.25rem 2.5rem;max-height:88vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;margin-bottom:1.25rem}
+.modal-title{font-size:17px;font-weight:600;color:#1a1a1a;flex:1}
+.modal-close{font-size:20px;color:#aaa;cursor:pointer;padding:0 4px;line-height:1;background:none;border:none;font-family:inherit}
+.modal-close:hover{color:#555}
+.course-list{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem}
+.course-row{display:flex;align-items:center;gap:10px;background:#f9f8f5;border-radius:10px;padding:10px 12px}
+.course-row-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.course-row-name{font-size:14px;font-weight:500;color:#1a1a1a;flex:1}
+.course-row-info{font-size:12px;color:#999}
+.icon-btn{width:30px;height:30px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.12);background:#fff;color:#555;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon-btn:hover{background:#f0efe9}
+.icon-btn.danger:hover{background:#FCEBEB;color:#A32D2D;border-color:#F09595}
+.add-course-btn{width:100%;padding:10px;font-size:14px;border-radius:10px;border:1px dashed rgba(0,0,0,0.18);background:transparent;color:#888;cursor:pointer;font-family:inherit}
+.add-course-btn:hover{background:#f5f4f0}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;color:#888;margin-bottom:6px;display:block}
+.form-input{width:100%;padding:9px 12px;font-size:14px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;background:#fff;color:#1a1a1a;font-family:inherit;outline:none}
+.form-input:focus{border-color:#7F77DD}
+.weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.wd-btn{padding:7px 2px;font-size:12px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.15);background:#fff;color:#555;cursor:pointer;font-family:inherit;text-align:center}
+.wd-btn.selected{background:#7F77DD;border-color:#7F77DD;color:#fff}
+.color-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+.color-swatch{width:100%;aspect-ratio:1;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform 0.1s}
+.color-swatch.selected{border-color:#1a1a1a;transform:scale(1.15)}
+.form-switch-row{display:flex;align-items:center;gap:10px}
+.form-switch-label{font-size:13px;color:#444;flex:1}
+.switch{position:relative;width:40px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch-slider{position:absolute;inset:0;background:#ddd;border-radius:12px;cursor:pointer;transition:background 0.2s}
+.switch-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform 0.2s}
+.switch input:checked+.switch-slider{background:#7F77DD}
+.switch input:checked+.switch-slider:before{transform:translateX(16px)}
+.adjust-row{display:flex;align-items:center;gap:10px}
+.adjust-label{font-size:13px;color:#444;flex:1}
+.counter{display:flex;align-items:center;gap:8px}
+.counter-btn{width:32px;height:32px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.15);background:#fff;font-size:18px;color:#333;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.counter-btn:hover{background:#f0efe9}
+.counter-val{font-size:16px;font-weight:600;color:#1a1a1a;min-width:28px;text-align:center}
+.form-btns{display:flex;gap:8px;margin-top:1.5rem}
+.form-btn{flex:1;padding:11px;font-size:14px;border-radius:10px;border:0.5px solid rgba(0,0,0,0.15);background:transparent;color:#333;cursor:pointer;font-family:inherit;font-weight:500}
+.form-btn.save{background:#7F77DD;border-color:#7F77DD;color:#fff}
+.form-btn.save:hover{background:#6d65c8}
+.form-btn:hover{background:#f0efe9}
+.form-btn.del{color:#A32D2D;border-color:#F09595}
+.form-btn.del:hover{background:#FCEBEB}
+.divider{height:0.5px;background:rgba(0,0,0,0.08);margin:1.5rem 0}
+.section-label{font-size:11px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.export-btn{width:100%;padding:12px;font-size:14px;border-radius:10px;border:0.5px solid rgba(0,0,0,0.15);background:#fff;color:#1a1a1a;cursor:pointer;font-family:inherit;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px}
+.export-btn:hover{background:#f0efe9}
+.export-hint{font-size:11px;color:#aaa;margin-top:8px;text-align:center;line-height:1.5}
+.time-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f9f8f5;border-radius:10px;margin-bottom:8px}
+.time-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.time-name{font-size:14px;font-weight:500;color:#1a1a1a;flex:1}
+.time-input{padding:6px 10px;font-size:13px;border:0.5px solid rgba(0,0,0,0.18);border-radius:7px;background:#fff;color:#1a1a1a;font-family:inherit;width:110px}
+.export-options{margin:1rem 0}
+.export-option{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid rgba(0,0,0,0.06)}
+.export-option:last-child{border-bottom:none}
+.export-option-label{font-size:13px;color:#444}
+.export-option-desc{font-size:11px;color:#aaa;margin-top:2px}
+.download-btn{width:100%;padding:13px;font-size:15px;border-radius:10px;border:none;background:#7F77DD;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;margin-top:1rem}
+.download-btn:hover{background:#6d65c8}
+.reminder-select{padding:6px 10px;font-size:13px;border:0.5px solid rgba(0,0,0,0.18);border-radius:7px;background:#fff;color:#1a1a1a;font-family:inherit}
+</style>
 </head>
 <body>
+
 <div class="app">
   <div class="header">
     <div class="header-text">
@@ -129,10 +129,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
   <div class="cards" id="cards-container"></div>
   <div class="divider"></div>
   <p class="section-label">日历提醒</p>
-  <button class="export-btn" onclick="openExportModal()">
-    <span class="export-icon">📅</span>
-    导出到 Apple Calendar
-  </button>
+  <button class="export-btn" onclick="openExportModal()">📅 导出到 Apple Calendar</button>
   <p class="export-hint">生成 .ics 文件，包含每周上课提醒 + 续费提醒，iPhone 打开即可导入</p>
 </div>
 
@@ -236,14 +233,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
       <span class="modal-title">导出到 Apple Calendar</span>
       <button class="modal-close" onclick="closeModal('export-modal')">✕</button>
     </div>
-    <p style="font-size:13px;color:#888;margin-bottom:1rem;line-height:1.6;">为每门课设置上课时间，然后下载 .ics 文件。iPhone 上打开文件即可导入日历。</p>
+    <p style="font-size:13px;color:#888;margin-bottom:1rem;line-height:1.6;">为每门课设置上课时间，下载 .ics 文件后用 iPhone 打开即可导入日历。</p>
     <label class="form-label">每门课的上课时间</label>
     <div id="export-time-list"></div>
     <div class="export-options">
       <div class="export-option">
         <div style="flex:1">
           <div class="export-option-label">每周上课提醒</div>
-          <div class="export-option-desc">课前提醒，含打卡提示</div>
+          <div class="export-option-desc">课前推送，含打卡提示</div>
         </div>
         <select class="reminder-select" id="exp-remind-before">
           <option value="60">提前 1 小时</option>
@@ -255,381 +252,401 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
       <div class="export-option">
         <div style="flex:1">
           <div class="export-option-label">续费提醒</div>
-          <div class="export-option-desc">剩余课时 ≤ 2 时，在下一次上课日提醒</div>
+          <div class="export-option-desc">剩余 ≤ 2 次时，在下一个上课日提醒</div>
         </div>
         <label class="switch"><input type="checkbox" id="exp-pay-alert" checked /><span class="switch-slider"></span></label>
       </div>
       <div class="export-option">
         <div style="flex:1">
           <div class="export-option-label">课包到期提醒</div>
-          <div class="export-option-desc">最后一节课当天生成"课包用完"提醒</div>
+          <div class="export-option-desc">最后一节课当天 + 提前3天各提醒一次</div>
         </div>
         <label class="switch"><input type="checkbox" id="exp-expire-alert" checked /><span class="switch-slider"></span></label>
       </div>
     </div>
     <button class="download-btn" onclick="generateICS()">下载 .ics 文件</button>
-    <p style="font-size:11px;color:#aaa;text-align:center;margin-top:10px;line-height:1.6;">导入后日历里会显示每周重复的上课事件。<br>如果上课时间变了，重新导出一次覆盖即可。</p>
+    <p style="font-size:11px;color:#aaa;text-align:center;margin-top:10px;line-height:1.6;">导入后日历会显示每周重复的上课事件。<br>时间变了重新导出覆盖即可。</p>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'course_tracker_v1';
-const COLORS = ['#7F77DD','#1D9E75','#D85A30','#378ADD','#D4537E','#BA7517','#639922','#E24B4A','#555555','#0F6E56'];
-const WEEKDAYS = ['周日','周一','周二','周三','周四','周五','周六'];
-let editingIdx = null, formWeekday = 1, formColor = COLORS[0];
+var STORAGE_KEY = 'course_tracker_v1';
+var COLORS = ['#7F77DD','#1D9E75','#D85A30','#378ADD','#D4537E','#BA7517','#639922','#E24B4A','#555555','#0F6E56'];
+var WEEKDAYS = ['周日','周一','周二','周三','周四','周五','周六'];
+var editingIdx = null;
+var formWeekday = 1;
+var formColor = COLORS[0];
 
-const defaultCourses = [
-  {id:'xingti',name:'形体课',weekday:1,color:'#7F77DD',total:10,used:3,remaining:null,startDate:'2025-03-09',history:[{date:'2025-03-09',status:'done'},{date:'2025-03-16',status:'done'},{date:'2025-03-23',status:'done'}],payAlert:false},
-  {id:'sumiao',name:'素描课',weekday:2,color:'#1D9E75',total:10,used:3,remaining:null,startDate:'2025-03-10',history:[{date:'2025-03-10',status:'done'},{date:'2025-03-17',status:'done'},{date:'2025-03-24',status:'done'}],payAlert:false},
-  {id:'meishu',name:'美术课',weekday:3,color:'#D85A30',total:null,used:0,remaining:16,startDate:'2025-03-25',history:[],payAlert:false},
-  {id:'zhongwen',name:'中文阅读',weekday:4,color:'#378ADD',total:null,used:0,remaining:null,startDate:'2025-04-16',history:[],payAlert:false},
-  {id:'jita',name:'吉他课',weekday:0,color:'#D4537E',total:null,used:0,remaining:2,startDate:'2025-03-29',history:[],payAlert:true}
+var defaultCourses = [
+  {id:'xingti',name:'形体课',weekday:1,color:'#7F77DD',total:10,used:3,remaining:null,startDate:'2025-03-09',classTime:'10:00',history:[{date:'2025-03-09',status:'done'},{date:'2025-03-16',status:'done'},{date:'2025-03-23',status:'done'}],payAlert:false},
+  {id:'sumiao',name:'素描课',weekday:2,color:'#1D9E75',total:10,used:3,remaining:null,startDate:'2025-03-10',classTime:'10:00',history:[{date:'2025-03-10',status:'done'},{date:'2025-03-17',status:'done'},{date:'2025-03-24',status:'done'}],payAlert:false},
+  {id:'meishu',name:'美术课',weekday:3,color:'#D85A30',total:null,used:0,remaining:16,startDate:'2025-03-25',classTime:'10:00',history:[],payAlert:false},
+  {id:'zhongwen',name:'中文阅读',weekday:4,color:'#378ADD',total:null,used:0,remaining:null,startDate:'2025-04-16',classTime:'10:00',history:[],payAlert:false},
+  {id:'jita',name:'吉他课',weekday:0,color:'#D4537E',total:null,used:0,remaining:2,startDate:'2025-03-29',classTime:'10:00',history:[],payAlert:true}
 ];
 
-function loadData(){try{const r=localStorage.getItem(STORAGE_KEY);if(r)return JSON.parse(r);}catch(e){}return JSON.parse(JSON.stringify(defaultCourses));}
-function saveData(c){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(c));}catch(e){}}
-function isoDate(d){return d.toISOString().slice(0,10);}
-function formatDate(d){return d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'});}
+function loadData() {
+  try {
+    var r = localStorage.getItem(STORAGE_KEY);
+    if (r) return JSON.parse(r);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(defaultCourses));
+}
 
-function getNextClassDate(course){
-  const today=new Date();today.setHours(0,0,0,0);
-  const start=new Date(course.startDate);start.setHours(0,0,0,0);
-  const base=start>today?start:today;
-  let d=new Date(base);
-  let diff=(course.weekday-d.getDay()+7)%7;
-  if(diff===0&&d.getTime()===today.getTime())diff=0;
-  else if(diff===0)diff=7;
-  d.setDate(d.getDate()+diff);
-  if(d<start)d=new Date(start);
+function saveData(c) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); } catch(e) {}
+}
+
+function isoDate(d) {
+  var y = d.getFullYear();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var dd = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+dd;
+}
+
+function formatDate(d) {
+  return d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'});
+}
+
+function getNextClassDate(course) {
+  var today = new Date(); today.setHours(0,0,0,0);
+  var start = new Date(course.startDate); start.setHours(0,0,0,0);
+  var base = start > today ? start : today;
+  var d = new Date(base);
+  var diff = (course.weekday - d.getDay() + 7) % 7;
+  if (diff === 0 && d.getTime() === today.getTime()) diff = 0;
+  else if (diff === 0) diff = 7;
+  d.setDate(d.getDate() + diff);
+  if (d < start) d = new Date(start);
   return d;
 }
 
-function getRemainingCount(course){
-  if(course.total!==null&&course.total!==undefined)return course.total-course.used;
-  if(course.remaining!==null&&course.remaining!==undefined)return course.remaining-course.used;
+function getRemainingCount(course) {
+  if (course.total !== null && course.total !== undefined) return course.total - course.used;
+  if (course.remaining !== null && course.remaining !== undefined) return course.remaining - course.used;
   return null;
 }
 
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2400);
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2400);
 }
 
-function render(){
-  const courses=loadData();
-  const container=document.getElementById('cards-container');
-  container.innerHTML='';
-  const today=new Date();today.setHours(0,0,0,0);
-  const todayStr=isoDate(today);
-  document.getElementById('today-date').textContent=formatDate(today);
+function render() {
+  var courses = loadData();
+  var container = document.getElementById('cards-container');
+  container.innerHTML = '';
+  var today = new Date(); today.setHours(0,0,0,0);
+  var todayStr = isoDate(today);
+  document.getElementById('today-date').textContent = formatDate(today);
 
-  courses.forEach((course,idx)=>{
-    const remaining=getRemainingCount(course);
-    const nextDate=getNextClassDate(course);
-    const nextStr=isoDate(nextDate);
-    const startDate=new Date(course.startDate);startDate.setHours(0,0,0,0);
-    const isClassToday=course.weekday===today.getDay()&&startDate<=today;
-    const alreadyToday=course.history.some(h=>h.date===todayStr);
+  for (var idx = 0; idx < courses.length; idx++) {
+    (function(course, idx){
+      var remaining = getRemainingCount(course);
+      var nextDate = getNextClassDate(course);
+      var nextStr = isoDate(nextDate);
+      var startDate = new Date(course.startDate); startDate.setHours(0,0,0,0);
+      var isClassToday = course.weekday === today.getDay() && startDate <= today;
+      var alreadyToday = course.history.some(function(h){ return h.date === todayStr; });
 
-    let badgeClass='badge-ok',badgeText='正常';
-    if(course.payAlert&&remaining!==null&&remaining<=2){badgeClass='badge-alert';badgeText='需续费';}
-    else if(remaining!==null&&remaining<=2){badgeClass='badge-warn';badgeText=`剩${remaining}次`;}
-    else if(remaining!==null){badgeText=`剩${remaining}次`;}
+      var badgeClass = 'badge-ok', badgeText = '正常';
+      if (course.payAlert && remaining !== null && remaining <= 2) { badgeClass='badge-alert'; badgeText='需续费'; }
+      else if (remaining !== null && remaining <= 2) { badgeClass='badge-warn'; badgeText='剩'+remaining+'次'; }
+      else if (remaining !== null) { badgeText='剩'+remaining+'次'; }
 
-    const totalForBar=course.total!==null&&course.total!==undefined?course.total:
-                      course.remaining!==null&&course.remaining!==undefined?(course.used+course.remaining):null;
-    const pct=totalForBar?Math.round((course.used/totalForBar)*100):0;
-    const nextDisplay=nextStr===todayStr?'今天':formatDate(nextDate);
+      var totalForBar = null;
+      if (course.total !== null && course.total !== undefined) totalForBar = course.total;
+      else if (course.remaining !== null && course.remaining !== undefined) totalForBar = course.used + course.remaining;
+      var pct = totalForBar ? Math.round((course.used/totalForBar)*100) : 0;
+      var nextDisplay = nextStr === todayStr ? '今天' : formatDate(nextDate);
 
-    let historyHTML='';
-    if(course.history.length>0){
-      historyHTML=[...course.history].reverse().slice(0,6).map((h,i)=>{
-        const label=h.status==='done'?'✓ 已上课':'— 请假';
-        const cls=h.status==='done'?'status-done':'status-skip';
-        const realIdx=course.history.length-1-i;
-        return `<div class="history-item"><span>${h.date}</span><span class="${cls}">${label}</span><span class="history-undo" onclick="undoRecord(${idx},${realIdx})">撤销</span></div>`;
-      }).join('');
-    }else{
-      historyHTML='<div class="history-item"><span style="color:#ccc">暂无记录</span></div>';
+      var historyHTML = '';
+      if (course.history.length > 0) {
+        var rev = course.history.slice().reverse().slice(0,6);
+        for (var i = 0; i < rev.length; i++) {
+          var h = rev[i];
+          var label = h.status === 'done' ? '✓ 已上课' : '— 请假';
+          var cls = h.status === 'done' ? 'status-done' : 'status-skip';
+          var realIdx = course.history.length - 1 - i;
+          historyHTML += '<div class="history-item"><span>'+h.date+'</span><span class="'+cls+'">'+label+'</span><span class="history-undo" onclick="undoRecord('+idx+','+realIdx+')">撤销</span></div>';
+        }
+      } else {
+        historyHTML = '<div class="history-item"><span style="color:#ccc">暂无记录</span></div>';
+      }
+
+      var actionBtns;
+      if (alreadyToday) {
+        actionBtns = '<div class="checked-label">今天已打卡 ✓</div>';
+      } else if (isClassToday) {
+        actionBtns = '<button class="btn btn-primary" onclick="markClass('+idx+',\'done\')">今天上课了 ✓</button><button class="btn btn-skip" onclick="markClass('+idx+',\'skip\')">今天请假</button>';
+      } else {
+        actionBtns = '<button class="btn" onclick="markClass('+idx+',\'done\')" style="font-size:12px;color:#888;">手动补打卡</button>';
+      }
+
+      var totalLabel = totalForBar ? '共'+totalForBar+'次' : '课时不限';
+      var card = document.createElement('div');
+      card.className = 'card';
+      if (course.payAlert && remaining !== null && remaining <= 2) card.style.borderColor = '#F09595';
+
+      var progressBar = totalForBar ? '<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%;background:'+course.color+'"></div></div>' : '';
+
+      card.innerHTML =
+        '<div class="card-header">' +
+          '<div class="dot" style="background:'+course.color+'"></div>' +
+          '<span class="card-title">'+course.name+'</span>' +
+          '<span class="badge '+badgeClass+'">'+badgeText+'</span>' +
+          '<button class="icon-btn" onclick="openEditForm('+idx+')" style="font-size:13px;">✎</button>' +
+        '</div>' +
+        '<div class="stats-row">' +
+          '<div class="stat"><div class="stat-label">已上</div><div class="stat-value">'+course.used+'</div></div>' +
+          '<div class="stat"><div class="stat-label">剩余</div><div class="stat-value">'+(remaining!==null?remaining:'—')+'</div></div>' +
+          '<div class="stat"><div class="stat-label">'+(totalForBar?'总课时':'类型')+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+totalLabel+'</div></div>' +
+        '</div>' +
+        progressBar +
+        '<div class="next-info">下次上课：<strong>'+nextDisplay+'</strong>（每'+WEEKDAYS[course.weekday]+'）</div>' +
+        '<div class="actions">'+actionBtns+'</div>' +
+        '<span class="history-toggle" onclick="toggleHistory(\'hist-'+idx+'\')">查看近期记录</span>' +
+        '<div class="history" id="hist-'+idx+'">'+historyHTML+'</div>';
+
+      container.appendChild(card);
+    })(courses[idx], idx);
+  }
+}
+
+function markClass(idx, status) {
+  var courses = loadData();
+  var course = courses[idx];
+  var todayStr = isoDate(new Date());
+  if (course.history.some(function(h){ return h.date === todayStr; })) { showToast('今天已经打卡过了'); return; }
+  course.history.push({date:todayStr, status:status});
+  if (status === 'done') {
+    course.used += 1;
+    if (course.remaining !== null && course.remaining !== undefined) course.remaining -= 1;
+    showToast(course.name+' 打卡成功！已上 '+course.used+' 次');
+    var rem = getRemainingCount(course);
+    if (rem !== null && rem <= 2 && rem > 0) {
+      setTimeout(function(){ showToast('提醒：'+course.name+' 仅剩 '+rem+' 次课！'); }, 2500);
     }
-
-    const actionBtns=alreadyToday
-      ?`<div class="checked-label">今天已打卡 ✓</div>`
-      :isClassToday
-        ?`<button class="btn btn-primary" onclick="markClass(${idx},'done')">今天上课了 ✓</button><button class="btn btn-skip" onclick="markClass(${idx},'skip')">今天请假</button>`
-        :`<button class="btn" onclick="markClass(${idx},'done')" style="font-size:12px;color:#888;">手动补打卡</button>`;
-
-    const totalLabel=totalForBar?`共${totalForBar}次`:'课时不限';
-    const card=document.createElement('div');
-    card.className='card';
-    if(course.payAlert&&remaining!==null&&remaining<=2)card.style.borderColor='#F09595';
-
-    card.innerHTML=`
-      <div class="card-header">
-        <div class="dot" style="background:${course.color}"></div>
-        <span class="card-title">${course.name}</span>
-        <span class="badge ${badgeClass}">${badgeText}</span>
-        <button class="icon-btn" onclick="openEditForm(${idx})" title="编辑" style="font-size:13px;">✎</button>
-      </div>
-      <div class="stats-row">
-        <div class="stat"><div class="stat-label">已上</div><div class="stat-value">${course.used}</div></div>
-        <div class="stat"><div class="stat-label">剩余</div><div class="stat-value">${remaining!==null?remaining:'—'}</div></div>
-        <div class="stat"><div class="stat-label">${totalForBar?'总课时':'类型'}</div><div class="stat-value" style="font-size:13px;padding-top:3px;">${totalLabel}</div></div>
-      </div>
-      ${totalForBar?`<div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${course.color}"></div></div>`:''}
-      <div class="next-info">下次上课：<strong>${nextDisplay}</strong>（每${WEEKDAYS[course.weekday]}）</div>
-      <div class="actions">${actionBtns}</div>
-      <span class="history-toggle" onclick="toggleHistory('hist-${idx}')">查看近期记录</span>
-      <div class="history" id="hist-${idx}">${historyHTML}</div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-function markClass(idx,status){
-  const courses=loadData();
-  const course=courses[idx];
-  const todayStr=isoDate(new Date());
-  if(course.history.some(h=>h.date===todayStr)){showToast('今天已经打卡过了');return;}
-  course.history.push({date:todayStr,status});
-  if(status==='done'){
-    course.used+=1;
-    if(course.remaining!==null&&course.remaining!==undefined)course.remaining-=1;
-    showToast(`${course.name} 打卡成功！已上 ${course.used} 次`);
-    const rem=getRemainingCount(course);
-    if(rem!==null&&rem<=2&&rem>0)setTimeout(()=>showToast(`提醒：${course.name} 仅剩 ${rem} 次课！`),2500);
-  }else{
-    showToast(`${course.name} 已记录请假，课时顺延`);
+  } else {
+    showToast(course.name+' 已记录请假，课时顺延');
   }
-  saveData(courses);render();
+  saveData(courses); render();
 }
 
-function undoRecord(courseIdx,histIdx){
-  const courses=loadData();
-  const course=courses[courseIdx];
-  const record=course.history[histIdx];
-  if(!record)return;
-  if(record.status==='done'){
-    course.used=Math.max(0,course.used-1);
-    if(course.remaining!==null&&course.remaining!==undefined)course.remaining+=1;
+function undoRecord(courseIdx, histIdx) {
+  var courses = loadData();
+  var course = courses[courseIdx];
+  var record = course.history[histIdx];
+  if (!record) return;
+  if (record.status === 'done') {
+    course.used = Math.max(0, course.used - 1);
+    if (course.remaining !== null && course.remaining !== undefined) course.remaining += 1;
   }
-  course.history.splice(histIdx,1);
-  saveData(courses);showToast('已撤销打卡记录');render();
+  course.history.splice(histIdx, 1);
+  saveData(courses); showToast('已撤销打卡记录'); render();
 }
 
-function toggleHistory(id){document.getElementById(id).classList.toggle('open');}
+function toggleHistory(id) { document.getElementById(id).classList.toggle('open'); }
 
-function openManager(){
-  const courses=loadData();
-  const list=document.getElementById('manager-list');
-  list.innerHTML='';
-  courses.forEach((c,idx)=>{
-    const rem=getRemainingCount(c);
-    const row=document.createElement('div');
-    row.className='course-row';
-    row.innerHTML=`
-      <div class="course-row-dot" style="background:${c.color}"></div>
-      <span class="course-row-name">${c.name}</span>
-      <span class="course-row-info">${WEEKDAYS[c.weekday]} · 剩${rem!==null?rem+'次':'?'}</span>
-      <button class="icon-btn" onclick="closeModal('manager-modal');openEditForm(${idx})" style="font-size:13px;">✎</button>
-      <button class="icon-btn danger" onclick="deleteCourse(${idx})">✕</button>
-    `;
-    list.appendChild(row);
-  });
+function openManager() {
+  var courses = loadData();
+  var list = document.getElementById('manager-list');
+  list.innerHTML = '';
+  for (var idx = 0; idx < courses.length; idx++) {
+    (function(c, idx){
+      var rem = getRemainingCount(c);
+      var row = document.createElement('div');
+      row.className = 'course-row';
+      row.innerHTML =
+        '<div class="course-row-dot" style="background:'+c.color+'"></div>' +
+        '<span class="course-row-name">'+c.name+'</span>' +
+        '<span class="course-row-info">'+WEEKDAYS[c.weekday]+' · 剩'+(rem!==null?rem+'次':'?')+'</span>' +
+        '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" style="font-size:13px;">✎</button>' +
+        '<button class="icon-btn danger" onclick="deleteCourse('+idx+')">✕</button>';
+      list.appendChild(row);
+    })(courses[idx], idx);
+  }
   document.getElementById('manager-modal').classList.add('open');
 }
 
-function deleteCourse(idx){
-  if(!confirm('确定删除这门课程？打卡记录也会一起删除。'))return;
-  const courses=loadData();
-  courses.splice(idx,1);
+function deleteCourse(idx) {
+  if (!confirm('确定删除这门课程？打卡记录也会一起删除。')) return;
+  var courses = loadData();
+  courses.splice(idx, 1);
   saveData(courses);
-  openManager();render();
+  openManager(); render();
 }
 
-function buildColorGrid(selected){
-  const grid=document.getElementById('f-color-grid');
-  grid.innerHTML='';
-  COLORS.forEach(c=>{
-    const sw=document.createElement('div');
-    sw.className='color-swatch'+(c===selected?' selected':'');
-    sw.style.background=c;
-    sw.onclick=()=>{formColor=c;buildColorGrid(c);};
+function buildColorGrid(selected) {
+  var grid = document.getElementById('f-color-grid');
+  grid.innerHTML = '';
+  COLORS.forEach(function(c){
+    var sw = document.createElement('div');
+    sw.className = 'color-swatch' + (c === selected ? ' selected' : '');
+    sw.style.background = c;
+    sw.onclick = function(){ formColor = c; buildColorGrid(c); };
     grid.appendChild(sw);
   });
 }
 
-function selectWeekday(day){
-  formWeekday=day;
-  document.querySelectorAll('.wd-btn').forEach(b=>{
-    b.classList.toggle('selected',parseInt(b.dataset.day)===day);
+function selectWeekday(day) {
+  formWeekday = day;
+  document.querySelectorAll('.wd-btn').forEach(function(b){
+    b.classList.toggle('selected', parseInt(b.dataset.day) === day);
   });
 }
 
-function toggleTotalMode(){
-  const hasTot=document.getElementById('f-has-total').checked;
-  document.getElementById('f-total-section').style.display=hasTot?'block':'none';
-  document.getElementById('f-remaining-section').style.display=hasTot?'none':'block';
+function toggleTotalMode() {
+  var hasTot = document.getElementById('f-has-total').checked;
+  document.getElementById('f-total-section').style.display = hasTot ? 'block' : 'none';
+  document.getElementById('f-remaining-section').style.display = hasTot ? 'none' : 'block';
 }
 
-function adjustVal(id,delta){
-  const el=document.getElementById(id);
-  el.textContent=Math.max(0,parseInt(el.textContent)+delta);
+function adjustVal(id, delta) {
+  var el = document.getElementById(id);
+  el.textContent = Math.max(0, parseInt(el.textContent) + delta);
 }
 
-function openAddForm(){
-  editingIdx=null;formWeekday=1;formColor=COLORS[0];
-  document.getElementById('edit-modal-title').textContent='新增课程';
-  document.getElementById('f-name').value='';
-  document.getElementById('f-start').value=isoDate(new Date());
-  document.getElementById('f-has-total').checked=false;
-  document.getElementById('f-total').textContent='10';
-  document.getElementById('f-remaining').textContent='10';
-  document.getElementById('f-used').textContent='0';
-  document.getElementById('f-pay-alert').checked=false;
-  toggleTotalMode();selectWeekday(1);buildColorGrid(COLORS[0]);
-  document.getElementById('edit-form-btns').innerHTML=`
-    <button class="form-btn" onclick="closeModal('edit-modal')">取消</button>
-    <button class="form-btn save" onclick="saveForm()">保存</button>
-  `;
+function openAddForm() {
+  editingIdx = null; formWeekday = 1; formColor = COLORS[0];
+  document.getElementById('edit-modal-title').textContent = '新增课程';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-start').value = isoDate(new Date());
+  document.getElementById('f-has-total').checked = false;
+  document.getElementById('f-total').textContent = '10';
+  document.getElementById('f-remaining').textContent = '10';
+  document.getElementById('f-used').textContent = '0';
+  document.getElementById('f-pay-alert').checked = false;
+  toggleTotalMode(); selectWeekday(1); buildColorGrid(COLORS[0]);
+  document.getElementById('edit-form-btns').innerHTML =
+    '<button class="form-btn" onclick="closeModal(\'edit-modal\')">取消</button>' +
+    '<button class="form-btn save" onclick="saveForm()">保存</button>';
   closeModal('manager-modal');
   document.getElementById('edit-modal').classList.add('open');
 }
 
-function openEditForm(idx){
-  editingIdx=idx;
-  const course=loadData()[idx];
-  formWeekday=course.weekday;formColor=course.color;
-  document.getElementById('edit-modal-title').textContent='编辑课程';
-  document.getElementById('f-name').value=course.name;
-  document.getElementById('f-start').value=course.startDate;
-  const hasTot=course.total!==null&&course.total!==undefined;
-  document.getElementById('f-has-total').checked=hasTot;
-  document.getElementById('f-total').textContent=hasTot?course.total:10;
-  const curRem=getRemainingCount(course);
-  document.getElementById('f-remaining').textContent=curRem!==null?curRem:10;
-  document.getElementById('f-used').textContent=course.used;
-  document.getElementById('f-pay-alert').checked=!!course.payAlert;
-  toggleTotalMode();selectWeekday(course.weekday);buildColorGrid(course.color);
-  document.getElementById('edit-form-btns').innerHTML=`
-    <button class="form-btn del" onclick="if(confirm('确定删除？'))deleteCourse(${idx})">删除</button>
-    <button class="form-btn save" onclick="saveForm()">保存</button>
-  `;
+function openEditForm(idx) {
+  editingIdx = idx;
+  var course = loadData()[idx];
+  formWeekday = course.weekday; formColor = course.color;
+  document.getElementById('edit-modal-title').textContent = '编辑课程';
+  document.getElementById('f-name').value = course.name;
+  document.getElementById('f-start').value = course.startDate;
+  var hasTot = course.total !== null && course.total !== undefined;
+  document.getElementById('f-has-total').checked = hasTot;
+  document.getElementById('f-total').textContent = hasTot ? course.total : 10;
+  var curRem = getRemainingCount(course);
+  document.getElementById('f-remaining').textContent = curRem !== null ? curRem : 10;
+  document.getElementById('f-used').textContent = course.used;
+  document.getElementById('f-pay-alert').checked = !!course.payAlert;
+  toggleTotalMode(); selectWeekday(course.weekday); buildColorGrid(course.color);
+  document.getElementById('edit-form-btns').innerHTML =
+    '<button class="form-btn del" onclick="if(confirm(\'确定删除？\'))deleteCourse('+idx+')">删除</button>' +
+    '<button class="form-btn save" onclick="saveForm()">保存</button>';
   document.getElementById('edit-modal').classList.add('open');
 }
 
-function saveForm(){
-  const name=document.getElementById('f-name').value.trim();
-  if(!name){showToast('请填写课程名称');return;}
-  const hasTot=document.getElementById('f-has-total').checked;
-  const total=hasTot?parseInt(document.getElementById('f-total').textContent):null;
-  const remaining=hasTot?null:parseInt(document.getElementById('f-remaining').textContent);
-  const used=parseInt(document.getElementById('f-used').textContent);
-  const courses=loadData();
-  if(editingIdx!==null){
-    const c=courses[editingIdx];
-    c.name=name;c.weekday=formWeekday;c.color=formColor;
+function saveForm() {
+  var name = document.getElementById('f-name').value.trim();
+  if (!name) { showToast('请填写课程名称'); return; }
+  var hasTot = document.getElementById('f-has-total').checked;
+  var total = hasTot ? parseInt(document.getElementById('f-total').textContent) : null;
+  var remaining = hasTot ? null : parseInt(document.getElementById('f-remaining').textContent);
+  var used = parseInt(document.getElementById('f-used').textContent);
+  var courses = loadData();
+  if (editingIdx !== null) {
+    var c = courses[editingIdx];
+    c.name=name; c.weekday=formWeekday; c.color=formColor;
     c.startDate=document.getElementById('f-start').value;
-    c.total=total;c.remaining=remaining;c.used=used;
+    c.total=total; c.remaining=remaining; c.used=used;
     c.payAlert=document.getElementById('f-pay-alert').checked;
-  }else{
-    courses.push({id:'c'+Date.now(),name,weekday:formWeekday,color:formColor,
+  } else {
+    courses.push({id:'c'+Date.now(),name:name,weekday:formWeekday,color:formColor,
       startDate:document.getElementById('f-start').value,
-      total,used,remaining,history:[],
+      total:total,used:used,remaining:remaining,classTime:'10:00',history:[],
       payAlert:document.getElementById('f-pay-alert').checked});
   }
   saveData(courses);
   closeModal('edit-modal');
-  showToast(editingIdx!==null?'课程已更新':'课程已添加');
+  showToast(editingIdx !== null ? '课程已更新' : '课程已添加');
   render();
 }
 
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-
-function openExportModal(){
-  const courses=loadData();
-  const list=document.getElementById('export-time-list');
-  list.innerHTML='';
-  courses.forEach((c,idx)=>{
-    const row=document.createElement('div');
-    row.className='time-row';
-    const savedTime=c.classTime||'10:00';
-    row.innerHTML=`
-      <div class="time-dot" style="background:${c.color}"></div>
-      <span class="time-name">${c.name}<br><span style="font-size:11px;color:#aaa;font-weight:400;">每${WEEKDAYS[c.weekday]}</span></span>
-      <input class="time-input" type="time" value="${savedTime}" data-idx="${idx}" onchange="saveClassTime(${idx},this.value)" />
-    `;
-    list.appendChild(row);
-  });
+function openExportModal() {
+  var courses = loadData();
+  var list = document.getElementById('export-time-list');
+  list.innerHTML = '';
+  for (var idx = 0; idx < courses.length; idx++) {
+    (function(c, idx){
+      var row = document.createElement('div');
+      row.className = 'time-row';
+      var savedTime = c.classTime || '10:00';
+      row.innerHTML =
+        '<div class="time-dot" style="background:'+c.color+'"></div>' +
+        '<span class="time-name">'+c.name+'<br><span style="font-size:11px;color:#aaa;font-weight:400;">每'+WEEKDAYS[c.weekday]+'</span></span>' +
+        '<input class="time-input" type="time" value="'+savedTime+'" onchange="saveClassTime('+idx+',this.value)" />';
+      list.appendChild(row);
+    })(courses[idx], idx);
+  }
   document.getElementById('export-modal').classList.add('open');
 }
 
-function saveClassTime(idx,val){
-  const courses=loadData();
-  courses[idx].classTime=val;
+function saveClassTime(idx, val) {
+  var courses = loadData();
+  courses[idx].classTime = val;
   saveData(courses);
 }
 
-function padZ(n){return String(n).padStart(2,'0');}
+function padZ(n) { return String(n).padStart(2,'0'); }
 
-function toICSDate(dateObj,timeStr,allDay){
-  if(allDay){
-    return dateObj.getFullYear()+padZ(dateObj.getMonth()+1)+padZ(dateObj.getDate());
-  }
-  const [h,m]=timeStr.split(':').map(Number);
+function toICSDate(dateObj, h, m) {
   return dateObj.getFullYear()+padZ(dateObj.getMonth()+1)+padZ(dateObj.getDate())+'T'+padZ(h)+padZ(m)+'00';
 }
 
-function getEndDate(course){
-  // estimate end: if total known, start + (total * 7) days
-  const start=new Date(course.startDate);
-  const totalSessions=(course.total!==null&&course.total!==undefined)?course.total:
-                      (course.remaining!==null&&course.remaining!==undefined)?(course.used+(course.remaining-course.used)+course.used):52;
-  const endDate=new Date(start);
-  endDate.setDate(endDate.getDate()+(totalSessions*7)+7);
-  return endDate;
-}
+function generateICS() {
+  var courses = loadData();
+  var reminderMins = parseInt(document.getElementById('exp-remind-before').value);
+  var includePayAlert = document.getElementById('exp-pay-alert').checked;
+  var includeExpireAlert = document.getElementById('exp-expire-alert').checked;
+  var lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//课时打卡//ZH','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:课时打卡'];
+  var rrDays = ['SU','MO','TU','WE','TH','FR','SA'];
 
-function generateICS(){
-  const courses=loadData();
-  const reminderMins=parseInt(document.getElementById('exp-remind-before').value);
-  const includePayAlert=document.getElementById('exp-pay-alert').checked;
-  const includeExpireAlert=document.getElementById('exp-expire-alert').checked;
-  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//课时打卡//ZH','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:课时打卡','X-WR-TIMEZONE:Asia/Shanghai'];
+  for (var i = 0; i < courses.length; i++) {
+    var c = courses[i];
+    var time = c.classTime || '10:00';
+    var tp = time.split(':');
+    var th = parseInt(tp[0]), tm = parseInt(tp[1]);
+    var startDate = new Date(c.startDate); startDate.setHours(0,0,0,0);
+    var firstDate = new Date(startDate);
+    var diff = (c.weekday - firstDate.getDay() + 7) % 7;
+    if (diff === 0) diff = 0;
+    firstDate.setDate(firstDate.getDate() + diff);
 
-  const rrDays=['SU','MO','TU','WE','TH','FR','SA'];
+    var totalSessions = null;
+    if (c.total !== null && c.total !== undefined) totalSessions = c.total;
+    else if (c.remaining !== null && c.remaining !== undefined) totalSessions = c.used + c.remaining;
+    var weeksToRun = totalSessions ? totalSessions + 4 : 60;
+    var untilDate = new Date(firstDate);
+    untilDate.setDate(untilDate.getDate() + weeksToRun * 7);
+    var untilStr = untilDate.getFullYear()+padZ(untilDate.getMonth()+1)+padZ(untilDate.getDate())+'T000000Z';
 
-  courses.forEach(c=>{
-    const time=c.classTime||'10:00';
-    const [h,m]=time.split(':').map(Number);
-    const startDate=new Date(c.startDate);
-    startDate.setHours(0,0,0,0);
-    let firstDate=new Date(startDate);
-    let diff=(c.weekday-firstDate.getDay()+7)%7;
-    firstDate.setDate(firstDate.getDate()+diff);
-
-    const endDate=getEndDate(c);
-    const untilStr=endDate.getFullYear()+padZ(endDate.getMonth()+1)+padZ(endDate.getDate())+'T000000Z';
-
-    const evStart=new Date(firstDate);
-    evStart.setHours(h,m,0,0);
-    const evEnd=new Date(evStart);
-    evEnd.setMinutes(evEnd.getMinutes()+60);
-
-    const uid='class-'+c.id+'@keshidaka';
-    const dtstart=toICSDate(evStart,time,false);
-    const dtend=toICSDate(evEnd,time,false);
+    var evStart = new Date(firstDate); evStart.setHours(th,tm,0,0);
+    var evEnd = new Date(evStart); evEnd.setHours(th, tm+60, 0, 0);
+    // safer end: +1hr
+    var evEndMs = evStart.getTime() + 3600000;
+    var evEndDate = new Date(evEndMs);
 
     lines.push('BEGIN:VEVENT');
-    lines.push('UID:'+uid);
-    lines.push('DTSTART;TZID=Asia/Shanghai:'+dtstart);
-    lines.push('DTEND;TZID=Asia/Shanghai:'+dtend);
+    lines.push('UID:class-'+c.id+'@keshidaka');
+    lines.push('DTSTART:'+toICSDate(evStart,th,tm));
+    lines.push('DTEND:'+toICSDate(evEndDate, evEndDate.getHours(), evEndDate.getMinutes()));
     lines.push('RRULE:FREQ=WEEKLY;BYDAY='+rrDays[c.weekday]+';UNTIL='+untilStr);
     lines.push('SUMMARY:'+c.name);
-    lines.push('DESCRIPTION:记得打卡！打开课时打卡 App 记录今天的课。');
+    lines.push('DESCRIPTION:记得打卡！');
     lines.push('BEGIN:VALARM');
     lines.push('TRIGGER:-PT'+reminderMins+'M');
     lines.push('ACTION:DISPLAY');
@@ -637,18 +654,18 @@ function generateICS(){
     lines.push('END:VALARM');
     lines.push('END:VEVENT');
 
-    // 续费提醒：剩余 ≤ 2 次时在下一次上课日提醒
-    if(includePayAlert){
-      const remaining=getRemainingCount(c);
-      if(remaining!==null&&remaining<=2&&remaining>0){
-        const alertDate=new Date(firstDate);
-        alertDate.setHours(h,m,0,0);
+    // 续费提醒
+    if (includePayAlert) {
+      var rem = getRemainingCount(c);
+      if (rem !== null && rem <= 2 && rem > 0) {
+        var alertDate = new Date(firstDate); alertDate.setHours(th,tm,0,0);
+        var alertEnd = new Date(alertDate.getTime()+3600000);
         lines.push('BEGIN:VEVENT');
-        lines.push('UID:payalert-'+c.id+'@keshidaka');
-        lines.push('DTSTART;TZID=Asia/Shanghai:'+toICSDate(alertDate,time,false));
-        lines.push('DTEND;TZID=Asia/Shanghai:'+toICSDate(new Date(alertDate.getTime()+3600000),time,false));
+        lines.push('UID:pay-'+c.id+'@keshidaka');
+        lines.push('DTSTART:'+toICSDate(alertDate,th,tm));
+        lines.push('DTEND:'+toICSDate(alertEnd,alertEnd.getHours(),alertEnd.getMinutes()));
         lines.push('SUMMARY:⚠️ '+c.name+' 需要续费');
-        lines.push('DESCRIPTION:'+c.name+'仅剩 '+remaining+' 次课，记得联系老师续费！');
+        lines.push('DESCRIPTION:'+c.name+'仅剩'+rem+'次课，记得联系老师续费！');
         lines.push('BEGIN:VALARM');
         lines.push('TRIGGER:-PT0M');
         lines.push('ACTION:DISPLAY');
@@ -658,55 +675,51 @@ function generateICS(){
       }
     }
 
-    // 课包到期提醒：计算最后一节课的日期
-    if(includeExpireAlert){
-      const totalSessions=(c.total!==null&&c.total!==undefined)?c.total:
-                          (c.remaining!==null&&c.remaining!==undefined)?(c.used+c.remaining):null;
-      if(totalSessions!==null){
-        const sessionsLeft=totalSessions-c.used;
-        if(sessionsLeft>0){
-          // last class = firstDate + (sessionsLeft - 1) weeks
-          const lastDate=new Date(firstDate);
-          lastDate.setDate(lastDate.getDate()+(sessionsLeft-1)*7);
-          lastDate.setHours(h,m,0,0);
-          lines.push('BEGIN:VEVENT');
-          lines.push('UID:expire-'+c.id+'@keshidaka');
-          lines.push('DTSTART;TZID=Asia/Shanghai:'+toICSDate(lastDate,time,false));
-          lines.push('DTEND;TZID=Asia/Shanghai:'+toICSDate(new Date(lastDate.getTime()+3600000),time,false));
-          lines.push('SUMMARY:🎓 '+c.name+' 最后一节课');
-          lines.push('DESCRIPTION:这是'+c.name+'课包的最后一次课（共'+totalSessions+'次），记得安排续费或新课包！');
-          lines.push('BEGIN:VALARM');
-          lines.push('TRIGGER:-PT'+reminderMins+'M');
-          lines.push('ACTION:DISPLAY');
-          lines.push('DESCRIPTION:'+c.name+'今天是最后一节课！');
-          lines.push('END:VALARM');
-          // also a 3-day-before reminder
-          lines.push('BEGIN:VALARM');
-          lines.push('TRIGGER:-P3D');
-          lines.push('ACTION:DISPLAY');
-          lines.push('DESCRIPTION:'+c.name+'3天后就是最后一节课了，记得安排续费！');
-          lines.push('END:VALARM');
-          lines.push('END:VEVENT');
-        }
+    // 课包到期提醒
+    if (includeExpireAlert && totalSessions !== null) {
+      var sessionsLeft = totalSessions - c.used;
+      if (sessionsLeft > 0) {
+        var lastDate = new Date(firstDate);
+        lastDate.setDate(lastDate.getDate() + (sessionsLeft-1)*7);
+        lastDate.setHours(th,tm,0,0);
+        var lastEnd = new Date(lastDate.getTime()+3600000);
+        lines.push('BEGIN:VEVENT');
+        lines.push('UID:expire-'+c.id+'@keshidaka');
+        lines.push('DTSTART:'+toICSDate(lastDate,th,tm));
+        lines.push('DTEND:'+toICSDate(lastEnd,lastEnd.getHours(),lastEnd.getMinutes()));
+        lines.push('SUMMARY:🎓 '+c.name+' 最后一节课');
+        lines.push('DESCRIPTION:'+c.name+'课包的最后一次课（共'+totalSessions+'次），记得安排续费！');
+        lines.push('BEGIN:VALARM');
+        lines.push('TRIGGER:-PT'+reminderMins+'M');
+        lines.push('ACTION:DISPLAY');
+        lines.push('DESCRIPTION:'+c.name+'今天是最后一节课！');
+        lines.push('END:VALARM');
+        lines.push('BEGIN:VALARM');
+        lines.push('TRIGGER:-P3D');
+        lines.push('ACTION:DISPLAY');
+        lines.push('DESCRIPTION:'+c.name+'3天后是最后一节课，记得续费！');
+        lines.push('END:VALARM');
+        lines.push('END:VEVENT');
       }
     }
-  });
+  }
 
   lines.push('END:VCALENDAR');
-  const icsContent=lines.join('\r\n');
-  const blob=new Blob([icsContent],{type:'text/calendar;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download='课时打卡.ics';
-  document.body.appendChild(a);a.click();
+  var blob = new Blob([lines.join('\r\n')], {type:'text/calendar;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = '课时打卡.ics';
+  document.body.appendChild(a); a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('已下载！用 iPhone 打开文件导入日历');
   closeModal('export-modal');
 }
 
-document.querySelectorAll('.modal-overlay').forEach(overlay=>{
-  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open');});
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(function(overlay){
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.classList.remove('open'); });
 });
 
 render();
