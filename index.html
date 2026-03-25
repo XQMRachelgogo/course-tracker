@@ -517,24 +517,43 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
       <div class="color-grid" id="f-color-grid"></div>
     </div>
     <div class="form-group">
-      <div class="adjust-row">
-        <span class="adjust-label">课包总课时</span>
-        <div class="counter">
-          <button class="counter-btn" onclick="adjustVal('f-total',-1)">−</button>
-          <input class="counter-input" id="f-total" type="number" min="0" step="1" value="10" inputmode="numeric" />
-          <button class="counter-btn" onclick="adjustVal('f-total',1)">+</button>
+      <label class="form-label">收费方式</label>
+      <select class="form-input" id="f-course-type" onchange="updateCourseTypeFields()">
+        <option value="package">课包制（多少钱 / 多少次）</option>
+        <option value="monthly">包月制（按日期范围）</option>
+      </select>
+    </div>
+    <div id="f-package-fields">
+      <div class="form-group">
+        <div class="adjust-row">
+          <span class="adjust-label">课包总课时</span>
+          <div class="counter">
+            <button class="counter-btn" onclick="adjustVal('f-total',-1)">−</button>
+            <input class="counter-input" id="f-total" type="number" min="0" step="1" value="0" inputmode="numeric" />
+            <button class="counter-btn" onclick="adjustVal('f-total',1)">+</button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">剩余课时会根据 课包总数 − 已上课次数 自动计算，不需要单独填写。</div>
+      </div>
+      <div class="form-group">
+        <div class="adjust-row">
+          <span class="adjust-label">已上课次数</span>
+          <div class="counter">
+            <button class="counter-btn" onclick="adjustVal('f-used',-1)">−</button>
+            <input class="counter-input" id="f-used" type="number" min="0" step="1" value="0" inputmode="numeric" />
+            <button class="counter-btn" onclick="adjustVal('f-used',1)">+</button>
+          </div>
         </div>
       </div>
-      <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">剩余课时会根据 课包总数 − 已上课次数 自动计算，不需要单独填写。</div>
     </div>
-    <div class="form-group">
-      <div class="adjust-row">
-        <span class="adjust-label">已上课次数</span>
-        <div class="counter">
-          <button class="counter-btn" onclick="adjustVal('f-used',-1)">−</button>
-          <input class="counter-input" id="f-used" type="number" min="0" step="1" value="0" inputmode="numeric" />
-          <button class="counter-btn" onclick="adjustVal('f-used',1)">+</button>
+    <div id="f-monthly-fields" class="hidden">
+      <div class="form-group">
+        <label class="form-label">包月周期</label>
+        <div class="reschedule-grid">
+          <input class="form-input" id="f-monthly-from" type="date" />
+          <input class="form-input" id="f-monthly-to" type="date" />
         </div>
+        <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">包月制用日期范围管理，例如 3/1 到 3/31。</div>
       </div>
     </div>
     <div class="form-group">
@@ -545,7 +564,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
     </div>
     <div class="form-group">
       <label class="form-label">学费记录</label>
-      <div style="font-size:12px;color:#a39abb;margin-bottom:8px;line-height:1.5;">每次缴费时记录金额，系统会按<strong style="color:#7a6fa8;">实际上课年份</strong>分摊，统计当年花销。</div>
+      <div id="f-fee-hint" style="font-size:12px;color:#a39abb;margin-bottom:8px;line-height:1.5;">新建课程时可直接填写首笔付费和购买课时，系统会按付款和跨年规则统计当年花销。</div>
       <div id="f-fee-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
       <div style="display:grid;grid-template-columns:80px 1fr 96px 130px;gap:6px;align-items:center;">
         <select class="form-input" id="f-fee-currency" style="padding:8px 6px;font-size:13px;">
@@ -559,10 +578,10 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
           <option value="AUD">A$ 澳元</option>
         </select>
         <input class="form-input" id="f-fee-amount" type="number" min="0" step="0.01" placeholder="金额" inputmode="decimal" style="padding:8px 10px;font-size:14px;" />
-        <input class="form-input" id="f-fee-sessions" type="number" min="0" step="1" placeholder="购买课时" inputmode="numeric" style="padding:8px 10px;font-size:13px;" />
+        <div id="f-fee-sessions-wrap"><input class="form-input" id="f-fee-sessions" type="number" min="0" step="1" placeholder="购买课时" inputmode="numeric" style="padding:8px 10px;font-size:13px;width:100%;" /></div>
         <input class="form-input" id="f-fee-date" type="date" style="padding:8px 8px;font-size:13px;" />
       </div>
-      <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">新建课程时可直接填写首笔付费和购买课时，点保存后会一起创建；已有课程再买课包时，新增购买课时会自动并入课包总数。</div>
+      <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">课包制可填写购买课时；包月制只需要金额和付款日期。</div>
       <button type="button" class="add-shift-btn" style="margin-top:8px;" onclick="addFeeFromForm()">+ 添加一笔学费</button>
     </div>
     <div class="form-btns" id="edit-form-btns"></div>
@@ -705,6 +724,9 @@ function normalizeCourse(course) {
   }) : [];
   c.classTime = c.classTime || '10:00';
   c.classEndTime = c.classEndTime || addMinutesToTime(c.classTime, 60);
+  c.courseType = (c.courseType === 'monthly') ? 'monthly' : 'package';
+  c.monthlyFrom = c.monthlyFrom || '';
+  c.monthlyTo = c.monthlyTo || '';
   c.used = Math.max(0, parseInt(c.used, 10) || 0);
   c.total = (c.total === null || c.total === undefined || c.total === '') ? null : Math.max(0, parseInt(c.total, 10) || 0);
   c.remaining = (c.remaining === null || c.remaining === undefined || c.remaining === '') ? null : Math.max(0, parseInt(c.remaining, 10) || 0);
@@ -1307,22 +1329,30 @@ function openManager() {
       row.innerHTML =
         '<div class="course-row-dot" style="background:'+c.color+'"></div>' +
         '<span class="course-row-name">'+c.name+'</span>' +
-        '<span class="course-row-info">'+formatWeekdayList(c)+' · '+formatTimeRange(c)+' · '+(rem!==null?('剩'+rem+'次'):'不限')+'</span>' +
+        '<span class="course-row-info">'+(c.courseType === 'monthly' ? '包月制' : ((rem!==null?('剩'+rem+'次'):'课包制')))+' · '+formatWeekdayList(c)+' · '+formatTimeRange(c)+'</span>' +
         '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" >✏️</button>' +
-        '<button class="icon-btn danger" onclick="deleteCourse('+idx+')">✕</button>';
+        '<button class="icon-btn danger" onclick="deleteCourse('+idx+', \'manager\', this)">✕</button>';
       list.appendChild(row);
     })(courses[idx], idx);
   }
   openModal('manager-modal');
 }
 
-function deleteCourse(idx) {
+function deleteCourse(idx, source, btnEl) {
+  if (btnEl && typeof btnEl.blur === 'function') btnEl.blur();
   if (!confirm('确定删除这门课程？打卡记录也会一起删除。')) return;
   var courses = loadData();
   var removed = courses.splice(idx, 1)[0];
   if (removed && expandedIds[removed.id]) delete expandedIds[removed.id];
   saveData(courses);
-  openManager(); render();
+  closeModal('edit-modal');
+  closeModal('manager-modal');
+  render();
+  if (source === 'manager') {
+    window.requestAnimationFrame(function(){ openManager(); });
+  } else {
+    showToast('课程已删除');
+  }
 }
 
 function buildColorGrid(selected) {
@@ -1352,6 +1382,24 @@ function toggleWeekday(day) {
   else formWeekdays.push(day);
   formWeekdays = sortWeekdays(formWeekdays);
   refreshWeekdayButtons();
+}
+function updateCourseTypeFields() {
+  var typeEl = document.getElementById('f-course-type');
+  var type = typeEl ? typeEl.value : 'package';
+  var packageBox = document.getElementById('f-package-fields');
+  var monthlyBox = document.getElementById('f-monthly-fields');
+  var feeSessionsWrap = document.getElementById('f-fee-sessions-wrap');
+  var feeSessionsInput = document.getElementById('f-fee-sessions');
+  var feeHint = document.getElementById('f-fee-hint');
+  if (packageBox) packageBox.classList.toggle('hidden', type !== 'package');
+  if (monthlyBox) monthlyBox.classList.toggle('hidden', type !== 'monthly');
+  if (feeSessionsWrap) feeSessionsWrap.classList.toggle('hidden', type !== 'package');
+  if (type !== 'package' && feeSessionsInput) feeSessionsInput.value = '';
+  if (feeHint) {
+    feeHint.innerHTML = type === 'monthly'
+      ? '包月制只记录金额和覆盖日期；学费会按付款日期归入对应年份，如有跨年，可按日期范围再做调整。'
+      : '新建课程时可直接填写首笔付费和购买课时，点保存后会一起创建；已有课程再买课包时，新增购买课时会自动并入课包总数。';
+  }
 }
 function renderRescheduleList(course) {
   var empty = document.getElementById('f-reschedule-empty');
@@ -1446,6 +1494,9 @@ function openAddForm() {
   document.getElementById('edit-modal-title').textContent = '新增课程';
   document.getElementById('f-name').value = '';
   document.getElementById('f-start').value = isoDate(new Date());
+  document.getElementById('f-course-type').value = 'package';
+  document.getElementById('f-monthly-from').value = isoDate(new Date());
+  document.getElementById('f-monthly-to').value = isoDate(new Date(new Date().getFullYear(), new Date().getMonth()+1, 0));
   document.getElementById('f-time-start').value = '10:00';
   document.getElementById('f-time-end').value = '11:00';
   setCounterValue('f-total', 0);
@@ -1456,7 +1507,7 @@ function openAddForm() {
   document.getElementById('f-shift-note').value = '';
   clearFeeInputs(false);
   renderFeeList(null);
-  selectWeekday([1]); buildColorGrid(COLORS[0]); renderRescheduleList(null);
+  selectWeekday([1]); buildColorGrid(COLORS[0]); renderRescheduleList(null); updateCourseTypeFields();
   document.getElementById('edit-form-btns').innerHTML =
     '<button class="form-btn" onclick="closeModal(\'edit-modal\')">取消</button>' +
     '<button class="form-btn save" onclick="saveForm()">保存</button>';
@@ -1472,6 +1523,9 @@ function openEditForm(idx) {
   document.getElementById('edit-modal-title').textContent = '编辑课程';
   document.getElementById('f-name').value = course.name;
   document.getElementById('f-start').value = course.startDate;
+  document.getElementById('f-course-type').value = course.courseType || 'package';
+  document.getElementById('f-monthly-from').value = course.monthlyFrom || course.startDate || '';
+  document.getElementById('f-monthly-to').value = course.monthlyTo || '';
   document.getElementById('f-time-start').value = course.classTime || '10:00';
   document.getElementById('f-time-end').value = course.classEndTime || addMinutesToTime(course.classTime || '10:00', 60);
   setCounterValue('f-total', course.total !== null && course.total !== undefined ? course.total : (course.used + Math.max(0, getRemainingCount(course) || 0)));
@@ -1484,9 +1538,9 @@ function openEditForm(idx) {
   var lastCurrency = (course.fees && course.fees.length) ? (course.fees[course.fees.length-1].currency || 'CNY') : 'CNY';
   document.getElementById('f-fee-currency').value = lastCurrency;
   renderFeeList(course);
-  selectWeekday(formWeekdays); buildColorGrid(course.color); renderRescheduleList(course);
+  selectWeekday(formWeekdays); buildColorGrid(course.color); renderRescheduleList(course); updateCourseTypeFields();
   document.getElementById('edit-form-btns').innerHTML =
-    '<button class="form-btn del" onclick="if(confirm(\'确定删除？\'))deleteCourse('+idx+')">删除</button>' +
+    '<button class="form-btn del" onclick="deleteCourse('+idx+', \'edit\', this)">删除</button>' +
     '<button class="form-btn save" onclick="saveForm()">保存</button>';
   openModal('edit-modal');
 }
@@ -1498,11 +1552,19 @@ function saveForm() {
   var classTime = document.getElementById('f-time-start').value || '10:00';
   var classEndTime = document.getElementById('f-time-end').value || addMinutesToTime(classTime, 60);
   if (classEndTime <= classTime) { showToast('结束时间要晚于开始时间'); return; }
-  var total = getCounterValue('f-total');
+  var courseType = document.getElementById('f-course-type').value || 'package';
+  var total = courseType === 'package' ? getCounterValue('f-total') : null;
   var remaining = null;
-  var used = getCounterValue('f-used');
+  var used = courseType === 'package' ? getCounterValue('f-used') : 0;
   var pendingFee = buildFeeEntryFromInputs();
   if (pendingFee === false) return;
+  if (courseType === 'package' && used > total) { showToast('已上课次数不能大于课包总课时'); return; }
+  if (courseType === 'monthly') {
+    var monthlyFrom = document.getElementById('f-monthly-from').value || '';
+    var monthlyTo = document.getElementById('f-monthly-to').value || '';
+    if (!monthlyFrom || !monthlyTo) { showToast('请填写包月周期'); return; }
+    if (monthlyTo < monthlyFrom) { showToast('包月结束日期不能早于开始日期'); return; }
+  }
   var courses = loadData();
   if (editingIdx !== null) {
     var c = courses[editingIdx];
@@ -1511,6 +1573,9 @@ function saveForm() {
     c.weekday = c.weekdays[0];
     c.color = formColor;
     c.startDate = document.getElementById('f-start').value;
+    c.courseType = courseType;
+    c.monthlyFrom = courseType === 'monthly' ? (document.getElementById('f-monthly-from').value || '') : '';
+    c.monthlyTo = courseType === 'monthly' ? (document.getElementById('f-monthly-to').value || '') : '';
     c.classTime = classTime;
     c.classEndTime = classEndTime;
     c.total = total;
@@ -1531,6 +1596,9 @@ function saveForm() {
       weekday: formWeekdays[0],
       color: formColor,
       startDate: document.getElementById('f-start').value,
+      courseType: courseType,
+      monthlyFrom: courseType === 'monthly' ? (document.getElementById('f-monthly-from').value || '') : '',
+      monthlyTo: courseType === 'monthly' ? (document.getElementById('f-monthly-to').value || '') : '',
       total: total,
       used: used,
       remaining: remaining,
@@ -1598,6 +1666,7 @@ function clearFeeInputs(keepCurrency) {
   if (!keepCurrency) document.getElementById('f-fee-currency').value = 'CNY';
 }
 function applyPurchasedSessionsToCourse(course, purchasedSessions) {
+  if (course && course.courseType === 'monthly') return;
   var qty = Math.max(0, parseInt(purchasedSessions, 10) || 0);
   if (!qty) return;
   course.total = Math.max(0, parseInt(course.total, 10) || 0) + qty;
@@ -1606,7 +1675,8 @@ function buildFeeEntryFromInputs() {
   var amountRaw = document.getElementById('f-fee-amount').value.trim();
   var date = document.getElementById('f-fee-date').value;
   var currency = document.getElementById('f-fee-currency').value || 'CNY';
-  var sessions = getFeeSessionsInputValue();
+  var courseTypeEl = document.getElementById('f-course-type');
+  var sessions = (courseTypeEl && courseTypeEl.value === 'package') ? getFeeSessionsInputValue() : 0;
   if (!amountRaw && !sessions) return null;
   if (!amountRaw || isNaN(parseFloat(amountRaw)) || parseFloat(amountRaw) <= 0) { showToast('请填写有效金额'); return false; }
   if (!date) { showToast('请选择缴费日期'); return false; }
@@ -1725,7 +1795,7 @@ function deleteFee(feeIdx, btnEl) {
   c.fees = c.fees || [];
   var removed = c.fees.splice(feeIdx, 1)[0];
   var qty = removed && removed.sessions ? Math.max(0, parseInt(removed.sessions, 10) || 0) : 0;
-  if (qty) {
+  if (qty && c.courseType !== 'monthly') {
     c.total = Math.max(c.used, Math.max(0, parseInt(c.total, 10) || 0) - qty);
   }
   saveData(courses);
@@ -1776,6 +1846,11 @@ function prorateFeesByYear(course) {
     var amount = parseFloat(f.amount) || 0;
     if (!amount) return;
     var feeYear = f.date ? parseInt(String(f.date).slice(0,4), 10) : new Date().getFullYear();
+    if (course.courseType === 'monthly') {
+      if (!result[feeYear]) result[feeYear] = {};
+      result[feeYear][currency] = (result[feeYear][currency] || 0) + amount;
+      return;
+    }
     var sessions = Math.max(0, parseInt(f.sessions, 10) || 0);
     if (!sessions) {
       if (!result[feeYear]) result[feeYear] = {};
