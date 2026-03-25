@@ -46,6 +46,10 @@ body{
 }
 body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-behavior:none;}
 .app{width:100%;max-width:480px;margin:0 auto}
+.version-bar{display:flex;justify-content:center;margin:0 0 10px}
+.version-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.82);border:1px solid rgba(120,102,164,0.14);box-shadow:0 6px 18px rgba(151,119,215,0.08);font-size:12px;color:#7a6fa8;font-weight:700}
+.version-bar{display:flex;justify-content:center;margin:0 0 10px}
+.version-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.82);border:1px solid rgba(120,102,164,0.14);box-shadow:0 6px 18px rgba(151,119,215,0.08);font-size:12px;color:#7a6fa8;font-weight:700}
 .header{
   display:flex;align-items:center;margin-bottom:1.1rem;
   background:rgba(255,255,255,0.72);backdrop-filter:blur(10px);
@@ -556,6 +560,7 @@ var TABLE_NAME = 'course_tracker_state';
 var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var COLORS = ['#8A7EF0','#5BC7A5','#FF9E6B','#6FA8FF','#FF93B5','#FFC663','#A6D96A','#FF7D8D','#8D8D9A','#35B8A6'];
 var WEEKDAYS = ['周日','周一','周二','周三','周四','周五','周六'];
+var APP_VERSION = 'v2026.03.25-StrictStart-2';
 var editingIdx = null;
 var formWeekdays = [1];
 var formColor = COLORS[0];
@@ -865,32 +870,56 @@ async function initAuth() {
   });
 }
 
-function isoDate(d) { return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function formatDate(d) { return d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'}); }
-function formatShortDate(d) { return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}); }
 function parseLocalDate(value) {
-  if (!value) return null;
+  if (!value && value !== 0) return null;
   if (value instanceof Date) {
-    var clone = new Date(value);
-    clone.setHours(0,0,0,0);
-    return clone;
+    var d0 = new Date(value.getFullYear(), value.getMonth(), value.getDate());
+    d0.setHours(0,0,0,0);
+    return d0;
   }
-  var str = String(value).trim();
-  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (typeof value === 'number') {
+    var d1 = new Date(value);
+    if (isNaN(d1.getTime())) return null;
+    d1 = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate());
+    d1.setHours(0,0,0,0);
+    return d1;
+  }
+  var raw = String(value).trim();
+  if (!raw) return null;
+  var m = raw.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/);
   if (m) {
-    return new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10));
+    var y = parseInt(m[1],10), mo = parseInt(m[2],10), da = parseInt(m[3],10);
+    var d2 = new Date(y, mo - 1, da);
+    d2.setHours(0,0,0,0);
+    return d2;
   }
-  var d = new Date(str);
-  if (isNaN(d.getTime())) return null;
-  d.setHours(0,0,0,0);
-  return d;
+  var d3 = new Date(raw);
+  if (isNaN(d3.getTime())) return null;
+  d3 = new Date(d3.getFullYear(), d3.getMonth(), d3.getDate());
+  d3.setHours(0,0,0,0);
+  return d3;
+}
+function getCourseStartDate(course) {
+  return parseLocalDate(course && course.startDate) || getTodayDate();
+}
+function isoDate(d) {
+  var dd = parseLocalDate(d) || getTodayDate();
+  return dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');
+}
+function formatDate(d) {
+  var dd = parseLocalDate(d) || getTodayDate();
+  return dd.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'});
+}
+function formatShortDate(d) {
+  var dd = parseLocalDate(d) || getTodayDate();
+  return dd.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'});
 }
 function formatShortDateFromIso(iso) {
   if (!iso) return '';
   var d = parseLocalDate(iso);
-  return !d || isNaN(d.getTime()) ? iso : formatShortDate(d);
+  return !d ? String(iso) : formatShortDate(d);
 }
-function getTodayDate(){ var t = new Date(); t.setHours(0,0,0,0); return t; }
+function getTodayDate(){ var t = new Date(); t = new Date(t.getFullYear(), t.getMonth(), t.getDate()); t.setHours(0,0,0,0); return t; }
 function getCourseWeekdays(course) {
   return sortWeekdays(Array.isArray(course.weekdays) && course.weekdays.length ? course.weekdays : [typeof course.weekday === 'number' ? course.weekday : 1]);
 }
@@ -898,25 +927,25 @@ function formatWeekdayList(course) {
   return getCourseWeekdays(course).map(function(day){ return WEEKDAYS[day]; }).join(' / ');
 }
 function isRegularCourseOnDate(course, dateObj) {
-  var current = parseLocalDate(dateObj || getTodayDate());
-  var startDate = parseLocalDate(course.startDate);
-  if (!current || !startDate) return false;
+  var current = new Date(dateObj || getTodayDate());
+  current.setHours(0,0,0,0);
+  var startDate = getCourseStartDate(course);
   return startDate <= current && getCourseWeekdays(course).indexOf(current.getDay()) >= 0;
 }
 function getNextRegularClassDate(course, fromDate) {
-  var base = parseLocalDate(fromDate || getTodayDate()) || getTodayDate();
-  var start = parseLocalDate(course.startDate) || base;
+  var base = new Date(fromDate || getTodayDate());
+  base.setHours(0,0,0,0);
+  var start = getCourseStartDate(course);
   if (base < start) base = new Date(start);
   var best = null;
   getCourseWeekdays(course).forEach(function(day){
     var candidate = new Date(base);
     var diff = (day - candidate.getDay() + 7) % 7;
     candidate.setDate(candidate.getDate() + diff);
-    candidate.setHours(0,0,0,0);
     if (candidate < start) candidate.setDate(candidate.getDate() + 7);
     if (!best || candidate < best) best = candidate;
   });
-  return best || new Date(start);
+  return best || new Date(base);
 }
 function getPendingReschedulesForDate(course, dateStr) {
   return (course.reschedules || []).filter(function(plan){
@@ -961,16 +990,23 @@ function getTodayMeta(course) {
 }
 function getNextSessionInfo(course) {
   var today = getTodayDate();
-  var nextRegular = getNextRegularClassDate(course, today);
+  var start = getCourseStartDate(course);
+  var base = today > start ? today : start;
+  var nextRegular = getNextRegularClassDate(course, base);
   var best = { date: nextRegular, type: 'regular', note: '每' + formatWeekdayList(course) };
   (course.reschedules || []).forEach(function(plan){
     if (plan.used) return;
     var d = parseLocalDate(plan.toDate);
-    if (!d || d < today) return;
+    if (!d) return;
+    if (d < base) return;
     if (!best || d < best.date) {
       best = { date: d, type: 'reschedule', note: '调课：' + formatShortDateFromIso(plan.fromDate) + ' → ' + formatShortDateFromIso(plan.toDate) };
     }
   });
+  if (today < start && best && best.date && best.date >= start) {
+    best.unstarted = true;
+    if (best.type === 'regular') best.note = '首课起于 ' + formatShortDate(start) + ' · 每' + formatWeekdayList(course);
+  }
   return best;
 }
 function getRemainingCount(course) {
@@ -1624,7 +1660,7 @@ function generateICS() {
   var rrDays = ['SU','MO','TU','WE','TH','FR','SA'];
 
   function estimateLastRegularDate(course, sessionsLeft) {
-    var cursor = parseLocalDate(course.startDate) || getTodayDate();
+    var cursor = getCourseStartDate(course);
     var count = 0;
     for (var i = 0; i < 4000; i++) {
       if (isRegularCourseOnDate(course, cursor)) {
@@ -1633,7 +1669,7 @@ function generateICS() {
       }
       cursor.setDate(cursor.getDate() + 1);
     }
-    return getNextRegularClassDate(course, parseLocalDate(course.startDate) || getTodayDate());
+    return getNextRegularClassDate(course, getCourseStartDate(course));
   }
 
   for (var i = 0; i < courses.length; i++) {
@@ -1651,7 +1687,7 @@ function generateICS() {
     var weeksToRun = totalSessions ? Math.ceil(totalSessions / weeklySlots) + 6 : 60;
 
     getCourseWeekdays(c).forEach(function(day){
-      var startDate = parseLocalDate(c.startDate) || getTodayDate();
+      var startDate = getCourseStartDate(c);
       var firstDate = new Date(startDate);
       var diff = (day - firstDate.getDay() + 7) % 7;
       firstDate.setDate(firstDate.getDate() + diff);
@@ -1786,6 +1822,7 @@ document.addEventListener('touchend', function(e){
   if (now - lastTouchEnd <= 300) e.preventDefault();
   lastTouchEnd = now;
 }, {passive:false});
+document.getElementById('app-version').textContent = '版本 ' + APP_VERSION;
 initAuth();
 </script>
 
