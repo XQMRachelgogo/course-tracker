@@ -304,6 +304,22 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .fee-item-del{background:none;border:none;color:#c4bcd8;cursor:pointer;font-size:16px;padding:0 2px;line-height:1}
 .fee-item-del:hover{color:#b33b4d}
 
+.cal-action-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cal-action-btn{display:flex;align-items:center;gap:10px;padding:13px 12px;border-radius:16px;border:1px solid rgba(127,119,221,0.14);background:#fff;cursor:pointer;font-family:inherit;text-align:left;box-shadow:var(--shadow);transition:background .15s;width:100%}
+.cal-action-btn:hover{background:#faf6ff}
+.cal-action-btn--primary{background:linear-gradient(135deg,#f0ecff 0%,#ffe8f7 100%);border-color:rgba(138,126,240,0.22)}
+.cal-action-btn--primary:hover{background:linear-gradient(135deg,#e8e2ff 0%,#ffddf5 100%)}
+.cal-action-icon{font-size:22px;flex-shrink:0}
+.cal-action-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cal-action-title{font-size:13px;font-weight:700;color:#4a3f73;line-height:1.2}
+.cal-action-desc{font-size:11px;color:#a39abb;line-height:1.3}
+.ical-url-box{display:flex;align-items:center;gap:8px;background:#f8f4ff;border:1px solid rgba(127,119,221,0.14);border-radius:12px;padding:10px 12px;margin-bottom:1rem}
+.ical-url-text{flex:1;font-size:11px;color:#6d63a8;word-break:break-all;font-family:monospace;line-height:1.5}
+.ical-copy-btn{flex-shrink:0;padding:6px 12px;border-radius:8px;border:1px solid rgba(127,119,221,0.2);background:#fff;color:#6d63a8;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.ical-copy-btn:hover{background:#f0ecff}
+.ical-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:.5rem}
+.ical-step{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#574e74;line-height:1.5}
+.ical-step-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#8a7ef0;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .version-notes{background:#fffafc;border:1px solid #ffd8ea;border-radius:18px;box-shadow:0 8px 20px rgba(255,158,203,.10);overflow:hidden;}
 .version-notes summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:700;color:#7b4b94;display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .version-notes summary::-webkit-details-marker{display:none;}
@@ -425,6 +441,44 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
     <div id="fee-rate-note" class="fee-rate-note"></div>
   </div>
   <div class="divider"></div>
+  <p class="section-label">日历提醒</p>
+  <button class="export-btn" onclick="openIcalModal()">
+    🔄 订阅日历（iPhone 自动更新）
+  </button>
+  <p class="export-hint">登录后生成专属链接，iPhone 订阅一次，课程变动自动同步</p>
+</div>
+
+<div class="modal-overlay" id="ical-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">订阅日历 URL</span>
+      <button class="modal-close" onclick="closeModal('ical-modal')">✕</button>
+    </div>
+    <div id="ical-modal-body">
+      <div id="ical-loading" style="text-align:center;padding:2rem 0;color:#a39abb;font-size:14px;">生成链接中…</div>
+      <div id="ical-content" class="hidden">
+        <p style="font-size:13px;color:#8f86aa;margin-bottom:1rem;line-height:1.65;">这是你的专属日历订阅链接。iPhone 订阅后会每 6 小时自动拉取最新课程，课程变动无需重新操作。</p>
+        <div class="ical-url-box">
+          <span class="ical-url-text" id="ical-url-text"></span>
+          <button class="ical-copy-btn" onclick="copyIcalUrl()" id="ical-copy-btn">复制</button>
+        </div>
+        <div class="ical-steps">
+          <div class="ical-step"><span class="ical-step-num">1</span><span>点下方按钮，iPhone 会自动打开"日历"并弹出订阅确认</span></div>
+          <div class="ical-step"><span class="ical-step-num">2</span><span>点"订阅"即完成，日历名称会显示为"课时打卡"</span></div>
+          <div class="ical-step"><span class="ical-step-num">3</span><span>之后课程有任何变动，日历最多 6 小时内自动更新</span></div>
+        </div>
+        <button class="download-btn" onclick="openIcalSubscribeLink()" style="margin-top:1rem;">在 iPhone 上打开订阅 →</button>
+        <p style="font-size:11px;color:#b4acc9;margin-top:12px;text-align:center;line-height:1.6;">链接包含你的专属 token，请勿分享给他人。<br>如需让旧链接失效，可点下方重置。</p>
+        <button class="form-btn" style="width:100%;margin-top:8px;color:#a39abb;font-size:12px;" onclick="resetIcalToken()">重置链接（让旧链接失效）</button>
+      </div>
+      <div id="ical-login-prompt" class="hidden" style="text-align:center;padding:1.5rem 0;">
+        <div style="font-size:32px;margin-bottom:12px;">☁️</div>
+        <div style="font-size:15px;font-weight:600;color:#7a6fa8;margin-bottom:8px;">需要登录才能使用</div>
+        <div style="font-size:13px;color:#a39abb;line-height:1.6;">订阅日历需要账号，这样 Apple Calendar 才能<br>访问你的云端课程数据。</div>
+        <button class="auth-btn" style="margin-top:1.25rem;width:100%;" onclick="closeModal('ical-modal');openAuthModal()">去登录 / 注册</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="reset-password-modal">
@@ -2350,6 +2404,67 @@ document.addEventListener('touchend', function(e){
   lastTouchEnd = now;
 }, {passive:false});
 applySavedFeeDisplayCurrency();
+var currentIcalUrl = '';
+
+async function openIcalModal() {
+  openModal('ical-modal');
+  document.getElementById('ical-loading').classList.remove('hidden');
+  document.getElementById('ical-content').classList.add('hidden');
+  document.getElementById('ical-login-prompt').classList.add('hidden');
+
+  if (!currentUser) {
+    document.getElementById('ical-loading').classList.add('hidden');
+    document.getElementById('ical-login-prompt').classList.remove('hidden');
+    return;
+  }
+
+  try {
+    var result = await supabase.rpc('upsert_ical_token');
+    if (result.error) throw result.error;
+    var token = result.data;
+    currentIcalUrl = SUPABASE_URL + '/functions/v1/ical?user_id=' + currentUser.id + '&token=' + token;
+    document.getElementById('ical-url-text').textContent = currentIcalUrl;
+    document.getElementById('ical-loading').classList.add('hidden');
+    document.getElementById('ical-content').classList.remove('hidden');
+  } catch(e) {
+    showToast('获取链接失败：' + (e.message || e));
+    closeModal('ical-modal');
+  }
+}
+
+function copyIcalUrl() {
+  if (!currentIcalUrl) return;
+  navigator.clipboard.writeText(currentIcalUrl).then(function() {
+    var btn = document.getElementById('ical-copy-btn');
+    btn.textContent = '已复制 ✓';
+    setTimeout(function(){ btn.textContent = '复制'; }, 2000);
+  }).catch(function() {
+    showToast('复制失败，请手动选中链接复制');
+  });
+}
+
+function openIcalSubscribeLink() {
+  if (!currentIcalUrl) return;
+  // webcal:// scheme triggers Apple Calendar subscription on iPhone
+  var webcalUrl = currentIcalUrl.replace(/^https?:\/\//, 'webcal://');
+  window.location.href = webcalUrl;
+}
+
+async function resetIcalToken() {
+  if (!currentUser) return;
+  if (!confirm('重置后旧的订阅链接会失效，需要在 iPhone 日历里重新订阅。确定吗？')) return;
+  try {
+    var result = await supabase.rpc('reset_ical_token');
+    if (result.error) throw result.error;
+    var token = result.data;
+    currentIcalUrl = SUPABASE_URL + '/functions/v1/ical?user_id=' + currentUser.id + '&token=' + token;
+    document.getElementById('ical-url-text').textContent = currentIcalUrl;
+    showToast('链接已重置');
+  } catch(e) {
+    showToast('重置失败：' + (e.message || e));
+  }
+}
+
 initAuth();
 </script>
 
@@ -2390,7 +2505,13 @@ initAuth();
         <li>如果一周多次课的时间不一样，可以分别设置每个上课日的时间，课表会按各自时间显示。</li>
       </ul>
 
-      <h3>5. 账号与多设备同步</h3>
+      <h3>5. 日历提醒</h3>
+      <ul>
+        <li><strong>订阅日历 URL：</strong>登录后点"订阅日历"，生成专属的 webcal:// 链接。iPhone 点一下即可订阅，Apple Calendar 每 6 小时自动拉取最新数据——课程变动、调课、续费后日历自动更新，无需重新操作。</li>
+        <li>订阅链接包含专属 token，请勿分享给他人。如需让旧链接失效（换设备或误分享），可在订阅弹窗里点"重置链接"重新生成。</li>
+      </ul>
+
+      <h3>6. 账号与多设备同步</h3>
       <ul>
         <li>未登录时数据保存在本地浏览器，清除浏览器数据会丢失。</li>
         <li>注册登录后，所有课程和打卡记录自动同步到云端，手机、电脑均可查看。</li>
