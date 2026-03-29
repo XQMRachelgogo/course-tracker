@@ -545,43 +545,43 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
       <div class="color-grid" id="f-color-grid"></div>
     </div>
     <div class="form-group">
-      <div class="form-switch-row">
-        <span class="form-switch-label">有固定总课时数</span>
-        <label class="switch"><input type="checkbox" id="f-has-total" onchange="toggleTotalMode()" /><span class="switch-slider"></span></label>
-      </div>
+      <label class="form-label">收费方式</label>
+      <select class="form-input" id="f-course-type" onchange="updateCourseTypeFields()">
+        <option value="package">课包制（多少钱 / 多少次）</option>
+        <option value="monthly">订阅制（按日期范围）</option>
+      </select>
     </div>
-    <div id="f-total-section" style="display:none">
+    <div id="f-package-fields">
       <div class="form-group">
         <div class="adjust-row">
-          <span class="adjust-label">总课时数</span>
+          <span class="adjust-label">课包总课时</span>
           <div class="counter">
             <button class="counter-btn" onclick="adjustVal('f-total',-1)">−</button>
-            <input class="counter-input" id="f-total" type="number" min="0" step="1" value="10" inputmode="numeric" />
+            <input class="counter-input" id="f-total" type="number" min="0" step="1" value="0" inputmode="numeric" />
             <button class="counter-btn" onclick="adjustVal('f-total',1)">+</button>
           </div>
         </div>
+        <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">剩余课时会根据 课包总数 − 已上课次数 自动计算，不需要单独填写。</div>
       </div>
-    </div>
-    <div id="f-remaining-section">
       <div class="form-group">
         <div class="adjust-row">
-          <span class="adjust-label">当前剩余课时</span>
+          <span class="adjust-label">已上课次数</span>
           <div class="counter">
-            <button class="counter-btn" onclick="adjustVal('f-remaining',-1)">−</button>
-            <input class="counter-input" id="f-remaining" type="number" min="0" step="1" value="10" inputmode="numeric" />
-            <button class="counter-btn" onclick="adjustVal('f-remaining',1)">+</button>
+            <button class="counter-btn" onclick="adjustVal('f-used',-1)">−</button>
+            <input class="counter-input" id="f-used" type="number" min="0" step="1" value="0" inputmode="numeric" />
+            <button class="counter-btn" onclick="adjustVal('f-used',1)">+</button>
           </div>
         </div>
       </div>
     </div>
-    <div class="form-group">
-      <div class="adjust-row">
-        <span class="adjust-label">已上课次数</span>
-        <div class="counter">
-          <button class="counter-btn" onclick="adjustVal('f-used',-1)">−</button>
-          <input class="counter-input" id="f-used" type="number" min="0" step="1" value="0" inputmode="numeric" />
-          <button class="counter-btn" onclick="adjustVal('f-used',1)">+</button>
+    <div id="f-monthly-fields" class="hidden">
+      <div class="form-group">
+        <label class="form-label">订阅周期</label>
+        <div class="reschedule-grid">
+          <input class="form-input" id="f-monthly-from" type="date" />
+          <input class="form-input" id="f-monthly-to" type="date" />
         </div>
+        <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">订阅制用日期范围管理，例如 3/1 到 3/31。</div>
       </div>
     </div>
     <div class="form-group">
@@ -592,9 +592,9 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
     </div>
     <div class="form-group">
       <label class="form-label">学费记录</label>
-      <div style="font-size:12px;color:#a39abb;margin-bottom:8px;line-height:1.5;">每次缴费时记录金额，系统会按<strong style="color:#7a6fa8;">实际上课年份</strong>分摊，统计当年花销。</div>
+      <div id="f-fee-hint" style="font-size:12px;color:#a39abb;margin-bottom:8px;line-height:1.5;">新建课程时可直接填写首笔付费和购买课时，点保存后会一起创建；已有课程再买课包时，新增购买课时会自动并入课包总数。</div>
       <div id="f-fee-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
-      <div style="display:grid;grid-template-columns:80px 1fr 130px;gap:6px;align-items:center;">
+      <div style="display:grid;grid-template-columns:80px 1fr 96px 130px;gap:6px;align-items:center;">
         <select class="form-input" id="f-fee-currency" style="padding:8px 6px;font-size:13px;">
           <option value="CNY">¥ 人民币</option>
           <option value="USD">$ 美元</option>
@@ -606,8 +606,10 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
           <option value="AUD">A$ 澳元</option>
         </select>
         <input class="form-input" id="f-fee-amount" type="number" min="0" step="0.01" placeholder="金额" inputmode="decimal" style="padding:8px 10px;font-size:14px;" />
+        <div id="f-fee-sessions-wrap"><input class="form-input" id="f-fee-sessions" type="number" min="0" step="1" placeholder="购买课时" inputmode="numeric" style="padding:8px 10px;font-size:13px;width:100%;" /></div>
         <input class="form-input" id="f-fee-date" type="date" style="padding:8px 8px;font-size:13px;" />
       </div>
+      <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">课包制可填写购买课时；订阅制只需要金额和付款日期。</div>
       <button type="button" class="add-shift-btn" style="margin-top:8px;" onclick="addFeeFromForm()">+ 添加一笔学费</button>
     </div>
     <div class="form-btns" id="edit-form-btns"></div>
@@ -673,6 +675,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 var STORAGE_KEY = 'course_tracker_v2';
+var FEE_DISPLAY_CURRENCY_KEY = 'course_tracker_fee_display_currency_v1';
 var SUPABASE_URL = 'https://sdcxjbkkbytcujlqxcxp.supabase.co';
 var SUPABASE_ANON_KEY = 'sb_publishable_NNrQXaKRsT_8GVatoflfQw_ZfjxWANh';
 var TABLE_NAME = 'course_tracker_state';
@@ -749,8 +752,15 @@ function normalizeCourse(course) {
   c.classTime = c.classTime || '10:00';
   c.classEndTime = c.classEndTime || addMinutesToTime(c.classTime, 60);
   c.used = Math.max(0, parseInt(c.used, 10) || 0);
+  c.courseType = (c.courseType === 'monthly') ? 'monthly' : 'package';
   c.total = (c.total === null || c.total === undefined || c.total === '') ? null : Math.max(0, parseInt(c.total, 10) || 0);
   c.remaining = (c.remaining === null || c.remaining === undefined || c.remaining === '') ? null : Math.max(0, parseInt(c.remaining, 10) || 0);
+  if (c.courseType === 'package' && (c.total === null || c.total === undefined) && c.remaining !== null && c.remaining !== undefined) {
+    c.total = c.used + c.remaining;
+  }
+  if (c.courseType === 'package') c.remaining = null;
+  c.monthlyFrom = c.monthlyFrom || '';
+  c.monthlyTo = c.monthlyTo || '';
   c.childId = c.childId || '';
   return c;
 }
@@ -1001,6 +1011,7 @@ async function hydrateDataForUser() {
       setSyncPill('本地模式', 'error');
     }
   }
+  applySavedFeeDisplayCurrency();
   render();
 }
 
@@ -1323,12 +1334,14 @@ function getNextSessionInfo(course) {
   return best;
 }
 function getRemainingCount(course) {
-  if (course.total !== null && course.total !== undefined) return course.total - course.used;
-  if (course.remaining !== null && course.remaining !== undefined) return course.remaining;
+  if ((course.courseType || 'package') === 'monthly') return null;
+  if (course.total !== null && course.total !== undefined) return Math.max(0, course.total - course.used);
+  if (course.remaining !== null && course.remaining !== undefined) return Math.max(0, course.remaining);
   return null;
 }
 
 function getTotalDisplay(course) {
+  if ((course.courseType || 'package') === 'monthly') return null;
   if (course.total !== null && course.total !== undefined) return course.total;
   if (course.remaining !== null && course.remaining !== undefined) return course.used + course.remaining;
   return null;
@@ -1340,6 +1353,7 @@ function getProgressPercent(course) {
 }
 
 function handleRenewalAfterLastClass(course, entry) {
+  if ((course.courseType || 'package') === 'monthly') return false;
   var remaining = getRemainingCount(course);
   if (remaining !== 0) return false;
   var wantsFinal = confirm(course.name + ' 这次已经是最后一次课了。\n\n点“确定”表示确认这是最后一次。\n点“取消”表示已经延期 / 续费。');
@@ -1347,13 +1361,7 @@ function handleRenewalAfterLastClass(course, entry) {
   var raw = prompt('请输入本次续费增加的课时数', '10');
   if (raw === null) raw = '10';
   var addCount = Math.max(1, parseInt(raw, 10) || 10);
-  if (course.total !== null && course.total !== undefined) {
-    course.total += addCount;
-  } else if (course.remaining !== null && course.remaining !== undefined) {
-    course.remaining += addCount;
-  } else {
-    course.remaining = addCount;
-  }
+  course.total = Math.max(0, parseInt(course.total, 10) || 0) + addCount;
   if (entry) {
     entry.renewalAdded = addCount;
     entry.renewalAt = new Date().toISOString();
@@ -1476,7 +1484,7 @@ function render() {
     }
 
     var nextDisplay = isToday ? '今天' : formatDate(nextDate);
-    var compactCount = totalDisplay ? (remaining !== null ? remaining : '—') + '/' + totalDisplay : (remaining !== null ? '剩'+remaining+'次' : '不限次');
+    var compactCount = (course.courseType === 'monthly') ? '订阅制' : (totalDisplay ? (remaining !== null ? remaining : '—') + '/' + totalDisplay : (remaining !== null ? '剩'+remaining+'次' : '—'));
 
     var wrap = document.createElement('div');
     wrap.className = 'card-wrap' + (isToday ? ' today' : '') + (expanded ? ' expanded' : '') + ((course.payAlert && remaining !== null && remaining <= 2) ? ' urgent' : '');
@@ -1504,7 +1512,7 @@ function render() {
         '<div class="stats-row">'+
           '<div class="stat"><div class="stat-label">已上</div><div class="stat-value">'+course.used+'</div></div>'+
           '<div class="stat"><div class="stat-label">剩余</div><div class="stat-value">'+(remaining!==null?remaining:'—')+'</div></div>'+
-          '<div class="stat"><div class="stat-label">'+(totalDisplay?'总课时':'类型')+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+(totalDisplay?'共'+totalDisplay+'次':'课时不限')+'</div></div>'+
+          '<div class="stat"><div class="stat-label">'+(course.courseType === 'monthly' ? '类型' : (totalDisplay?'总课时':'类型'))+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+(course.courseType === 'monthly' ? '订阅制' : (totalDisplay?'共'+totalDisplay+'次':'—'))+'</div></div>'+
         '</div>'+
         (totalDisplay ? '<div class="progress-bar"><div class="progress-fill" style="width:'+getProgressPercent(course)+'%;background:'+course.color+'"></div></div>' : '')+
         '<div class="next-info">下次上课：<strong>'+nextDisplay+'</strong>（'+nextInfo.note+'）</div>'+
@@ -1602,7 +1610,7 @@ function openManager() {
         '<div class="course-row-dot" style="background:'+c.color+'"></div>' +
         '<div class="course-row-main">' +
           '<div class="course-row-name">'+getCourseDisplayName(c)+'</div>' +
-          '<div class="course-row-info">'+formatWeekdayList(c)+' · '+formatTimeRange(c)+' · '+(rem!==null?('剩'+rem+'次'):'不限')+'</div>' +
+          '<div class="course-row-info">'+((c.courseType === 'monthly') ? ('订阅制 · '+formatWeekdayList(c)+' · '+formatTimeRange(c)) : ((rem!==null?('剩'+rem+'次'):'课包制')+' · '+formatWeekdayList(c)+' · '+formatTimeRange(c)) )+'</div>' +
         '</div>' +
         '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" >✏️</button>' +
         '<button class="icon-btn danger" onclick="deleteCourse('+idx+')">✕</button>';
@@ -1713,14 +1721,25 @@ function removeReschedule(planId) {
   render();
   showToast('已删除调课安排');
 }
-function toggleTotalMode() {
-  var hasTot = document.getElementById('f-has-total').checked;
-  var classTime = document.getElementById('f-time-start').value || '10:00';
-  var classEndTime = document.getElementById('f-time-end').value || addMinutesToTime(classTime, 60);
-  if (classEndTime <= classTime) { showToast('结束时间要晚于开始时间'); return; }
-  document.getElementById('f-total-section').style.display = hasTot ? 'block' : 'none';
-  document.getElementById('f-remaining-section').style.display = hasTot ? 'none' : 'block';
+function updateCourseTypeFields() {
+  var typeEl = document.getElementById('f-course-type');
+  var type = typeEl ? typeEl.value : 'package';
+  var packageBox = document.getElementById('f-package-fields');
+  var monthlyBox = document.getElementById('f-monthly-fields');
+  var feeSessionsWrap = document.getElementById('f-fee-sessions-wrap');
+  var feeSessionsInput = document.getElementById('f-fee-sessions');
+  var feeHint = document.getElementById('f-fee-hint');
+  if (packageBox) packageBox.classList.toggle('hidden', type !== 'package');
+  if (monthlyBox) monthlyBox.classList.toggle('hidden', type !== 'monthly');
+  if (feeSessionsWrap) feeSessionsWrap.classList.toggle('hidden', type !== 'package');
+  if (type !== 'package' && feeSessionsInput) feeSessionsInput.value = '';
+  if (feeHint) {
+    feeHint.innerHTML = type === 'monthly'
+      ? '订阅制会按周期内的上课周数分摊；如果不跨年，则整笔计入当年。'
+      : '新建课程时可直接填写首笔付费和购买课时，点保存后会一起创建；已有课程再买课包时，新增购买课时会自动并入课包总数。';
+  }
 }
+function toggleTotalMode() { updateCourseTypeFields(); }
 function getCounterValue(id) {
   var el = document.getElementById(id);
   if (!el) return 0;
@@ -1749,25 +1768,24 @@ function openAddForm() {
   document.getElementById('edit-modal-title').textContent = '新增课程';
   document.getElementById('f-name').value = '';
   document.getElementById('f-start').value = isoDate(new Date());
-  document.getElementById('f-has-total').checked = false;
+  document.getElementById('f-course-type').value = 'package';
+  document.getElementById('f-monthly-from').value = isoDate(new Date());
+  document.getElementById('f-monthly-to').value = isoDate(new Date(new Date().getFullYear(), new Date().getMonth()+1, 0));
   document.getElementById('f-time-start').value = '10:00';
   document.getElementById('f-time-end').value = '11:00';
-  setCounterValue('f-total', 10);
-  setCounterValue('f-remaining', 10);
+  setCounterValue('f-total', 0);
   setCounterValue('f-used', 0);
   document.getElementById('f-pay-alert').checked = false;
   document.getElementById('f-shift-from').value = '';
   document.getElementById('f-shift-to').value = '';
   document.getElementById('f-shift-note').value = '';
-  document.getElementById('f-fee-amount').value = '';
-  document.getElementById('f-fee-date').value = isoDate(new Date());
-  document.getElementById('f-fee-currency').value = 'CNY';
+  clearFeeInputs(false);
   renderFeeList(null);
   refreshCourseChildField(currentChildId !== 'all' ? currentChildId : '');
-  toggleTotalMode(); selectWeekday([1]); buildColorGrid(COLORS[0]); renderRescheduleList(null);
+  selectWeekday([1]); buildColorGrid(COLORS[0]); renderRescheduleList(null); updateCourseTypeFields();
   document.getElementById('edit-form-btns').innerHTML =
-    '<button class="form-btn" onclick="closeModal(\'edit-modal\')">取消</button>' +
-    '<button class="form-btn save" onclick="saveForm()">保存</button>';
+    "<button class='form-btn' onclick=\"closeModal('edit-modal')\">取消</button>" +
+    "<button class='form-btn save' onclick=\"saveForm()\">保存</button>";
   closeModal('manager-modal');
   openModal('edit-modal');
 }
@@ -1780,28 +1798,26 @@ function openEditForm(idx) {
   document.getElementById('edit-modal-title').textContent = '编辑课程';
   document.getElementById('f-name').value = course.name;
   document.getElementById('f-start').value = course.startDate;
-  var hasTot = course.total !== null && course.total !== undefined;
-  document.getElementById('f-has-total').checked = hasTot;
+  document.getElementById('f-course-type').value = course.courseType || 'package';
+  document.getElementById('f-monthly-from').value = course.monthlyFrom || course.startDate || '';
+  document.getElementById('f-monthly-to').value = course.monthlyTo || '';
   document.getElementById('f-time-start').value = course.classTime || '10:00';
   document.getElementById('f-time-end').value = course.classEndTime || addMinutesToTime(course.classTime || '10:00', 60);
-  setCounterValue('f-total', hasTot ? course.total : 10);
-  var curRem = getRemainingCount(course);
-  setCounterValue('f-remaining', curRem !== null ? curRem : 10);
+  setCounterValue('f-total', course.total !== null && course.total !== undefined ? course.total : (course.used + Math.max(0, getRemainingCount(course) || 0)));
   setCounterValue('f-used', course.used);
   document.getElementById('f-pay-alert').checked = !!course.payAlert;
   document.getElementById('f-shift-from').value = '';
   document.getElementById('f-shift-to').value = '';
   document.getElementById('f-shift-note').value = '';
-  document.getElementById('f-fee-amount').value = '';
-  document.getElementById('f-fee-date').value = isoDate(new Date());
+  clearFeeInputs(true);
   var lastCurrency = (course.fees && course.fees.length) ? (course.fees[course.fees.length-1].currency || 'CNY') : 'CNY';
   document.getElementById('f-fee-currency').value = lastCurrency;
   renderFeeList(course);
   refreshCourseChildField(course.childId || '');
-  toggleTotalMode(); selectWeekday(formWeekdays); buildColorGrid(course.color); renderRescheduleList(course);
+  selectWeekday(formWeekdays); buildColorGrid(course.color); renderRescheduleList(course); updateCourseTypeFields();
   document.getElementById('edit-form-btns').innerHTML =
-    '<button class="form-btn del" onclick="if(confirm(\'确定删除？\'))deleteCourse('+idx+')">删除</button>' +
-    '<button class="form-btn save" onclick="saveForm()">保存</button>';
+    "<button class='form-btn del' onclick=\"if(confirm('确定删除？'))deleteCourse(" + idx + ")\">删除</button>" +
+    "<button class='form-btn save' onclick=\"saveForm()\">保存</button>";
   openModal('edit-modal');
 }
 
@@ -1809,13 +1825,22 @@ function saveForm() {
   var name = document.getElementById('f-name').value.trim();
   if (!name) { showToast('请填写课程名称'); return; }
   if (!formWeekdays.length) { showToast('请至少选择一个上课日'); return; }
-  var hasTot = document.getElementById('f-has-total').checked;
   var classTime = document.getElementById('f-time-start').value || '10:00';
   var classEndTime = document.getElementById('f-time-end').value || addMinutesToTime(classTime, 60);
   if (classEndTime <= classTime) { showToast('结束时间要晚于开始时间'); return; }
-  var total = hasTot ? getCounterValue('f-total') : null;
-  var remaining = hasTot ? null : getCounterValue('f-remaining');
-  var used = getCounterValue('f-used');
+  var courseType = document.getElementById('f-course-type').value || 'package';
+  var total = courseType === 'package' ? getCounterValue('f-total') : null;
+  var remaining = null;
+  var used = courseType === 'package' ? getCounterValue('f-used') : 0;
+  var pendingFee = buildFeeEntryFromInputs();
+  if (pendingFee === false) return;
+  if (courseType === 'package' && used > total) { showToast('已上课次数不能大于课包总课时'); return; }
+  if (courseType === 'monthly') {
+    var monthlyFrom = document.getElementById('f-monthly-from').value || '';
+    var monthlyTo = document.getElementById('f-monthly-to').value || '';
+    if (!monthlyFrom || !monthlyTo) { showToast('请填写订阅周期'); return; }
+    if (monthlyTo < monthlyFrom) { showToast('订阅结束日期不能早于开始日期'); return; }
+  }
   var courses = loadData();
   if (editingIdx !== null) {
     var c = courses[editingIdx];
@@ -1824,6 +1849,9 @@ function saveForm() {
     c.weekday = c.weekdays[0];
     c.color = formColor;
     c.startDate = document.getElementById('f-start').value;
+    c.courseType = courseType;
+    c.monthlyFrom = courseType === 'monthly' ? (document.getElementById('f-monthly-from').value || '') : '';
+    c.monthlyTo = courseType === 'monthly' ? (document.getElementById('f-monthly-to').value || '') : '';
     c.classTime = classTime;
     c.classEndTime = classEndTime;
     c.total = total;
@@ -1832,15 +1860,22 @@ function saveForm() {
     c.payAlert = document.getElementById('f-pay-alert').checked;
     c.childId = (document.getElementById('f-child-id') || {}).value || '';
     c.fees = c.fees || [];
+    if (pendingFee) {
+      c.fees.push(pendingFee);
+      applyPurchasedSessionsToCourse(c, pendingFee.sessions);
+    }
   } else {
     var newId = 'c' + Date.now();
-    courses.push({
+    var newCourse = {
       id: newId,
       name: name,
       weekdays: formWeekdays.slice(),
       weekday: formWeekdays[0],
       color: formColor,
       startDate: document.getElementById('f-start').value,
+      courseType: courseType,
+      monthlyFrom: courseType === 'monthly' ? (document.getElementById('f-monthly-from').value || '') : '',
+      monthlyTo: courseType === 'monthly' ? (document.getElementById('f-monthly-to').value || '') : '',
       total: total,
       used: used,
       remaining: remaining,
@@ -1851,7 +1886,12 @@ function saveForm() {
       fees: [],
       payAlert: document.getElementById('f-pay-alert').checked,
       childId: (document.getElementById('f-child-id') || {}).value || ''
-    });
+    };
+    if (pendingFee) {
+      newCourse.fees.push(pendingFee);
+      applyPurchasedSessionsToCourse(newCourse, pendingFee.sessions);
+    }
+    courses.push(newCourse);
     expandedIds[newId] = false;
   }
   saveData(courses);
@@ -1863,7 +1903,6 @@ function saveForm() {
 
 var CURRENCY_SYMBOLS = { CNY:'¥', USD:'$', HKD:'HK$', EUR:'€', GBP:'£', JPY:'¥', CAD:'CA$', AUD:'A$' };
 
-// Approximate rates to CNY (base). User can't edit these here but they're clearly labeled as approximate.
 var RATES_TO_CNY = { CNY:1, USD:7.25, HKD:0.93, EUR:7.85, GBP:9.15, JPY:0.048, CAD:5.25, AUD:4.65 };
 
 function toCNY(amount, currency) {
@@ -1879,6 +1918,44 @@ function fmtMoney(amount, currency) {
   if (currency === 'JPY') return sym + Math.round(n).toLocaleString('zh-CN');
   return sym + (n % 1 < 0.005 ? Math.round(n).toLocaleString('zh-CN') : n.toLocaleString('zh-CN', {minimumFractionDigits:2, maximumFractionDigits:2}));
 }
+function getSavedFeeDisplayCurrency() {
+  try { return localStorage.getItem(FEE_DISPLAY_CURRENCY_KEY) || 'CNY'; } catch(e) { return 'CNY'; }
+}
+function setSavedFeeDisplayCurrency(currency) {
+  try { localStorage.setItem(FEE_DISPLAY_CURRENCY_KEY, currency || 'CNY'); } catch(e) {}
+}
+function applySavedFeeDisplayCurrency() {
+  var el = document.getElementById('fee-display-currency');
+  if (el) el.value = getSavedFeeDisplayCurrency();
+}
+function getFeeSessionsInputValue() {
+  var el = document.getElementById('f-fee-sessions');
+  return el ? Math.max(0, parseInt(el.value, 10) || 0) : 0;
+}
+function clearFeeInputs(keepCurrency) {
+  document.getElementById('f-fee-amount').value = '';
+  document.getElementById('f-fee-date').value = isoDate(new Date());
+  var sessionsEl = document.getElementById('f-fee-sessions');
+  if (sessionsEl) sessionsEl.value = '';
+  if (!keepCurrency) document.getElementById('f-fee-currency').value = 'CNY';
+}
+function applyPurchasedSessionsToCourse(course, purchasedSessions) {
+  if (course && course.courseType === 'monthly') return;
+  var qty = Math.max(0, parseInt(purchasedSessions, 10) || 0);
+  if (!qty) return;
+  course.total = Math.max(0, parseInt(course.total, 10) || 0) + qty;
+}
+function buildFeeEntryFromInputs() {
+  var amountRaw = document.getElementById('f-fee-amount').value.trim();
+  var date = document.getElementById('f-fee-date').value;
+  var currency = document.getElementById('f-fee-currency').value || 'CNY';
+  var courseTypeEl = document.getElementById('f-course-type');
+  var sessions = (courseTypeEl && courseTypeEl.value === 'package') ? getFeeSessionsInputValue() : 0;
+  if (!amountRaw && !sessions) return null;
+  if (!amountRaw || isNaN(parseFloat(amountRaw)) || parseFloat(amountRaw) <= 0) { showToast('请填写有效金额'); return false; }
+  if (!date) { showToast('请选择缴费日期'); return false; }
+  return { id: 'fee' + Date.now(), amount: parseFloat(amountRaw), currency: currency, date: date, sessions: sessions };
+}
 
 function renderFeeSummary() {
   var courses = getCoursesForCurrentFilter(loadData());
@@ -1889,7 +1966,9 @@ function renderFeeSummary() {
   var displayCurEl = document.getElementById('fee-display-currency');
   if (!totalEl || !breakdownEl) return;
 
-  var displayCur = (displayCurEl && displayCurEl.value) || 'CNY';
+  if (displayCurEl && !displayCurEl.value) displayCurEl.value = getSavedFeeDisplayCurrency();
+  var displayCur = (displayCurEl && displayCurEl.value) || getSavedFeeDisplayCurrency() || 'CNY';
+  setSavedFeeDisplayCurrency(displayCur);
   var needsConversion = false;
 
   var grandTotalCNY = 0;
@@ -1914,7 +1993,7 @@ function renderFeeSummary() {
 
   if (!items.length) {
     totalEl.textContent = '—';
-    breakdownEl.innerHTML = '<div style="font-size:12px;color:#b4acc9;">在课程编辑里添加学费记录后，这里会按实际上课比例分摊显示。当前只统计所选孩子的课程。</div>';
+    breakdownEl.innerHTML = '<div style="font-size:12px;color:#b4acc9;">在课程编辑里添加学费记录后，这里会按当前收费方式统计。今年只显示当前选中孩子的课程。</div>';
     if (rateNoteEl) rateNoteEl.textContent = '';
     return;
   }
@@ -1938,7 +2017,6 @@ function renderFeeSummary() {
   }
 }
 
-
 function renderFeeList(course) {
   var list = document.getElementById('f-fee-list');
   if (!list) return;
@@ -1946,113 +2024,167 @@ function renderFeeList(course) {
   if (!fees.length) { list.innerHTML = '<div style="font-size:12px;color:#b4acc9;padding:4px 0;">暂无记录</div>'; return; }
   list.innerHTML = fees.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; }).map(function(f){
     var origIdx = fees.indexOf(f);
-    var sym = CURRENCY_SYMBOLS[f.currency] || (f.currency || '¥');
+    var sessionsText = f.sessions ? '<span style="font-size:11px;color:#8f86aa;background:#f4efff;border-radius:999px;padding:2px 8px;">+' + f.sessions + '次</span>' : '';
     return '<div class="fee-item-row">' +
       '<span class="fee-item-date">' + f.date + '</span>' +
       '<span style="font-size:11px;color:#a39abb;margin-right:2px;">' + (f.currency || 'CNY') + '</span>' +
       '<span class="fee-item-amt">' + fmtMoney(f.amount, f.currency || 'CNY') + '</span>' +
-      '<button class="fee-item-del" onclick="deleteFee(' + origIdx + ')" title="删除">✕</button>' +
+      sessionsText +
+      '<button class="fee-item-del" onclick="deleteFee(' + origIdx + ', this)" title="删除">✕</button>' +
     '</div>';
   }).join('');
 }
 
 function addFeeFromForm() {
-  var amountRaw = document.getElementById('f-fee-amount').value.trim();
-  var date = document.getElementById('f-fee-date').value;
-  var currency = document.getElementById('f-fee-currency').value || 'CNY';
-  if (!amountRaw || isNaN(parseFloat(amountRaw)) || parseFloat(amountRaw) <= 0) { showToast('请填写有效金额'); return; }
-  if (!date) { showToast('请选择缴费日期'); return; }
+  var feeEntry = buildFeeEntryFromInputs();
+  if (feeEntry === false) return;
+  if (!feeEntry) { showToast('请先填写金额或购买课时'); return; }
   var courses = loadData();
   var target = editingIdx !== null ? courses[editingIdx] : null;
-  if (!target) { showToast('请先保存课程'); return; }
+  if (!target) { showToast('新建课程时，直接填写后点保存即可'); return; }
   target.fees = target.fees || [];
-  target.fees.push({ id: 'fee' + Date.now(), amount: parseFloat(amountRaw), currency: currency, date: date });
+  target.fees.push(feeEntry);
+  applyPurchasedSessionsToCourse(target, feeEntry.sessions);
   saveData(courses);
-  document.getElementById('f-fee-amount').value = '';
+  clearFeeInputs(true);
   renderFeeList(target);
   renderFeeSummary();
+  render();
   showToast('已添加学费记录');
 }
 
-function deleteFee(feeIdx) {
+function deleteFee(feeIdx, btnEl) {
   if (editingIdx === null) return;
+  if (btnEl && typeof btnEl.blur === 'function') btnEl.blur();
+  var row = btnEl && btnEl.closest ? btnEl.closest('.fee-item-row') : null;
+  if (row) {
+    row.style.opacity = '0';
+    row.style.transform = 'scale(0.98)';
+    row.style.transition = 'opacity .16s ease, transform .16s ease';
+    row.style.pointerEvents = 'none';
+  }
   var courses = loadData();
   var c = courses[editingIdx];
   c.fees = c.fees || [];
-  c.fees.splice(feeIdx, 1);
+  var removed = c.fees.splice(feeIdx, 1)[0];
+  var qty = removed && removed.sessions ? Math.max(0, parseInt(removed.sessions, 10) || 0) : 0;
+  if (qty && c.courseType !== 'monthly') {
+    c.total = Math.max(c.used, Math.max(0, parseInt(c.total, 10) || 0) - qty);
+  }
   saveData(courses);
-  renderFeeList(c);
-  renderFeeSummary();
-}
-
-// Get all dates of actual classes taken (history status='done'), grouped by year
-function getClassDatesByYear(course) {
-  var byYear = {};
-  (course.history || []).forEach(function(h) {
-    if (h.status !== 'done') return;
-    var yr = h.date ? parseInt(String(h.date).slice(0, 4), 10) : null;
-    if (!yr) return;
-    byYear[yr] = (byYear[yr] || 0) + 1;
+  window.requestAnimationFrame(function(){
+    renderFeeList(c);
+    renderFeeSummary();
+    render();
   });
-  return byYear;
 }
 
+function weeksRemainingInYearForCourse(course, fromDateStr) {
+  var weekdays = Array.isArray(course.weekdays) && course.weekdays.length ? course.weekdays.slice() : [typeof course.weekday === 'number' ? course.weekday : 1];
+  if (!weekdays.length) weekdays = [1];
+  var from = fromDateStr ? new Date(fromDateStr + 'T00:00:00') : getTodayDate();
+  if (isNaN(from.getTime())) from = getTodayDate();
+  from.setHours(0,0,0,0);
+  var year = from.getFullYear();
+  var end = new Date(year, 11, 31);
+  end.setHours(0,0,0,0);
+  var count = 0;
+  var cursor = new Date(from);
+  while (cursor <= end) {
+    if (weekdays.indexOf(cursor.getDay()) !== -1) count += 1;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return count;
+}
+function countCourseOccurrencesInRange(course, startStr, endStr, yearFilter) {
+  var start = startStr ? new Date(startStr + 'T00:00:00') : null;
+  var end = endStr ? new Date(endStr + 'T00:00:00') : null;
+  if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return 0;
+  start.setHours(0,0,0,0);
+  end.setHours(0,0,0,0);
+  var weekdays = getCourseWeekdays(course);
+  var count = 0;
+  var cursor = new Date(start);
+  while (cursor <= end) {
+    if ((!yearFilter || cursor.getFullYear() === yearFilter) && weekdays.indexOf(cursor.getDay()) !== -1) count += 1;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return count;
+}
+function allocateSubscriptionFeeByYear(course, fee, result) {
+  var currency = fee.currency || 'CNY';
+  var amount = parseFloat(fee.amount) || 0;
+  if (!amount) return;
+  var feeYear = fee.date ? parseInt(String(fee.date).slice(0,4), 10) : new Date().getFullYear();
+  var fromStr = course.monthlyFrom || fee.date || '';
+  var toStr = course.monthlyTo || fromStr;
+  if (!fromStr || !toStr) {
+    if (!result[feeYear]) result[feeYear] = {};
+    result[feeYear][currency] = (result[feeYear][currency] || 0) + amount;
+    return;
+  }
+  var fromYear = parseInt(String(fromStr).slice(0,4), 10);
+  var toYear = parseInt(String(toStr).slice(0,4), 10);
+  if (!fromYear || !toYear || fromYear === toYear) {
+    var oneYear = fromYear || feeYear;
+    if (!result[oneYear]) result[oneYear] = {};
+    result[oneYear][currency] = (result[oneYear][currency] || 0) + amount;
+    return;
+  }
+  var totalOccurrences = countCourseOccurrencesInRange(course, fromStr, toStr);
+  if (!totalOccurrences) {
+    if (!result[feeYear]) result[feeYear] = {};
+    result[feeYear][currency] = (result[feeYear][currency] || 0) + amount;
+    return;
+  }
+  var allocated = 0;
+  for (var y = fromYear; y <= toYear; y++) {
+    var occurrences = countCourseOccurrencesInRange(course, fromStr, toStr, y);
+    if (!occurrences) continue;
+    var part = amount * occurrences / totalOccurrences;
+    allocated += part;
+    if (!result[y]) result[y] = {};
+    result[y][currency] = (result[y][currency] || 0) + part;
+  }
+  var roundingDiff = amount - allocated;
+  if (Math.abs(roundingDiff) > 0.000001) {
+    if (!result[toYear]) result[toYear] = {};
+    result[toYear][currency] = (result[toYear][currency] || 0) + roundingDiff;
+  }
+}
 function prorateFeesByYear(course) {
   var result = {};
-  var fees = course.fees || [];
+  var fees = (course.fees || []).slice().sort(function(a,b){ return (a.date || '') > (b.date || '') ? 1 : -1; });
   if (!fees.length) return result;
-
-  var classByYear = getClassDatesByYear(course);
-  var totalHistorySessions = Object.keys(classByYear).reduce(function(a, yr) { return a + classByYear[yr]; }, 0);
-  var thisYear = new Date().getFullYear();
-
-  // If we have actual history, prorate by real attendance
-  if (totalHistorySessions > 0) {
-    fees.forEach(function(f) {
-      var currency = f.currency || 'CNY';
-      var amount = parseFloat(f.amount) || 0;
-      if (!amount) return;
-      Object.keys(classByYear).forEach(function(yr) {
-        var share = amount * classByYear[yr] / totalHistorySessions;
-        if (!result[yr]) result[yr] = {};
-        result[yr][currency] = (result[yr][currency] || 0) + share;
-      });
-    });
-    return result;
-  }
-
-  // No history yet — estimate using course.used and start date
-  // Strategy: spread sessions across years based on startDate and used count
-  var used = course.used || 0;
-  var startYear = course.startDate ? parseInt(String(course.startDate).slice(0,4), 10) : thisYear;
-
   fees.forEach(function(f) {
     var currency = f.currency || 'CNY';
     var amount = parseFloat(f.amount) || 0;
     if (!amount) return;
-
-    var targetYear;
-    if (used === 0) {
-      // Nothing attended yet — show in current year (course is future/ongoing)
-      targetYear = thisYear;
-    } else if (startYear === thisYear) {
-      // All classes in this year
-      targetYear = thisYear;
-    } else {
-      // Course spans years but no history — attribute to this year
-      // (conservative: show cost as current-year expense)
-      targetYear = thisYear;
+    var feeYear = f.date ? parseInt(String(f.date).slice(0,4), 10) : new Date().getFullYear();
+    if (course.courseType === 'monthly') {
+      allocateSubscriptionFeeByYear(course, f, result);
+      return;
     }
-
-    if (!result[targetYear]) result[targetYear] = {};
-    result[targetYear][currency] = (result[targetYear][currency] || 0) + amount;
+    var sessions = Math.max(0, parseInt(f.sessions, 10) || 0);
+    if (!sessions) {
+      if (!result[feeYear]) result[feeYear] = {};
+      result[feeYear][currency] = (result[feeYear][currency] || 0) + amount;
+      return;
+    }
+    var schedulableThisYear = weeksRemainingInYearForCourse(course, f.date || (feeYear + '-01-01'));
+    var recognizedSessions = Math.min(sessions, schedulableThisYear);
+    var deferredSessions = Math.max(0, sessions - recognizedSessions);
+    var recognizedAmount = amount * recognizedSessions / sessions;
+    var deferredAmount = amount - recognizedAmount;
+    if (!result[feeYear]) result[feeYear] = {};
+    result[feeYear][currency] = (result[feeYear][currency] || 0) + recognizedAmount;
+    if (deferredSessions > 0) {
+      if (!result[feeYear + 1]) result[feeYear + 1] = {};
+      result[feeYear + 1][currency] = (result[feeYear + 1][currency] || 0) + deferredAmount;
+    }
   });
-
   return result;
 }
-
-
-
 
 function getWeekMonday(dateObj) {
   var d = new Date(dateObj || getTodayDate());
@@ -2357,6 +2489,7 @@ document.addEventListener('touchend', function(e){
 }, {passive:false});
 resetChildForm();
 renderChildLauncher();
+applySavedFeeDisplayCurrency();
 initAuth();
 </script>
 
