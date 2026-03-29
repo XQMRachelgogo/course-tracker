@@ -141,7 +141,11 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
 .modal-close:hover{color:#6e658c}
 .course-list{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem}
 .course-row{display:flex;align-items:center;gap:12px;background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:16px;padding:12px 12px}
-.course-row-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.course-row-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}.course-row-name{font-size:14px;font-weight:600;color:#4a3f73;line-height:1.35;word-break:break-word}.course-row-info{font-size:12px;color:#9a93b6;line-height:1.45;word-break:break-word}
+.course-row-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.course-row-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.course-row-name{font-size:14px;font-weight:600;color:#4a3f73;line-height:1.3;word-break:break-word}
+.course-row-info{font-size:12px;color:#9a93b6;line-height:1.45;white-space:normal;word-break:break-word}
+@media (max-width: 640px){.course-row{align-items:flex-start}.course-row-main{padding-top:2px}.course-row-info{font-size:11px}}
 .icon-btn{width:44px;height:44px;min-width:44px;min-height:44px;border-radius:12px;border:1px solid rgba(127,119,221,0.12);background:#fff;color:#6f6691;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;line-height:1;font-weight:700}.icon-btn.edit-btn{font-size:26px}
 .icon-btn:hover{background:#f7f3ff}.icon-btn.danger:hover{background:#ffe9eb;color:#b33b4d;border-color:#f4aab1}
 .add-course-btn{width:100%;padding:11px;font-size:14px;border-radius:14px;border:1px dashed rgba(127,119,221,0.25);background:#fff;color:#8d84aa;cursor:pointer;font-family:inherit;font-weight:600}
@@ -198,15 +202,35 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
   inline-size:100%;
   max-inline-size:100%;
   min-inline-size:0;
+  flex:1 1 0%;
   -webkit-appearance:none;
   appearance:none;
   padding:12px 14px;
   background-clip:padding-box;
 }
+.reschedule-grid .form-input[type="date"]{
+  width:100%;
+  min-width:0;
+  inline-size:100%;
+  min-inline-size:0;
+  flex:1 1 0%;
+}
+.reschedule-grid .form-input[type="date"]::-webkit-date-and-time-value,
+.reschedule-grid .form-input[type="date"]::-webkit-datetime-edit{
+  min-height:1.25em;
+}
 @supports (-webkit-touch-callout: none) {
   .form-input[type="date"],.time-input[type="date"],.form-input[type="time"],.time-input[type="time"]{
     font-size:16px;
     line-height:1.2;
+  }
+  .reschedule-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch}
+  .reschedule-grid .form-input[type="date"]{
+    min-height:46px;
+    height:46px;
+    padding-top:11px;
+    padding-bottom:11px;
+    -webkit-min-logical-width:100%;
   }
 }
 
@@ -235,11 +259,9 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
   .summary-title{font-size:15px}.summary-count{font-size:12px;padding:6px 8px}.stats-row{grid-template-columns:1fr}.actions{flex-direction:column}
 }
 
-.auth-shell{display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px}
-.child-launcher,.auth-launcher{display:inline-flex;align-items:center;justify-content:center;gap:0;width:44px;height:44px;padding:0;border:none;border-radius:999px;background:rgba(255,255,255,.94);color:#6a56d6;font:inherit;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 10px 26px rgba(127,119,221,.12);border:1px solid rgba(138,126,240,.16)}
-.child-launcher:hover,.auth-launcher:hover{background:#fff}
-.child-launcher.active{background:linear-gradient(180deg,#fff 0%,#f7f2ff 100%);color:#5c4cc8;border-color:rgba(127,119,221,.22)}
-.auth-launcher small,.auth-launcher-label{display:none}
+.auth-shell{display:flex;justify-content:flex-end;margin-bottom:8px}
+.auth-launcher{display:inline-flex;align-items:center;justify-content:center;gap:0;width:44px;height:44px;padding:0;border:none;border-radius:999px;background:rgba(255,255,255,.94);color:#6a56d6;font:inherit;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 10px 26px rgba(127,119,221,.12);border:1px solid rgba(138,126,240,.16)}
+.auth-launcher:hover{background:#fff}.auth-launcher small,.auth-launcher-label{display:none}
 .auth-launcher.logged-in{background:linear-gradient(180deg,#fff 0%,#f7f2ff 100%);color:#5c4cc8;border-color:rgba(127,119,221,.22)}
 .auth-modal-overlay{display:none;position:fixed;inset:0;background:rgba(70,55,101,.26);z-index:120;align-items:center;justify-content:center;padding:18px}
 .auth-modal-overlay.open{display:flex}
@@ -264,7 +286,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .auth-account span{font-size:11px;color:#8d84aa}
 .sync-pill{font-size:11px;padding:4px 8px;border-radius:999px;background:#f7f2ff;color:#7F77DD}.sync-pill.error{background:#fff1f1;color:#c75151}.sync-pill.ok{background:#eefaf5;color:#2d8b63}
 .hidden{display:none!important}.setup-box{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff8ed;color:#8b5d10;font-size:12px;line-height:1.6}.setup-box code{display:block;white-space:pre-wrap;background:#fff;border-radius:8px;padding:8px;margin-top:8px;color:#704b0b}.auth-mini{font-size:11px;color:#a095bc;line-height:1.6;margin-top:8px;text-align:center}
-@media (max-width:380px){.auth-launcher,.child-launcher{width:40px;height:40px;font-size:16px}}
+@media (max-width:380px){.auth-launcher{width:40px;height:40px;font-size:16px}}
 
 
 .fee-summary-card{background:linear-gradient(135deg,#f8f3ff 0%,#fff4ec 100%);border:1px solid rgba(127,119,221,0.14);border-radius:16px;padding:.85rem 1.1rem}
@@ -282,6 +304,22 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .fee-item-del{background:none;border:none;color:#c4bcd8;cursor:pointer;font-size:16px;padding:0 2px;line-height:1}
 .fee-item-del:hover{color:#b33b4d}
 
+.cal-action-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cal-action-btn{display:flex;align-items:center;gap:10px;padding:13px 12px;border-radius:16px;border:1px solid rgba(127,119,221,0.14);background:#fff;cursor:pointer;font-family:inherit;text-align:left;box-shadow:var(--shadow);transition:background .15s;width:100%}
+.cal-action-btn:hover{background:#faf6ff}
+.cal-action-btn--primary{background:linear-gradient(135deg,#f0ecff 0%,#ffe8f7 100%);border-color:rgba(138,126,240,0.22)}
+.cal-action-btn--primary:hover{background:linear-gradient(135deg,#e8e2ff 0%,#ffddf5 100%)}
+.cal-action-icon{font-size:22px;flex-shrink:0}
+.cal-action-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cal-action-title{font-size:13px;font-weight:700;color:#4a3f73;line-height:1.2}
+.cal-action-desc{font-size:11px;color:#a39abb;line-height:1.3}
+.ical-url-box{display:flex;align-items:center;gap:8px;background:#f8f4ff;border:1px solid rgba(127,119,221,0.14);border-radius:12px;padding:10px 12px;margin-bottom:1rem}
+.ical-url-text{flex:1;font-size:11px;color:#6d63a8;word-break:break-all;font-family:monospace;line-height:1.5}
+.ical-copy-btn{flex-shrink:0;padding:6px 12px;border-radius:8px;border:1px solid rgba(127,119,221,0.2);background:#fff;color:#6d63a8;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.ical-copy-btn:hover{background:#f0ecff}
+.ical-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:.5rem}
+.ical-step{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#574e74;line-height:1.5}
+.ical-step-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#8a7ef0;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .version-notes{background:#fffafc;border:1px solid #ffd8ea;border-radius:18px;box-shadow:0 8px 20px rgba(255,158,203,.10);overflow:hidden;}
 .version-notes summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:700;color:#7b4b94;display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .version-notes summary::-webkit-details-marker{display:none;}
@@ -293,54 +331,13 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .version-notes-body li{margin:4px 0;}
 .version-tag{display:inline-block;margin-top:4px;padding:4px 10px;border-radius:999px;background:#ffe7f3;color:#8a4f73;font-size:12px;font-weight:700;}
 
-
-.child-list{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
-.child-row{display:flex;align-items:center;gap:12px;background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:16px;padding:12px 12px;cursor:pointer}
-.child-row.active{background:linear-gradient(180deg,#fff 0%,#f6f1ff 100%);border-color:rgba(138,126,240,.24)}
-.child-avatar{width:42px;height:42px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 10px rgba(127,119,221,.08);flex-shrink:0}
-.child-row-main{flex:1;min-width:0}
-.child-row-name{font-size:14px;font-weight:700;color:#4a3f73;line-height:1.3;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.child-row-sub{font-size:12px;color:#9a93b6;line-height:1.45;margin-top:3px}
-.child-check{font-size:11px;padding:4px 8px;border-radius:999px;background:#f0ecff;color:#6c5db5;font-weight:700}
-.child-actions{display:flex;gap:8px;flex-shrink:0}
-.child-empty{font-size:12px;color:#a39abb;line-height:1.6;background:#fbf8ff;border:1px dashed rgba(127,119,221,.14);border-radius:14px;padding:12px}
-.child-emoji-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
-.child-emoji-btn{height:42px;border-radius:12px;border:1px solid rgba(127,119,221,.14);background:#fff;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center}
-.child-emoji-btn.selected{background:#f0ecff;border-color:#8a7ef0;box-shadow:0 0 0 2px rgba(138,126,240,.12) inset}
-.child-helper{font-size:11px;color:#a39abb;line-height:1.6;margin-top:6px}
-.filter-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#6c5db5;background:#f4efff;border-radius:999px;padding:4px 8px;margin-top:6px}
-
 </style>
 </head>
 <body>
 <div class="app">
 
   <div id="auth-shell" class="auth-shell">
-    <button id="child-launcher" class="child-launcher" onclick="openChildModal()" aria-label="孩子档案" title="孩子档案">👨‍👩‍👧‍👦</button>
     <button id="auth-launcher" class="auth-launcher" onclick="openAuthModal()" aria-label="登录与同步">☁️<span class="auth-launcher-label">登录同步</span><small>不占地方</small></button>
-  </div>
-
-  <div id="child-modal" class="modal-overlay">
-    <div class="modal">
-      <div class="modal-header">
-        <span class="modal-title">孩子档案</span>
-        <button class="modal-close" onclick="closeModal('child-modal')">✕</button>
-      </div>
-      <p style="font-size:13px;color:#8f86aa;margin-bottom:1rem;line-height:1.6;">先选择当前要查看的孩子，再开始记录课程。选中某个孩子后，课程卡片和学费分摊会只显示该孩子的内容。</p>
-      <div id="child-list" class="child-list"></div>
-      <div class="divider" style="margin:1rem 0 .9rem"></div>
-      <div class="section-label" style="margin-bottom:10px;">添加 / 编辑孩子</div>
-      <div id="child-emoji-grid" class="child-emoji-grid"></div>
-      <div class="form-group">
-        <label class="form-label">孩子名字</label>
-        <input class="form-input" id="child-name" placeholder="例：Mia" />
-        <div class="child-helper">新增课程时会自动继承当前选中的孩子；也可以在课程编辑里单独修改归属。</div>
-      </div>
-      <div class="form-btns">
-        <button class="form-btn" onclick="resetChildForm()">清空</button>
-        <button class="form-btn save" id="child-save-btn" onclick="saveChildProfile()">添加孩子</button>
-      </div>
-    </div>
   </div>
 
   <div id="auth-modal" class="auth-modal-overlay">
@@ -445,8 +442,43 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
   </div>
   <div class="divider"></div>
   <p class="section-label">日历提醒</p>
-  <button class="export-btn" onclick="openExportModal()">📅 导出到 Apple Calendar</button>
-  <p class="export-hint">生成 .ics 文件，包含每周上课提醒 + 续费提醒，iPhone 打开即可导入</p>
+  <button class="export-btn" onclick="openIcalModal()">
+    🔄 订阅日历（iPhone 自动更新）
+  </button>
+  <p class="export-hint">登录后生成专属链接，iPhone 订阅一次，课程变动自动同步</p>
+</div>
+
+<div class="modal-overlay" id="ical-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">订阅日历 URL</span>
+      <button class="modal-close" onclick="closeModal('ical-modal')">✕</button>
+    </div>
+    <div id="ical-modal-body">
+      <div id="ical-loading" style="text-align:center;padding:2rem 0;color:#a39abb;font-size:14px;">生成链接中…</div>
+      <div id="ical-content" class="hidden">
+        <p style="font-size:13px;color:#8f86aa;margin-bottom:1rem;line-height:1.65;">这是你的专属日历订阅链接。iPhone 订阅后会每 6 小时自动拉取最新课程，课程变动无需重新操作。</p>
+        <div class="ical-url-box">
+          <span class="ical-url-text" id="ical-url-text"></span>
+          <button class="ical-copy-btn" onclick="copyIcalUrl()" id="ical-copy-btn">复制</button>
+        </div>
+        <div class="ical-steps">
+          <div class="ical-step"><span class="ical-step-num">1</span><span>点下方按钮，iPhone 会自动打开"日历"并弹出订阅确认</span></div>
+          <div class="ical-step"><span class="ical-step-num">2</span><span>点"订阅"即完成，日历名称会显示为"课时打卡"</span></div>
+          <div class="ical-step"><span class="ical-step-num">3</span><span>之后课程有任何变动，日历最多 6 小时内自动更新</span></div>
+        </div>
+        <button class="download-btn" onclick="openIcalSubscribeLink()" style="margin-top:1rem;">在 iPhone 上打开订阅 →</button>
+        <p style="font-size:11px;color:#b4acc9;margin-top:12px;text-align:center;line-height:1.6;">链接包含你的专属 token，请勿分享给他人。<br>如需让旧链接失效，可点下方重置。</p>
+        <button class="form-btn" style="width:100%;margin-top:8px;color:#a39abb;font-size:12px;" onclick="resetIcalToken()">重置链接（让旧链接失效）</button>
+      </div>
+      <div id="ical-login-prompt" class="hidden" style="text-align:center;padding:1.5rem 0;">
+        <div style="font-size:32px;margin-bottom:12px;">☁️</div>
+        <div style="font-size:15px;font-weight:600;color:#7a6fa8;margin-bottom:8px;">需要登录才能使用</div>
+        <div style="font-size:13px;color:#a39abb;line-height:1.6;">订阅日历需要账号，这样 Apple Calendar 才能<br>访问你的云端课程数据。</div>
+        <button class="auth-btn" style="margin-top:1.25rem;width:100%;" onclick="closeModal('ical-modal');openAuthModal()">去登录 / 注册</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="reset-password-modal">
@@ -490,11 +522,6 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
     <div class="form-group">
       <label class="form-label">课程名称</label>
       <input class="form-input" id="f-name" placeholder="例：形体课" />
-    </div>
-    <div class="form-group hidden" id="f-child-wrap">
-      <label class="form-label">归属孩子</label>
-      <select class="form-input" id="f-child-id"></select>
-      <div class="mini-tip">有孩子档案时才显示。新增课程会默认继承当前选中的孩子。</div>
     </div>
     <div class="form-group">
       <label class="form-label">上课日（可多选）</label>
@@ -606,7 +633,7 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
     </div>
     <div class="form-group">
       <label class="form-label">学费记录</label>
-      <div id="f-fee-hint" style="font-size:12px;color:#a39abb;margin-bottom:8px;line-height:1.5;">新建课程时可直接填写首笔付费和购买课时，点保存后会一起创建；已有课程再买课包时，新增购买课时会自动并入课包总数。</div>
+      <div id="f-fee-hint" style="font-size:12px;color:#a39abb;margin-bottom:8px;line-height:1.5;">新建课程时可直接填写首笔付费和购买课时，系统会按付款和跨年规则统计当年花销。</div>
       <div id="f-fee-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
       <div style="display:grid;grid-template-columns:80px 1fr 96px 130px;gap:6px;align-items:center;">
         <select class="form-input" id="f-fee-currency" style="padding:8px 6px;font-size:13px;">
@@ -642,54 +669,12 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
   </div>
 </div>
 
-<div class="modal-overlay" id="export-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">导出到 Apple Calendar</span>
-      <button class="modal-close" onclick="closeModal('export-modal')">✕</button>
-    </div>
-    <p style="font-size:13px;color:#8f86aa;margin-bottom:1rem;line-height:1.6;">为每门课设置上课时间，下载 .ics 文件后用 iPhone 打开即可导入日历。</p>
-    <label class="form-label">每门课的上课时间</label>
-    <div id="export-time-list"></div>
-    <div class="export-options">
-      <div class="export-option">
-        <div style="flex:1">
-          <div class="export-option-label">每周上课提醒</div>
-          <div class="export-option-desc">课前推送，含打卡提示</div>
-        </div>
-        <select class="reminder-select" id="exp-remind-before">
-          <option value="60">提前 1 小时</option>
-          <option value="30" selected>提前 30 分钟</option>
-          <option value="15">提前 15 分钟</option>
-          <option value="0">准时提醒</option>
-        </select>
-      </div>
-      <div class="export-option">
-        <div style="flex:1">
-          <div class="export-option-label">续费提醒</div>
-          <div class="export-option-desc">剩余 ≤ 2 次时，在下一个上课日提醒</div>
-        </div>
-        <label class="switch"><input type="checkbox" id="exp-pay-alert" checked /><span class="switch-slider"></span></label>
-      </div>
-      <div class="export-option">
-        <div style="flex:1">
-          <div class="export-option-label">课包到期提醒</div>
-          <div class="export-option-desc">最后一节课当天 + 提前3天各提醒一次</div>
-        </div>
-        <label class="switch"><input type="checkbox" id="exp-expire-alert" checked /><span class="switch-slider"></span></label>
-      </div>
-    </div>
-    <button class="download-btn" onclick="generateICS()">下载 .ics 文件</button>
-    <p style="font-size:11px;color:#a39abb;text-align:center;margin-top:10px;line-height:1.6;">导入后日历会显示每周重复的上课事件。<br>时间变了重新导出覆盖即可。</p>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 var STORAGE_KEY = 'course_tracker_v2';
-var FEE_DISPLAY_CURRENCY_KEY = 'course_tracker_fee_display_currency_v1';
+var FEE_DISPLAY_CURRENCY_KEY = 'course_tracker_fee_display_currency';
 var SUPABASE_URL = 'https://sdcxjbkkbytcujlqxcxp.supabase.co';
 var SUPABASE_ANON_KEY = 'sb_publishable_NNrQXaKRsT_8GVatoflfQw_ZfjxWANh';
 var TABLE_NAME = 'course_tracker_state';
@@ -702,15 +687,9 @@ var formColor = COLORS[0];
 var expandedIds = {};
 
 var defaultCourses = [];
-var defaultChildren = [];
 var currentCourses = [];
-var currentChildren = [];
-var currentChildId = 'all';
 var currentUser = null;
-var childEditingId = null;
-var formChildEmoji = '🧒';
 var saveTimer = null;
-var CHILD_EMOJIS = ['🧒','👧','👦','🧑','👶','🧸','🎀','🦄','🐼','🦊'];
 var setupSQL = [
   "create table if not exists public.course_tracker_state (",
   "  user_id uuid primary key references auth.users(id) on delete cascade,",
@@ -773,7 +752,14 @@ function normalizeCourse(course) {
   c.weekday = c.weekdays[0];
   c.history = Array.isArray(c.history) ? c.history : [];
   c.reschedules = Array.isArray(c.reschedules) ? c.reschedules : [];
-  c.fees = Array.isArray(c.fees) ? c.fees : [];
+  c.fees = Array.isArray(c.fees) ? c.fees.map(function(f){
+    var fee = deepClone(f || {});
+    fee.amount = parseFloat(fee.amount) || 0;
+    fee.currency = fee.currency || 'CNY';
+    fee.date = fee.date || '';
+    fee.sessions = Math.max(0, parseInt(fee.sessions, 10) || 0);
+    return fee;
+  }) : [];
   c.classTime = c.classTime || '10:00';
   c.classEndTime = c.classEndTime || addMinutesToTime(c.classTime, 60);
   c.timeMode = c.timeMode === 'diff' ? 'diff' : 'same';
@@ -785,123 +771,36 @@ function normalizeCourse(course) {
     if (end <= start) end = addMinutesToTime(start, 60);
     c.dayTimes[day] = { start:start, end:end };
   });
-  c.used = Math.max(0, parseInt(c.used, 10) || 0);
   c.courseType = (c.courseType === 'monthly') ? 'monthly' : 'package';
-  c.total = (c.total === null || c.total === undefined || c.total === '') ? null : Math.max(0, parseInt(c.total, 10) || 0);
-  c.remaining = (c.remaining === null || c.remaining === undefined || c.remaining === '') ? null : Math.max(0, parseInt(c.remaining, 10) || 0);
-  if (c.courseType === 'package' && (c.total === null || c.total === undefined) && c.remaining !== null && c.remaining !== undefined) {
-    c.total = c.used + c.remaining;
-  }
-  if (c.courseType === 'package') c.remaining = null;
   c.monthlyFrom = c.monthlyFrom || '';
   c.monthlyTo = c.monthlyTo || '';
-  c.childId = c.childId || '';
+  c.used = Math.max(0, parseInt(c.used, 10) || 0);
+  c.total = (c.total === null || c.total === undefined || c.total === '') ? null : Math.max(0, parseInt(c.total, 10) || 0);
+  c.remaining = (c.remaining === null || c.remaining === undefined || c.remaining === '') ? null : Math.max(0, parseInt(c.remaining, 10) || 0);
+  if ((c.total === null || c.total === undefined) && c.remaining !== null && c.remaining !== undefined) {
+    c.total = c.used + c.remaining;
+    c.remaining = null;
+  }
   return c;
 }
 function normalizeCourses(courses) {
   return (Array.isArray(courses) ? courses : []).map(normalizeCourse);
 }
-function normalizeChild(child) {
-  var c = deepClone(child || {});
-  c.id = c.id || ('kid' + Date.now());
-  c.name = String(c.name || '').trim();
-  c.emoji = c.emoji || '🧒';
-  return c;
-}
-function normalizeChildren(children) {
-  return (Array.isArray(children) ? children : []).map(normalizeChild).filter(function(child){ return !!child.name; });
-}
-function normalizeSelectedChildId(childId, children) {
-  var list = normalizeChildren(children || currentChildren);
-  if (!childId || childId === 'all') return 'all';
-  return list.some(function(child){ return child.id === childId; }) ? childId : 'all';
-}
-function normalizeState(payload) {
-  if (Array.isArray(payload)) {
-    return { courses: normalizeCourses(payload), children: normalizeChildren(defaultChildren), selectedChildId: 'all' };
-  }
-  payload = payload || {};
-  var children = normalizeChildren(payload.children || defaultChildren);
-  return {
-    courses: normalizeCourses(payload.courses || defaultCourses),
-    children: children,
-    selectedChildId: normalizeSelectedChildId(payload.selectedChildId, children)
-  };
-}
-function getStatePayload() {
-  return {
-    version: 3,
-    courses: deepClone(normalizeCourses(currentCourses)),
-    children: deepClone(normalizeChildren(currentChildren)),
-    selectedChildId: normalizeSelectedChildId(currentChildId, currentChildren)
-  };
-}
 function getLocalBackup() {
   try {
     var r = localStorage.getItem(STORAGE_KEY);
-    if (r) return normalizeState(JSON.parse(r));
+    if (r) return normalizeCourses(JSON.parse(r));
   } catch(e) {}
-  return normalizeState({ courses: deepClone(defaultCourses), children: deepClone(defaultChildren), selectedChildId: 'all' });
+  return normalizeCourses(deepClone(defaultCourses));
 }
-function writeLocalBackup(state) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeState(state))); } catch(e) {}
+function writeLocalBackup(courses) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeCourses(courses))); } catch(e) {}
 }
 function loadData() { return deepClone(normalizeCourses(currentCourses)); }
-function loadChildren() { return deepClone(normalizeChildren(currentChildren)); }
-function saveAllState(courses, children, selectedChildId) {
-  currentCourses = normalizeCourses(deepClone(courses));
-  currentChildren = normalizeChildren(deepClone(children));
-  currentChildId = normalizeSelectedChildId(selectedChildId, currentChildren);
-  writeLocalBackup(getStatePayload());
-  queueRemoteSave();
-}
 function saveData(courses) {
-  saveAllState(courses, currentChildren, currentChildId);
-}
-function saveChildrenState(children, selectedChildId) {
-  saveAllState(currentCourses, children, selectedChildId);
-}
-function getChildById(childId) {
-  return currentChildren.find(function(child){ return child.id === childId; }) || null;
-}
-function getSelectedChild() {
-  return getChildById(currentChildId);
-}
-function getSelectedChildLabel() {
-  var child = getSelectedChild();
-  return child ? (child.emoji + ' ' + child.name) : '全部孩子';
-}
-function getCourseDisplayName(course) {
-  var child = getChildById(course && course.childId);
-  if (child && currentChildId === 'all') return course.name + ' · ' + child.emoji + ' ' + child.name;
-  return course.name;
-}
-function getCoursesForCurrentFilter(courses) {
-  var list = Array.isArray(courses) ? courses : loadData();
-  if (currentChildId === 'all') return list.slice();
-  return list.filter(function(course){ return (course.childId || '') === currentChildId; });
-}
-function getVisibleCourseEntries(courses) {
-  var list = Array.isArray(courses) ? courses : loadData();
-  return list.map(function(course, idx){ return { course: course, idx: idx }; }).filter(function(entry){
-    return currentChildId === 'all' || (entry.course.childId || '') === currentChildId;
-  });
-}
-function renderChildLauncher() {
-  var btn = document.getElementById('child-launcher');
-  if (!btn) return;
-  var child = getSelectedChild();
-  if (child) {
-    btn.textContent = child.emoji;
-    btn.classList.add('active');
-    btn.title = '当前：' + child.name;
-    btn.setAttribute('aria-label', '当前孩子：' + child.name);
-  } else {
-    btn.textContent = currentChildren.length ? '👨‍👩‍👧‍👦' : '🧒';
-    btn.classList.toggle('active', currentChildren.length > 0);
-    btn.title = currentChildren.length ? '全部孩子' : '孩子档案';
-    btn.setAttribute('aria-label', currentChildren.length ? '全部孩子' : '孩子档案');
-  }
+  currentCourses = normalizeCourses(deepClone(courses));
+  writeLocalBackup(currentCourses);
+  queueRemoteSave();
 }
 function setSyncPill(text, cls) {
   var el = document.getElementById('sync-pill');
@@ -924,7 +823,7 @@ async function fetchRemoteState() {
 async function persistRemoteState() {
   if (!currentUser) { setSyncPill('本地模式', ''); return; }
   setSyncPill('同步中...', '');
-  var payload = getStatePayload();
+  var payload = deepClone(currentCourses);
   var result = await supabase.from(TABLE_NAME).upsert({
     user_id: currentUser.id,
     payload: payload,
@@ -999,45 +898,28 @@ function updateAuthUI() {
 
     switchAuthMode('signin');
   }
-  renderChildLauncher();
 }
 async function hydrateDataForUser() {
-  var localState = getLocalBackup();
+  var local = getLocalBackup();
   if (!currentUser) {
-    currentCourses = normalizeCourses(deepClone(localState.courses));
-    currentChildren = normalizeChildren(deepClone(localState.children));
-    currentChildId = normalizeSelectedChildId(localState.selectedChildId, currentChildren);
+    currentCourses = normalizeCourses(deepClone(local));
     render();
     return;
   }
   try {
     var remote = await fetchRemoteState();
-    if (remote !== null && remote !== undefined) {
-      var remoteState = normalizeState(remote);
-      if (remoteState.courses.length || remoteState.children.length || !Array.isArray(remote)) {
-        currentCourses = normalizeCourses(deepClone(remoteState.courses));
-        currentChildren = normalizeChildren(deepClone(remoteState.children));
-        currentChildId = normalizeSelectedChildId(remoteState.selectedChildId, currentChildren);
-        writeLocalBackup(remoteState);
-        showSetupBox(false);
-        setSyncPill('已同步', 'ok');
-      } else {
-        currentCourses = normalizeCourses(deepClone(localState.courses));
-        currentChildren = normalizeChildren(deepClone(localState.children));
-        currentChildId = normalizeSelectedChildId(localState.selectedChildId, currentChildren);
-        await persistRemoteState();
-      }
+    if (remote && remote.length) {
+      currentCourses = normalizeCourses(deepClone(remote));
+      writeLocalBackup(currentCourses);
+      showSetupBox(false);
+      setSyncPill('已同步', 'ok');
     } else {
-      currentCourses = normalizeCourses(deepClone(localState.courses));
-      currentChildren = normalizeChildren(deepClone(localState.children));
-      currentChildId = normalizeSelectedChildId(localState.selectedChildId, currentChildren);
+      currentCourses = normalizeCourses(deepClone(local));
       await persistRemoteState();
     }
   } catch(err) {
     console.error(err);
-    currentCourses = normalizeCourses(deepClone(localState.courses));
-    currentChildren = normalizeChildren(deepClone(localState.children));
-    currentChildId = normalizeSelectedChildId(localState.selectedChildId, currentChildren);
+    currentCourses = normalizeCourses(deepClone(local));
     if (err && String(err.message || '').toLowerCase().indexOf('relation') >= 0) {
       showSetupBox(true);
       setSyncPill('缺少数据表', 'error');
@@ -1045,137 +927,7 @@ async function hydrateDataForUser() {
       setSyncPill('本地模式', 'error');
     }
   }
-  applySavedFeeDisplayCurrency();
   render();
-}
-
-function openChildModal() {
-  renderChildManager();
-  openModal('child-modal');
-}
-function resetChildForm() {
-  childEditingId = null;
-  formChildEmoji = '🧒';
-  var input = document.getElementById('child-name');
-  if (input) input.value = '';
-  renderChildEmojiGrid();
-  var btn = document.getElementById('child-save-btn');
-  if (btn) btn.textContent = '添加孩子';
-}
-function renderChildEmojiGrid() {
-  var box = document.getElementById('child-emoji-grid');
-  if (!box) return;
-  box.innerHTML = CHILD_EMOJIS.map(function(emoji){
-    return '<button type="button" class="child-emoji-btn'+(emoji === formChildEmoji ? ' selected' : '')+'" onclick="selectChildEmoji(\''+emoji+'\')">'+emoji+'</button>';
-  }).join('');
-}
-function selectChildEmoji(emoji) {
-  formChildEmoji = emoji || '🧒';
-  renderChildEmojiGrid();
-}
-function beginEditChild(childId) {
-  var child = getChildById(childId);
-  if (!child) return;
-  childEditingId = child.id;
-  formChildEmoji = child.emoji || '🧒';
-  var input = document.getElementById('child-name');
-  if (input) input.value = child.name || '';
-  renderChildEmojiGrid();
-  var btn = document.getElementById('child-save-btn');
-  if (btn) btn.textContent = '保存修改';
-}
-function saveChildProfile() {
-  var name = (document.getElementById('child-name').value || '').trim();
-  if (!name) { showToast('请填写孩子名字'); return; }
-  var children = loadChildren();
-  if (childEditingId) {
-    var existing = children.find(function(child){ return child.id === childEditingId; });
-    if (existing) { existing.name = name; existing.emoji = formChildEmoji || '🧒'; }
-    saveChildrenState(children, currentChildId);
-    showToast('孩子档案已更新');
-  } else {
-    var newChild = { id: 'kid' + Date.now(), name: name, emoji: formChildEmoji || '🧒' };
-    children.push(newChild);
-    saveChildrenState(children, newChild.id);
-    showToast('孩子档案已添加');
-  }
-  resetChildForm();
-  refreshCourseChildField();
-  renderChildManager();
-  render();
-}
-function removeChildProfile(childId) {
-  var child = getChildById(childId);
-  if (!child) return;
-  var msg = '确定删除 ' + child.name + ' 的档案？\n\n该孩子名下的课程不会删除，但会变成未指定归属。';
-  if (!confirm(msg)) return;
-  var children = loadChildren().filter(function(item){ return item.id !== childId; });
-  var courses = getCoursesForCurrentFilter(loadData());
-  courses.forEach(function(course){ if ((course.childId || '') === childId) course.childId = ''; });
-  var nextSelected = currentChildId === childId ? 'all' : currentChildId;
-  currentCourses = normalizeCourses(courses);
-  saveAllState(courses, children, nextSelected);
-  resetChildForm();
-  refreshCourseChildField();
-  renderChildManager();
-  render();
-  showToast('孩子档案已删除');
-}
-function switchCurrentChild(childId) {
-  currentChildId = normalizeSelectedChildId(childId, currentChildren);
-  writeLocalBackup(getStatePayload());
-  queueRemoteSave();
-  renderChildLauncher();
-  closeModal('child-modal');
-  render();
-  showToast(currentChildId === 'all' ? '已切换到全部孩子' : ('已切换到 ' + getSelectedChildLabel()));
-}
-function renderChildManager() {
-  var list = document.getElementById('child-list');
-  if (!list) return;
-  var courses = loadData();
-  var totalCourses = courses.length;
-  var html = '<div class="child-row'+(currentChildId === 'all' ? ' active' : '')+'" onclick="switchCurrentChild(\'all\')">' +
-    '<div class="child-avatar">👨‍👩‍👧‍👦</div>' +
-    '<div class="child-row-main"><div class="child-row-name">全部孩子 ' + (currentChildId === 'all' ? '<span class="child-check">当前查看</span>' : '') + '</div><div class="child-row-sub">查看全部课程 · ' + totalCourses + ' 门</div></div>' +
-    '</div>';
-  if (!currentChildren.length) {
-    html += '<div class="child-empty">还没有孩子档案。先添加孩子，再按孩子分开记录课程。</div>';
-  } else {
-    html += currentChildren.map(function(child){
-      var count = courses.filter(function(course){ return (course.childId || '') === child.id; }).length;
-      return '<div class="child-row'+(currentChildId === child.id ? ' active' : '')+'" onclick="switchCurrentChild(\''+child.id+'\')">' +
-        '<div class="child-avatar">'+child.emoji+'</div>' +
-        '<div class="child-row-main"><div class="child-row-name">'+child.name + (currentChildId === child.id ? ' <span class="child-check">当前查看</span>' : '') + '</div><div class="child-row-sub">'+count+' 门课程</div></div>' +
-        '<div class="child-actions">' +
-          '<button class="icon-btn" onclick="event.stopPropagation();beginEditChild(\''+child.id+'\')">✏️</button>' +
-          '<button class="icon-btn danger" onclick="event.stopPropagation();removeChildProfile(\''+child.id+'\')">🗑</button>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-  }
-  list.innerHTML = html;
-  renderChildEmojiGrid();
-  var btn = document.getElementById('child-save-btn');
-  if (btn && !childEditingId) btn.textContent = '添加孩子';
-}
-function refreshCourseChildField(selectedId) {
-  var wrap = document.getElementById('f-child-wrap');
-  var select = document.getElementById('f-child-id');
-  if (!wrap || !select) return;
-  if (!currentChildren.length) {
-    wrap.classList.add('hidden');
-    select.innerHTML = '';
-    return;
-  }
-  wrap.classList.remove('hidden');
-  select.innerHTML = '<option value="">未指定</option>' + currentChildren.map(function(child){
-    return '<option value="'+child.id+'">'+child.emoji+' '+child.name+'</option>';
-  }).join('');
-  if (selectedId === undefined) {
-    selectedId = (editingIdx === null && currentChildId !== 'all') ? currentChildId : '';
-  }
-  select.value = selectedId || '';
 }
 
 function switchAuthMode(mode) {
@@ -1378,16 +1130,12 @@ function getNextSessionInfo(course) {
   return best;
 }
 function getRemainingCount(course) {
-  if ((course.courseType || 'package') === 'monthly') return null;
   if (course.total !== null && course.total !== undefined) return Math.max(0, course.total - course.used);
-  if (course.remaining !== null && course.remaining !== undefined) return Math.max(0, course.remaining);
   return null;
 }
 
 function getTotalDisplay(course) {
-  if ((course.courseType || 'package') === 'monthly') return null;
   if (course.total !== null && course.total !== undefined) return course.total;
-  if (course.remaining !== null && course.remaining !== undefined) return course.used + course.remaining;
   return null;
 }
 
@@ -1397,7 +1145,6 @@ function getProgressPercent(course) {
 }
 
 function handleRenewalAfterLastClass(course, entry) {
-  if ((course.courseType || 'package') === 'monthly') return false;
   var remaining = getRemainingCount(course);
   if (remaining !== 0) return false;
   var wantsFinal = confirm(course.name + ' 这次已经是最后一次课了。\n\n点“确定”表示确认这是最后一次。\n点“取消”表示已经延期 / 续费。');
@@ -1415,15 +1162,15 @@ function handleRenewalAfterLastClass(course, entry) {
 }
 
 function getSortedCourses() {
-  var entries = getVisibleCourseEntries(loadData());
-  return entries.map(function(entry){
-    var nextInfo = getNextSessionInfo(entry.course);
+  var courses = loadData();
+  return courses.map(function(course, idx){
+    var nextInfo = getNextSessionInfo(course);
     return {
-      course: entry.course,
-      idx: entry.idx,
+      course: course,
+      idx: idx,
       nextDate: nextInfo.date,
       nextInfo: nextInfo,
-      isToday: hasTodaySchedule(entry.course)
+      isToday: hasTodaySchedule(course)
     };
   }).sort(function(a,b){
     if (a.isToday && !b.isToday) return -1;
@@ -1452,16 +1199,13 @@ function render() {
   var today = getTodayDate();
   var todayStr = isoDate(today);
   document.getElementById('today-date').textContent = formatDate(today);
-  var selectedChildLabel = getSelectedChildLabel();
-  if (document.getElementById('today-date')) { document.getElementById('today-date').textContent += ' · ' + selectedChildLabel; }
-  renderChildLauncher();
   renderFeeSummary();
 
   if (sorted.length === 0) {
     container.innerHTML =
       '<div style="text-align:center;padding:2.5rem 1rem;color:#a39abb;">' +
         '<div style="font-size:36px;margin-bottom:12px;">🗒️</div>' +
-        '<div style="font-size:15px;font-weight:600;color:#7a6fa8;margin-bottom:8px;">' + (currentChildId === 'all' ? '还没有课程' : (getSelectedChildLabel() + ' 还没有课程')) + '</div>' +
+        '<div style="font-size:15px;font-weight:600;color:#7a6fa8;margin-bottom:8px;">还没有课程</div>' +
         '<div style="font-size:13px;line-height:1.6;">点右上角"管理课程"→ 新增课程 开始吧</div>' +
       '</div>';
     return;
@@ -1528,7 +1272,7 @@ function render() {
     }
 
     var nextDisplay = isToday ? '今天' : formatDate(nextDate);
-    var compactCount = (course.courseType === 'monthly') ? '订阅制' : (totalDisplay ? (remaining !== null ? remaining : '—') + '/' + totalDisplay : (remaining !== null ? '剩'+remaining+'次' : '—'));
+    var compactCount = totalDisplay ? (remaining !== null ? remaining : '—') + '/' + totalDisplay : (remaining !== null ? '剩'+remaining+'次' : '不限次');
 
     var wrap = document.createElement('div');
     wrap.className = 'card-wrap' + (isToday ? ' today' : '') + (expanded ? ' expanded' : '') + ((course.payAlert && remaining !== null && remaining <= 2) ? ' urgent' : '');
@@ -1538,7 +1282,7 @@ function render() {
         '<div class="summary-dot" style="background:'+course.color+'"></div>'+
         '<div class="summary-main">'+
           '<div class="summary-title-row">'+
-            '<span class="summary-title">'+getCourseDisplayName(course)+'</span>'+
+            '<span class="summary-title">'+course.name+'</span>'+
             (isToday ? '<span class="today-chip">今日打卡</span>' : '<span class="badge '+badgeClass+'">'+badgeText+'</span>')+
           '</div>'+
           '<div class="summary-meta">'+(isToday ? getTodayMeta(course) : '下次：'+formatShortDate(nextDate)+' · '+nextInfo.note)+'</div>'+
@@ -1549,14 +1293,14 @@ function render() {
       '<div class="card-body">'+
         '<div class="card-header">'+
           '<div class="dot" style="background:'+course.color+'"></div>'+
-          '<span class="card-title">'+getCourseDisplayName(course)+'</span>'+
+          '<span class="card-title">'+course.name+'</span>'+
           '<span class="badge '+badgeClass+'">'+badgeText+'</span>'+
           '<button class="icon-btn edit-btn" aria-label="编辑课程" onclick="openEditForm('+idx+')">✏️</button>'+
         '</div>'+
         '<div class="stats-row">'+
           '<div class="stat"><div class="stat-label">已上</div><div class="stat-value">'+course.used+'</div></div>'+
           '<div class="stat"><div class="stat-label">剩余</div><div class="stat-value">'+(remaining!==null?remaining:'—')+'</div></div>'+
-          '<div class="stat"><div class="stat-label">'+(course.courseType === 'monthly' ? '类型' : (totalDisplay?'总课时':'类型'))+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+(course.courseType === 'monthly' ? '订阅制' : (totalDisplay?'共'+totalDisplay+'次':'—'))+'</div></div>'+
+          '<div class="stat"><div class="stat-label">'+(totalDisplay?'总课时':'类型')+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+(totalDisplay?'共'+totalDisplay+'次':'课时不限')+'</div></div>'+
         '</div>'+
         (totalDisplay ? '<div class="progress-bar"><div class="progress-fill" style="width:'+getProgressPercent(course)+'%;background:'+course.color+'"></div></div>' : '')+
         '<div class="next-info">下次上课：<strong>'+nextDisplay+'</strong>（'+nextInfo.note+'）</div>'+
@@ -1594,9 +1338,6 @@ function markClass(idx, status, sessionKey) {
   course.history.push(entry);
   if (status === 'done') {
     course.used += 1;
-    if (course.total === null && course.remaining !== null && course.remaining !== undefined) {
-      course.remaining = Math.max(0, course.remaining - 1);
-    }
     var renewed = handleRenewalAfterLastClass(course, entry);
     showToast(course.name+' 打卡成功！已上 '+course.used+' 次');
     var rem = getRemainingCount(course);
@@ -1617,12 +1358,9 @@ function undoRecord(courseIdx, histIdx) {
   if (!record) return;
   if (record.status === 'done') {
     course.used = Math.max(0, course.used - 1);
-    if (course.total === null && course.remaining !== null && course.remaining !== undefined) course.remaining += 1;
     if (record.renewalAdded) {
       if (course.total !== null && course.total !== undefined) {
         course.total = Math.max(course.used, course.total - record.renewalAdded);
-      } else if (course.remaining !== null && course.remaining !== undefined) {
-        course.remaining = Math.max(0, course.remaining - record.renewalAdded);
       }
     }
     if (record.kind === 'reschedule' && record.planId) {
@@ -1637,40 +1375,43 @@ function undoRecord(courseIdx, histIdx) {
 function toggleHistory(id) { document.getElementById(id).classList.toggle('open'); }
 
 function openManager() {
-  var entries = getVisibleCourseEntries(loadData());
+  var courses = loadData();
   var list = document.getElementById('manager-list');
   list.innerHTML = '';
-  if (!entries.length) {
-    list.innerHTML = '<div class="child-empty">'+(currentChildId === 'all' ? '还没有课程。' : (getSelectedChildLabel() + ' 还没有课程。'))+'</div>';
-  }
-  for (var i = 0; i < entries.length; i++) {
-    (function(entry){
-      var c = entry.course;
-      var idx = entry.idx;
+  for (var idx = 0; idx < courses.length; idx++) {
+    (function(c, idx){
       var rem = getRemainingCount(c);
       var row = document.createElement('div');
       row.className = 'course-row';
       row.innerHTML =
         '<div class="course-row-dot" style="background:'+c.color+'"></div>' +
         '<div class="course-row-main">' +
-          '<div class="course-row-name">'+getCourseDisplayName(c)+'</div>' +
+          '<div class="course-row-name">'+c.name+'</div>' +
           '<div class="course-row-info">'+(c.courseType === 'monthly' ? '订阅制' : ((rem!==null?('剩'+rem+'次'):'课包制')))+' · '+formatWeekdayTimeList(c)+'</div>' +
         '</div>' +
         '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" >✏️</button>' +
-        '<button class="icon-btn danger" onclick="deleteCourse('+idx+')">✕</button>';
+        '<button class="icon-btn danger" onclick="deleteCourse('+idx+', \'manager\', this)">✕</button>';
       list.appendChild(row);
-    })(entries[i]);
+    })(courses[idx], idx);
   }
   openModal('manager-modal');
 }
 
-function deleteCourse(idx) {
+function deleteCourse(idx, source, btnEl) {
+  if (btnEl && typeof btnEl.blur === 'function') btnEl.blur();
   if (!confirm('确定删除这门课程？打卡记录也会一起删除。')) return;
   var courses = loadData();
   var removed = courses.splice(idx, 1)[0];
   if (removed && expandedIds[removed.id]) delete expandedIds[removed.id];
   saveData(courses);
-  openManager(); render();
+  closeModal('edit-modal');
+  closeModal('manager-modal');
+  render();
+  if (source === 'manager') {
+    window.requestAnimationFrame(function(){ openManager(); });
+  } else {
+    showToast('课程已删除');
+  }
 }
 
 function buildColorGrid(selected) {
@@ -1718,69 +1459,23 @@ function toggleWeekday(day) {
   formWeekdays = sortWeekdays(formWeekdays);
   refreshWeekdayButtons();
 }
-function syncEndTimeFromStart() {
-  var startEl = document.getElementById('f-time-start');
-  var endEl = document.getElementById('f-time-end');
-  if (!startEl || !endEl) return;
-  if (!endEl.value || endEl.value <= startEl.value) endEl.value = addMinutesToTime(startEl.value, 60);
-}
-function renderDayTimeEditors() {
-  var list = document.getElementById('f-day-time-list');
-  if (!list) return;
-  list.innerHTML = '';
-  sortWeekdays(formWeekdays).forEach(function(day){
-    var row = document.createElement('div');
-    row.className = 'day-time-row';
-    row.innerHTML = '<div class="day-time-label">'+WEEKDAYS[day]+'</div>' +
-      '<div class="time-range">' +
-      '<input class="time-input" type="time" id="f-day-start-'+day+'" value="'+(document.getElementById('f-time-start') ? document.getElementById('f-time-start').value : '10:00')+'" onchange="syncSpecificEndTime('+day+')" />' +
-      '<span class="time-sep">至</span>' +
-      '<input class="time-input" type="time" id="f-day-end-'+day+'" value="'+(document.getElementById('f-time-end') ? document.getElementById('f-time-end').value : '11:00')+'" />' +
-      '</div>';
-    list.appendChild(row);
-  });
-}
-function applyCourseDayTimesToForm(course) {
-  sortWeekdays(formWeekdays).forEach(function(day){
-    var startEl = document.getElementById('f-day-start-'+day);
-    var endEl = document.getElementById('f-day-end-'+day);
-    if (!startEl || !endEl) return;
-    var t = getCourseDayTime(course || {}, day);
-    startEl.value = t.start;
-    endEl.value = t.end;
-  });
-}
-function updateTimeModeUI() {
-  var mode = (document.getElementById('f-time-mode') || {}).value || 'same';
-  var sameBox = document.getElementById('f-same-time-box');
-  var diffBox = document.getElementById('f-diff-time-box');
-  if (sameBox) sameBox.classList.toggle('hidden', mode !== 'same');
-  if (diffBox) diffBox.classList.toggle('hidden', mode !== 'diff');
-  if (mode === 'diff') {
-    renderDayTimeEditors();
+function updateCourseTypeFields() {
+  var typeEl = document.getElementById('f-course-type');
+  var type = typeEl ? typeEl.value : 'package';
+  var packageBox = document.getElementById('f-package-fields');
+  var monthlyBox = document.getElementById('f-monthly-fields');
+  var feeSessionsWrap = document.getElementById('f-fee-sessions-wrap');
+  var feeSessionsInput = document.getElementById('f-fee-sessions');
+  var feeHint = document.getElementById('f-fee-hint');
+  if (packageBox) packageBox.classList.toggle('hidden', type !== 'package');
+  if (monthlyBox) monthlyBox.classList.toggle('hidden', type !== 'monthly');
+  if (feeSessionsWrap) feeSessionsWrap.classList.toggle('hidden', type !== 'package');
+  if (type !== 'package' && feeSessionsInput) feeSessionsInput.value = '';
+  if (feeHint) {
+    feeHint.innerHTML = type === 'monthly'
+      ? '订阅制会按周期内的上课周数分摊；如果不跨年，则整笔计入当年。'
+      : '新建课程时可直接填写首笔付费和购买课时，点保存后会一起创建；已有课程再买课包时，新增购买课时会自动并入课包总数。';
   }
-}
-function syncSpecificEndTime(day) {
-  var startEl = document.getElementById('f-day-start-'+day);
-  var endEl = document.getElementById('f-day-end-'+day);
-  if (!startEl || !endEl) return;
-  if (!endEl.value || endEl.value <= startEl.value) endEl.value = addMinutesToTime(startEl.value, 60);
-}
-function collectDayTimesFromForm() {
-  var mode = (document.getElementById('f-time-mode') || {}).value || 'same';
-  var baseStart = document.getElementById('f-time-start').value || '10:00';
-  var baseEnd = document.getElementById('f-time-end').value || addMinutesToTime(baseStart, 60);
-  var map = {};
-  sortWeekdays(formWeekdays).forEach(function(day){
-    if (mode === 'diff') {
-      var start = (document.getElementById('f-day-start-'+day) || {}).value || baseStart;
-      var end = (document.getElementById('f-day-end-'+day) || {}).value || addMinutesToTime(start, 60);
-      map[day] = { start:start, end:end };
-    } else {
-      map[day] = { start:baseStart, end:baseEnd };
-    }
-  });
-  return map;
 }
 function renderRescheduleList(course) {
   var empty = document.getElementById('f-reschedule-empty');
@@ -1846,25 +1541,7 @@ function removeReschedule(planId) {
   render();
   showToast('已删除调课安排');
 }
-function updateCourseTypeFields() {
-  var typeEl = document.getElementById('f-course-type');
-  var type = typeEl ? typeEl.value : 'package';
-  var packageBox = document.getElementById('f-package-fields');
-  var monthlyBox = document.getElementById('f-monthly-fields');
-  var feeSessionsWrap = document.getElementById('f-fee-sessions-wrap');
-  var feeSessionsInput = document.getElementById('f-fee-sessions');
-  var feeHint = document.getElementById('f-fee-hint');
-  if (packageBox) packageBox.classList.toggle('hidden', type !== 'package');
-  if (monthlyBox) monthlyBox.classList.toggle('hidden', type !== 'monthly');
-  if (feeSessionsWrap) feeSessionsWrap.classList.toggle('hidden', type !== 'package');
-  if (type !== 'package' && feeSessionsInput) feeSessionsInput.value = '';
-  if (feeHint) {
-    feeHint.innerHTML = type === 'monthly'
-      ? '订阅制会按周期内的上课周数分摊；如果不跨年，则整笔计入当年。'
-      : '新建课程时可直接填写首笔付费和购买课时，点保存后会一起创建；已有课程再买课包时，新增购买课时会自动并入课包总数。';
-  }
-}
-function toggleTotalMode() { updateCourseTypeFields(); }
+function toggleTotalMode() {}
 function getCounterValue(id) {
   var el = document.getElementById(id);
   if (!el) return 0;
@@ -1887,6 +1564,64 @@ function setCounterValue(id, value) {
 function adjustVal(id, delta) {
   setCounterValue(id, getCounterValue(id) + delta);
 }
+function renderDayTimeEditors() {
+  var list = document.getElementById('f-day-time-list');
+  if (!list) return;
+  list.innerHTML = '';
+  sortWeekdays(formWeekdays).forEach(function(day){
+    var row = document.createElement('div');
+    row.className = 'day-time-row';
+    row.innerHTML = '<div class="day-time-label">'+WEEKDAYS[day]+'</div>' +
+      '<div class="time-range">' +
+      '<input class="time-input" type="time" id="f-day-start-'+day+'" value="'+(document.getElementById('f-time-start') ? document.getElementById('f-time-start').value : '10:00')+'" onchange="syncSpecificEndTime('+day+')" />' +
+      '<span class="time-sep">至</span>' +
+      '<input class="time-input" type="time" id="f-day-end-'+day+'" value="'+(document.getElementById('f-time-end') ? document.getElementById('f-time-end').value : '11:00')+'" />' +
+      '</div>';
+    list.appendChild(row);
+  });
+}
+function applyCourseDayTimesToForm(course) {
+  sortWeekdays(formWeekdays).forEach(function(day){
+    var startEl = document.getElementById('f-day-start-'+day);
+    var endEl = document.getElementById('f-day-end-'+day);
+    if (!startEl || !endEl) return;
+    var t = getCourseDayTime(course || {}, day);
+    startEl.value = t.start;
+    endEl.value = t.end;
+  });
+}
+function updateTimeModeUI() {
+  var mode = (document.getElementById('f-time-mode') || {}).value || 'same';
+  var sameBox = document.getElementById('f-same-time-box');
+  var diffBox = document.getElementById('f-diff-time-box');
+  if (sameBox) sameBox.classList.toggle('hidden', mode !== 'same');
+  if (diffBox) diffBox.classList.toggle('hidden', mode !== 'diff');
+  if (mode === 'diff') {
+    renderDayTimeEditors();
+  }
+}
+function syncSpecificEndTime(day) {
+  var startEl = document.getElementById('f-day-start-'+day);
+  var endEl = document.getElementById('f-day-end-'+day);
+  if (!startEl || !endEl) return;
+  if (!endEl.value || endEl.value <= startEl.value) endEl.value = addMinutesToTime(startEl.value, 60);
+}
+function collectDayTimesFromForm() {
+  var mode = (document.getElementById('f-time-mode') || {}).value || 'same';
+  var baseStart = document.getElementById('f-time-start').value || '10:00';
+  var baseEnd = document.getElementById('f-time-end').value || addMinutesToTime(baseStart, 60);
+  var map = {};
+  sortWeekdays(formWeekdays).forEach(function(day){
+    if (mode === 'diff') {
+      var start = (document.getElementById('f-day-start-'+day) || {}).value || baseStart;
+      var end = (document.getElementById('f-day-end-'+day) || {}).value || addMinutesToTime(start, 60);
+      map[day] = { start:start, end:end };
+    } else {
+      map[day] = { start:baseStart, end:baseEnd };
+    }
+  });
+  return map;
+}
 
 function openAddForm() {
   editingIdx = null; formWeekdays = [1]; formColor = COLORS[0];
@@ -1907,11 +1642,10 @@ function openAddForm() {
   document.getElementById('f-shift-note').value = '';
   clearFeeInputs(false);
   renderFeeList(null);
-  refreshCourseChildField(currentChildId !== 'all' ? currentChildId : '');
   selectWeekday([1]); buildColorGrid(COLORS[0]); renderRescheduleList(null); updateCourseTypeFields(); updateTimeModeUI();
   document.getElementById('edit-form-btns').innerHTML =
-    "<button class='form-btn' onclick=\"closeModal('edit-modal')\">取消</button>" +
-    "<button class='form-btn save' onclick=\"saveForm()\">保存</button>";
+    '<button class="form-btn" onclick="closeModal(\'edit-modal\')">取消</button>' +
+    '<button class="form-btn save" onclick="saveForm()">保存</button>';
   closeModal('manager-modal');
   openModal('edit-modal');
 }
@@ -1940,11 +1674,10 @@ function openEditForm(idx) {
   var lastCurrency = (course.fees && course.fees.length) ? (course.fees[course.fees.length-1].currency || 'CNY') : 'CNY';
   document.getElementById('f-fee-currency').value = lastCurrency;
   renderFeeList(course);
-  refreshCourseChildField(course.childId || '');
   selectWeekday(formWeekdays); buildColorGrid(course.color); renderRescheduleList(course); updateCourseTypeFields(); updateTimeModeUI(); applyCourseDayTimesToForm(course);
   document.getElementById('edit-form-btns').innerHTML =
     '<button class="form-btn del" onclick="deleteCourse('+idx+', \'edit\', this)">删除</button>' +
-    "<button class='form-btn save' onclick=\"saveForm()\">保存</button>";
+    '<button class="form-btn save" onclick="saveForm()">保存</button>';
   openModal('edit-modal');
 }
 
@@ -1993,7 +1726,6 @@ function saveForm() {
     c.remaining = remaining;
     c.used = used;
     c.payAlert = document.getElementById('f-pay-alert').checked;
-    c.childId = (document.getElementById('f-child-id') || {}).value || '';
     c.fees = c.fees || [];
     if (pendingFee) {
       c.fees.push(pendingFee);
@@ -2021,8 +1753,7 @@ function saveForm() {
       history: [],
       reschedules: [],
       fees: [],
-      payAlert: document.getElementById('f-pay-alert').checked,
-      childId: (document.getElementById('f-child-id') || {}).value || ''
+      payAlert: document.getElementById('f-pay-alert').checked
     };
     if (pendingFee) {
       newCourse.fees.push(pendingFee);
@@ -2040,6 +1771,7 @@ function saveForm() {
 
 var CURRENCY_SYMBOLS = { CNY:'¥', USD:'$', HKD:'HK$', EUR:'€', GBP:'£', JPY:'¥', CAD:'CA$', AUD:'A$' };
 
+// Approximate rates to CNY (base). User can't edit these here but they're clearly labeled as approximate.
 var RATES_TO_CNY = { CNY:1, USD:7.25, HKD:0.93, EUR:7.85, GBP:9.15, JPY:0.048, CAD:5.25, AUD:4.65 };
 
 function toCNY(amount, currency) {
@@ -2055,6 +1787,8 @@ function fmtMoney(amount, currency) {
   if (currency === 'JPY') return sym + Math.round(n).toLocaleString('zh-CN');
   return sym + (n % 1 < 0.005 ? Math.round(n).toLocaleString('zh-CN') : n.toLocaleString('zh-CN', {minimumFractionDigits:2, maximumFractionDigits:2}));
 }
+
+
 function getSavedFeeDisplayCurrency() {
   try { return localStorage.getItem(FEE_DISPLAY_CURRENCY_KEY) || 'CNY'; } catch(e) { return 'CNY'; }
 }
@@ -2065,6 +1799,7 @@ function applySavedFeeDisplayCurrency() {
   var el = document.getElementById('fee-display-currency');
   if (el) el.value = getSavedFeeDisplayCurrency();
 }
+
 function getFeeSessionsInputValue() {
   var el = document.getElementById('f-fee-sessions');
   return el ? Math.max(0, parseInt(el.value, 10) || 0) : 0;
@@ -2095,7 +1830,7 @@ function buildFeeEntryFromInputs() {
 }
 
 function renderFeeSummary() {
-  var courses = getCoursesForCurrentFilter(loadData());
+  var courses = loadData();
   var thisYear = new Date().getFullYear();
   var totalEl = document.getElementById('fee-summary-total');
   var breakdownEl = document.getElementById('fee-summary-breakdown');
@@ -2125,12 +1860,12 @@ function renderFeeSummary() {
 
     var converted = fromCNY(courseCNY, displayCur);
     grandTotalCNY += courseCNY;
-    items.push({ name: getCourseDisplayName(c), color: c.color, amtCNY: courseCNY, converted: converted });
+    items.push({ name: c.name, color: c.color, amtCNY: courseCNY, converted: converted });
   });
 
   if (!items.length) {
     totalEl.textContent = '—';
-    breakdownEl.innerHTML = '<div style="font-size:12px;color:#b4acc9;">在课程编辑里添加学费记录后，这里会按当前收费方式统计。今年只显示当前选中孩子的课程。</div>';
+    breakdownEl.innerHTML = '<div style="font-size:12px;color:#b4acc9;">在课程编辑里添加学费记录后，这里会按付款先确认、跨年明显上不完时递延显示。</div>';
     if (rateNoteEl) rateNoteEl.textContent = '';
     return;
   }
@@ -2153,6 +1888,7 @@ function renderFeeSummary() {
       : '';
   }
 }
+
 
 function renderFeeList(course) {
   var list = document.getElementById('f-fee-list');
@@ -2216,6 +1952,18 @@ function deleteFee(feeIdx, btnEl) {
   });
 }
 
+// Get all dates of actual classes taken (history status='done'), grouped by year
+function getClassDatesByYear(course) {
+  var byYear = {};
+  (course.history || []).forEach(function(h) {
+    if (h.status !== 'done') return;
+    var yr = h.date ? parseInt(String(h.date).slice(0, 4), 10) : null;
+    if (!yr) return;
+    byYear[yr] = (byYear[yr] || 0) + 1;
+  });
+  return byYear;
+}
+
 function weeksRemainingInYearForCourse(course, fromDateStr) {
   var weekdays = Array.isArray(course.weekdays) && course.weekdays.length ? course.weekdays.slice() : [typeof course.weekday === 'number' ? course.weekday : 1];
   if (!weekdays.length) weekdays = [1];
@@ -2233,6 +1981,8 @@ function weeksRemainingInYearForCourse(course, fromDateStr) {
   }
   return count;
 }
+
+
 function countCourseOccurrencesInRange(course, startStr, endStr, yearFilter) {
   var start = startStr ? new Date(startStr + 'T00:00:00') : null;
   var end = endStr ? new Date(endStr + 'T00:00:00') : null;
@@ -2248,6 +1998,7 @@ function countCourseOccurrencesInRange(course, startStr, endStr, yearFilter) {
   }
   return count;
 }
+
 function allocateSubscriptionFeeByYear(course, fee, result) {
   var currency = fee.currency || 'CNY';
   var amount = parseFloat(fee.amount) || 0;
@@ -2289,10 +2040,12 @@ function allocateSubscriptionFeeByYear(course, fee, result) {
     result[toYear][currency] = (result[toYear][currency] || 0) + roundingDiff;
   }
 }
+
 function prorateFeesByYear(course) {
   var result = {};
   var fees = (course.fees || []).slice().sort(function(a,b){ return (a.date || '') > (b.date || '') ? 1 : -1; });
   if (!fees.length) return result;
+
   fees.forEach(function(f) {
     var currency = f.currency || 'CNY';
     var amount = parseFloat(f.amount) || 0;
@@ -2320,8 +2073,12 @@ function prorateFeesByYear(course) {
       result[feeYear + 1][currency] = (result[feeYear + 1][currency] || 0) + deferredAmount;
     }
   });
+
   return result;
 }
+
+
+
 
 function getWeekMonday(dateObj) {
   var d = new Date(dateObj || getTodayDate());
@@ -2342,7 +2099,7 @@ function buildWeekScheduleItems() {
     d.setDate(monday.getDate() + i);
     weekDays.push({ date: d, iso: isoDate(d), items: [] });
   }
-  var courses = getCoursesForCurrentFilter(loadData());
+  var courses = loadData();
   courses.forEach(function(course){
     weekDays.forEach(function(dayObj){
       if (isRegularCourseOnDate(course, dayObj.date)) {
@@ -2350,7 +2107,7 @@ function buildWeekScheduleItems() {
           type: 'regular',
           sortTime: getCourseTimeForDate(course, dayObj.date).start,
           color: course.color,
-          courseName: getCourseDisplayName(course),
+          courseName: course.name,
           timeText: formatTimeRange(course, dayObj.date.getDay()),
           note: '固定课程 · 每' + formatWeekdayList(course)
         });
@@ -2360,7 +2117,7 @@ function buildWeekScheduleItems() {
           type: 'reschedule',
           sortTime: getCourseTimeForDate(course, dayObj.date).start,
           color: course.color,
-          courseName: getCourseDisplayName(course),
+          courseName: course.name,
           timeText: formatTimeRange(course, dayObj.date.getDay()),
           note: '调课：' + formatShortDateFromIso(plan.fromDate) + ' → ' + formatShortDateFromIso(plan.toDate) + (plan.note ? ' · ' + plan.note : '')
         });
@@ -2410,7 +2167,7 @@ function openScheduleModal() {
 }
 
 function openExportModal() {
-  var courses = getCoursesForCurrentFilter(loadData());
+  var courses = loadData();
   var list = document.getElementById('export-time-list');
   list.innerHTML = '';
   for (var idx = 0; idx < courses.length; idx++) {
@@ -2438,7 +2195,7 @@ function openExportModal() {
       row.innerHTML =
         '<div style="display:flex;align-items:center;gap:8px;">' +
           '<div class="time-dot" style="background:'+c.color+';flex-shrink:0;"></div>' +
-          '<span style="font-size:14px;font-weight:600;color:#4a3f73;flex:1;">'+getCourseDisplayName(c)+'</span>' +
+          '<span style="font-size:14px;font-weight:600;color:#4a3f73;flex:1;">'+c.name+'</span>' +
           '<span style="font-size:11px;color:#a39abb;font-weight:500;">每'+formatWeekdayList(c)+(c.timeMode === 'diff' ? ' · 分别设置' : '')+'</span>' +
         '</div>' + dayRows;
       list.appendChild(row);
@@ -2448,10 +2205,7 @@ function openExportModal() {
 }
 function saveClassTime(idx, startVal, endVal, weekday) {
   var courses = loadData();
-  var visible = getVisibleCourseEntries(courses);
-  var entry = visible[idx];
-  if (!entry) return;
-  var c = courses[entry.idx];
+  var c = courses[idx];
   if (weekday === null || weekday === undefined || weekday === 'null') {
     if (startVal) c.classTime = startVal;
     if (endVal) c.classEndTime = endVal;
@@ -2480,7 +2234,7 @@ function padZ(n) { return String(n).padStart(2,'0'); }
 function toICSDate(dateObj, h, m) { return dateObj.getFullYear()+padZ(dateObj.getMonth()+1)+padZ(dateObj.getDate())+'T'+padZ(h)+padZ(m)+'00'; }
 
 function generateICS() {
-  var courses = getCoursesForCurrentFilter(loadData());
+  var courses = loadData();
   var reminderMins = parseInt(document.getElementById('exp-remind-before').value, 10);
   var includePayAlert = document.getElementById('exp-pay-alert').checked;
   var includeExpireAlert = document.getElementById('exp-expire-alert').checked;
@@ -2542,17 +2296,12 @@ function generateICS() {
 
     (c.reschedules || []).forEach(function(plan){
       if (plan.used) return;
-      var shiftBase = new Date(plan.toDate); shiftBase.setHours(0,0,0,0);
-      var shiftTime = getCourseTimeForDate(c, shiftBase);
-      var tp2 = shiftTime.start.split(':');
-      var th2 = parseInt(tp2[0], 10), tm2 = parseInt(tp2[1], 10);
-      var ep2 = shiftTime.end.split(':');
-      var eh2 = parseInt(ep2[0], 10), em2 = parseInt(ep2[1], 10);
-      var shiftDate = new Date(shiftBase); shiftDate.setHours(th2,tm2,0,0);
-      var shiftEnd = new Date(shiftBase); shiftEnd.setHours(eh2, em2, 0, 0);
+      var shiftDate = new Date(plan.toDate);
+      shiftDate.setHours(th,tm,0,0);
+      var shiftEnd = new Date(shiftDate); shiftEnd.setHours(eh, em, 0, 0);
       lines.push('BEGIN:VEVENT');
       lines.push('UID:shift-'+c.id+'-'+plan.id+'@keshidaka');
-      lines.push('DTSTART:'+toICSDate(shiftDate,th2,tm2));
+      lines.push('DTSTART:'+toICSDate(shiftDate,th,tm));
       lines.push('DTEND:'+toICSDate(shiftEnd, shiftEnd.getHours(), shiftEnd.getMinutes()));
       lines.push('SUMMARY:'+c.name+'（调课）');
       lines.push('DESCRIPTION:调课：'+formatShortDateFromIso(plan.fromDate)+' → '+formatShortDateFromIso(plan.toDate)+(plan.note ? '；'+plan.note : ''));
@@ -2568,16 +2317,11 @@ function generateICS() {
       var rem = getRemainingCount(c);
       if (rem !== null && rem <= 2 && rem > 0) {
         var alertDate = getNextRegularClassDate(c, getTodayDate());
-        var alertTime = getCourseTimeForDate(c, alertDate);
-        var ap = alertTime.start.split(':');
-        var ah = parseInt(ap[0], 10), am = parseInt(ap[1], 10);
-        var aep = alertTime.end.split(':');
-        var aeh = parseInt(aep[0], 10), aem = parseInt(aep[1], 10);
-        alertDate.setHours(ah,am,0,0);
-        var alertEnd = new Date(alertDate); alertEnd.setHours(aeh, aem, 0, 0);
+        alertDate.setHours(th,tm,0,0);
+        var alertEnd = new Date(alertDate); alertEnd.setHours(eh, em, 0, 0);
         lines.push('BEGIN:VEVENT');
         lines.push('UID:pay-'+c.id+'@keshidaka');
-        lines.push('DTSTART:'+toICSDate(alertDate,ah,am));
+        lines.push('DTSTART:'+toICSDate(alertDate,th,tm));
         lines.push('DTEND:'+toICSDate(alertEnd,alertEnd.getHours(),alertEnd.getMinutes()));
         lines.push('SUMMARY:⚠️ '+c.name+' 需要续费');
         lines.push('DESCRIPTION:'+c.name+'仅剩'+rem+'次课，记得联系老师续费！');
@@ -2594,16 +2338,11 @@ function generateICS() {
       var sessionsLeft = totalSessions - c.used;
       if (sessionsLeft > 0) {
         var lastDate = estimateLastRegularDate(c, sessionsLeft);
-        var lastTime = getCourseTimeForDate(c, lastDate);
-        var lp = lastTime.start.split(':');
-        var lh = parseInt(lp[0], 10), lm = parseInt(lp[1], 10);
-        var lep = lastTime.end.split(':');
-        var leh = parseInt(lep[0], 10), lem = parseInt(lep[1], 10);
-        lastDate.setHours(lh,lm,0,0);
-        var lastEnd = new Date(lastDate); lastEnd.setHours(leh, lem, 0, 0);
+        lastDate.setHours(th,tm,0,0);
+        var lastEnd = new Date(lastDate.getTime()+3600000);
         lines.push('BEGIN:VEVENT');
         lines.push('UID:expire-'+c.id+'@keshidaka');
-        lines.push('DTSTART:'+toICSDate(lastDate,lh,lm));
+        lines.push('DTSTART:'+toICSDate(lastDate,th,tm));
         lines.push('DTEND:'+toICSDate(lastEnd,lastEnd.getHours(),lastEnd.getMinutes()));
         lines.push('SUMMARY:🎓 '+c.name+' 最后一节课');
         lines.push('DESCRIPTION:'+c.name+'课包的最后一次课（共'+totalSessions+'次），记得安排续费！');
@@ -2664,9 +2403,68 @@ document.addEventListener('touchend', function(e){
   if (now - lastTouchEnd <= 300) e.preventDefault();
   lastTouchEnd = now;
 }, {passive:false});
-resetChildForm();
-renderChildLauncher();
 applySavedFeeDisplayCurrency();
+var currentIcalUrl = '';
+
+async function openIcalModal() {
+  openModal('ical-modal');
+  document.getElementById('ical-loading').classList.remove('hidden');
+  document.getElementById('ical-content').classList.add('hidden');
+  document.getElementById('ical-login-prompt').classList.add('hidden');
+
+  if (!currentUser) {
+    document.getElementById('ical-loading').classList.add('hidden');
+    document.getElementById('ical-login-prompt').classList.remove('hidden');
+    return;
+  }
+
+  try {
+    var result = await supabase.rpc('upsert_ical_token');
+    if (result.error) throw result.error;
+    var token = result.data;
+    currentIcalUrl = SUPABASE_URL + '/functions/v1/ical?user_id=' + currentUser.id + '&token=' + token;
+    document.getElementById('ical-url-text').textContent = currentIcalUrl;
+    document.getElementById('ical-loading').classList.add('hidden');
+    document.getElementById('ical-content').classList.remove('hidden');
+  } catch(e) {
+    showToast('获取链接失败：' + (e.message || e));
+    closeModal('ical-modal');
+  }
+}
+
+function copyIcalUrl() {
+  if (!currentIcalUrl) return;
+  navigator.clipboard.writeText(currentIcalUrl).then(function() {
+    var btn = document.getElementById('ical-copy-btn');
+    btn.textContent = '已复制 ✓';
+    setTimeout(function(){ btn.textContent = '复制'; }, 2000);
+  }).catch(function() {
+    showToast('复制失败，请手动选中链接复制');
+  });
+}
+
+function openIcalSubscribeLink() {
+  if (!currentIcalUrl) return;
+  // webcal:// scheme triggers Apple Calendar subscription on iPhone
+  var webcalUrl = currentIcalUrl.replace(/^https?:\/\//, 'webcal://');
+  window.location.href = webcalUrl;
+}
+
+async function resetIcalToken() {
+  if (!currentUser) return;
+  if (!confirm('重置后旧的订阅链接会失效，需要在 iPhone 日历里重新订阅。确定吗？')) return;
+  try {
+    var result = await supabase.rpc('reset_ical_token');
+    if (result.error) throw result.error;
+    var token = result.data;
+    currentIcalUrl = SUPABASE_URL + '/functions/v1/ical?user_id=' + currentUser.id + '&token=' + token;
+    document.getElementById('ical-url-text').textContent = currentIcalUrl;
+    showToast('链接已重置');
+  } catch(e) {
+    showToast('重置失败：' + (e.message || e));
+  }
+}
+
 initAuth();
 </script>
 
@@ -2686,13 +2484,6 @@ initAuth();
         <li>打完最后一次课时，系统弹出确认：选"已续费"后输入新增课时数，已上次数不清零，继续累计。</li>
       </ul>
 
-      <h3>1.5 孩子档案与筛选</h3>
-      <ul>
-        <li>左上角云朵旁新增“孩子档案”按钮，可添加多个孩子，支持 emoji 头像、编辑和删除。</li>
-        <li>可切换“全部孩子”或某个孩子；选中后，课程卡片、学费分摊、一键课表和导出日历都会只显示该孩子的课程。</li>
-        <li>新增课程会默认继承当前选中的孩子，也可在课程编辑里修改归属。</li>
-      </ul>
-
       <h3>2. 打卡与调课</h3>
       <ul>
         <li>当天有课的课程自动排在最上方并展开，点"今天上课了"打卡扣课时；点"今天请假"则课时保留顺延。</li>
@@ -2703,20 +2494,21 @@ initAuth();
       <h3>3. 今年学费分摊</h3>
       <ul>
         <li>在课程编辑里记录每次缴费的金额、货币和缴费日期，支持人民币、美元、港币、欧元、英镑、日元等。</li>
-        <li><strong>有打卡记录时：</strong>按各年实际打卡次数比例分摊总学费。例如课包共 10 次，2025 年打卡 4 次、2026 年打卡 6 次，则学费按 4:6 拆分到两年，续费叠加计算。</li>
-        <li><strong>无打卡记录时：</strong>学费暂时全归入当前年，开始打卡后自动按比例重新分配。</li>
-        <li>右上角切换显示货币，所有金额按参考汇率统一换算（仅供参考，不实时更新）。</li>
+        <li><strong>课包制：</strong>付款后通常直接计入当年；只有到年底前按每周上课频率明显上不完时，才把超出部分递延到下一年。</li>
+        <li><strong>订阅制：</strong>如果订阅周期不跨年，金额直接计入当年；如果跨年，则按订阅周期内各年份对应的上课周数比例分摊。</li>
+        <li>右上角可切换显示货币，系统会记住你上次选择的币种。</li>
       </ul>
 
       <h3>4. 一键课表</h3>
       <ul>
         <li>点顶部"一键课表"，按周一到周日展示本周所有固定课程和调课安排，标注上课时间段，当天高亮。</li>
+        <li>如果一周多次课的时间不一样，可以分别设置每个上课日的时间，课表会按各自时间显示。</li>
       </ul>
 
-      <h3>5. 导出到 Apple Calendar</h3>
+      <h3>5. 日历提醒</h3>
       <ul>
-        <li>为每门课设置上课时间后，生成 .ics 文件，iPhone 打开即可导入系统日历。</li>
-        <li>可选导出：每周上课提醒（可设提前时间）、续费提醒（剩余 ≤ 2 次）、课包到期提醒（最后一节课当天 + 提前 3 天）、调课日提醒。</li>
+        <li><strong>订阅日历 URL：</strong>登录后点"订阅日历"，生成专属的 webcal:// 链接。iPhone 点一下即可订阅，Apple Calendar 每 6 小时自动拉取最新数据——课程变动、调课、续费后日历自动更新，无需重新操作。</li>
+        <li>订阅链接包含专属 token，请勿分享给他人。如需让旧链接失效（换设备或误分享），可在订阅弹窗里点"重置链接"重新生成。</li>
       </ul>
 
       <h3>6. 账号与多设备同步</h3>
