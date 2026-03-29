@@ -184,11 +184,12 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
 .time-range{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;min-width:150px}
 .time-sep{font-size:12px;color:#a39abb;font-weight:700}
 .time-mode-toggle{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.time-mode-toggle .form-input{max-width:220px}.day-time-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}.day-time-row{display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:center;padding:10px 12px;border:1px solid rgba(127,119,221,0.1);border-radius:12px;background:#fbf8ff}.day-time-label{font-size:13px;font-weight:600;color:#4a3f73}
-/* iPhone date/time input stable size fix */
-.form-group,.reschedule-box,.time-range,.reschedule-grid{min-width:0}
+/* date/time input stable size fix */
+.form-group,.reschedule-box,.time-range,.reschedule-grid,.day-time-row{min-width:0;overflow:hidden}
 .time-range{width:100%;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
 .reschedule-grid{width:100%;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch}
-.time-range > *,.reschedule-grid > *{min-width:0}
+.time-range > *,.reschedule-grid > *{min-width:0;overflow:hidden}
+.day-time-row{display:grid;grid-template-columns:60px minmax(0,1fr);gap:8px}
 .form-input[type="date"],.time-input[type="date"],.form-input[type="time"],.time-input[type="time"]{
   display:block;
   width:100%;
@@ -198,15 +199,17 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
   inline-size:100%;
   max-inline-size:100%;
   min-inline-size:0;
-  min-height:48px;
-  height:48px;
-  padding:12px 14px;
-  line-height:1.2;
+  height:44px;
+  min-height:44px;
+  padding:0 10px;
+  font-size:15px;
+  line-height:44px;
   border-radius:12px;
   background-color:#fff;
   background-clip:padding-box;
-  -webkit-appearance:auto;
-  appearance:auto;
+  -webkit-appearance:none;
+  appearance:none;
+  overflow:hidden;
 }
 .form-input[type="date"]::-webkit-datetime-edit,
 .time-input[type="date"]::-webkit-datetime-edit,
@@ -214,21 +217,34 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
 .time-input[type="time"]::-webkit-datetime-edit{
   display:flex;
   align-items:center;
-  min-height:24px;
   padding:0;
+  width:100%;
+  overflow:hidden;
 }
 .form-input[type="date"]::-webkit-date-and-time-value,
 .time-input[type="date"]::-webkit-date-and-time-value,
 .form-input[type="time"]::-webkit-date-and-time-value,
 .time-input[type="time"]::-webkit-date-and-time-value{
   text-align:left;
+  width:100%;
+}
+.form-input[type="date"]::-webkit-inner-spin-button,
+.time-input[type="time"]::-webkit-inner-spin-button,
+.form-input[type="date"]::-webkit-calendar-picker-indicator,
+.time-input[type="time"]::-webkit-calendar-picker-indicator{
+  opacity:0.5;
+  flex-shrink:0;
 }
 @supports (-webkit-touch-callout: none) {
   .form-input[type="date"],.time-input[type="date"],.form-input[type="time"],.time-input[type="time"]{
     font-size:16px;
-    min-height:48px;
-    height:48px;
+    height:44px;
+    min-height:44px;
+    line-height:44px;
+    -webkit-appearance:none;
   }
+  .time-range{gap:6px}
+  .reschedule-grid{gap:6px}
 }
 
 .schedule-week{display:flex;flex-direction:column;gap:10px}
@@ -944,8 +960,19 @@ async function fetchRemoteState() {
 }
 async function persistRemoteState() {
   if (!currentUser) { setSyncPill('本地模式', ''); return; }
-  setSyncPill('同步中...', '');
   var payload = getStatePayload();
+  // 🔒 保护：当前数据为空时，先检查云端是否有数据，避免意外覆盖
+  if (!payload.courses || payload.courses.length === 0) {
+    try {
+      var existing = await fetchRemoteState();
+      if (existing && (existing.courses && existing.courses.length > 0)) {
+        console.warn('[sync] 本地数据为空但云端有数据，跳过本次同步以防覆盖');
+        setSyncPill('已同步', 'ok');
+        return;
+      }
+    } catch(e) {}
+  }
+  setSyncPill('同步中...', '');
   var result = await supabase.from(TABLE_NAME).upsert({
     user_id: currentUser.id,
     payload: payload,
