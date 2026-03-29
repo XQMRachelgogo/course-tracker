@@ -183,6 +183,7 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscr
 .time-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fbf8ff;border:1px solid rgba(127,119,221,0.08);border-radius:14px;margin-bottom:8px}.time-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.time-name{font-size:14px;font-weight:600;color:#4a3f73;flex:1}
 .time-range{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;min-width:150px}
 .time-sep{font-size:12px;color:#a39abb;font-weight:700}
+.time-mode-toggle{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.time-mode-toggle .form-input{max-width:220px}.day-time-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}.day-time-row{display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:center;padding:10px 12px;border:1px solid rgba(127,119,221,0.1);border-radius:12px;background:#fbf8ff}.day-time-label{font-size:13px;font-weight:600;color:#4a3f73}
 /* iPhone date/time input width fix */
 .form-group,.reschedule-box,.time-range,.reschedule-grid{min-width:0}
 .time-range{width:100%;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
@@ -514,10 +515,23 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
     </div>
     <div class="form-group">
       <label class="form-label">上课时间</label>
-      <div class="time-range">
-        <input class="time-input" id="f-time-start" type="time" value="10:00" onchange="syncEndTimeFromStart()" />
-        <span class="time-sep">至</span>
-        <input class="time-input" id="f-time-end" type="time" value="11:00" />
+      <div class="time-mode-toggle">
+        <span class="mini-tip" style="margin:0;">一周多次课时，可以设置时间是否一致</span>
+        <select class="form-input" id="f-time-mode" onchange="updateTimeModeUI()">
+          <option value="same">上课时间一样</option>
+          <option value="diff">上课时间不一样</option>
+        </select>
+      </div>
+      <div id="f-same-time-box">
+        <div class="time-range">
+          <input class="time-input" id="f-time-start" type="time" value="10:00" onchange="syncEndTimeFromStart()" />
+          <span class="time-sep">至</span>
+          <input class="time-input" id="f-time-end" type="time" value="11:00" />
+        </div>
+      </div>
+      <div id="f-diff-time-box" class="hidden">
+        <div class="mini-tip">已选上课日会分别显示时间，课表会按各自时间显示。</div>
+        <div id="f-day-time-list" class="day-time-list"></div>
       </div>
     </div>
     <div class="form-group">
@@ -728,10 +742,21 @@ function addMinutesToTime(timeStr, minutes) {
   total = ((total % 1440) + 1440) % 1440;
   return pad2(Math.floor(total / 60)) + ':' + pad2(total % 60);
 }
-function formatTimeRange(course) {
-  var start = course.classTime || '10:00';
-  var end = course.classEndTime || addMinutesToTime(start, 60);
-  return start + ' - ' + end;
+function getCourseDayTime(course, weekday) {
+  var day = parseInt(weekday, 10);
+  var map = course && course.dayTimes && typeof course.dayTimes === 'object' ? course.dayTimes : {};
+  var item = map && map[day] ? map[day] : null;
+  var start = (item && item.start) || (course && course.classTime) || '10:00';
+  var end = (item && item.end) || (course && course.classEndTime) || addMinutesToTime(start, 60);
+  if (end <= start) end = addMinutesToTime(start, 60);
+  return { start:start, end:end };
+}
+function getCourseTimeForDate(course, dateObj) {
+  return getCourseDayTime(course, dateObj ? dateObj.getDay() : null);
+}
+function formatTimeRange(course, weekday) {
+  var time = weekday === undefined ? getCourseDayTime(course, (course && course.weekdays && course.weekdays.length) ? course.weekdays[0] : (course ? course.weekday : 1)) : getCourseDayTime(course, weekday);
+  return time.start + ' - ' + time.end;
 }
 function sortWeekdays(days) {
   return (days || []).map(function(day){ return parseInt(day, 10); }).filter(function(day){
@@ -751,6 +776,15 @@ function normalizeCourse(course) {
   c.fees = Array.isArray(c.fees) ? c.fees : [];
   c.classTime = c.classTime || '10:00';
   c.classEndTime = c.classEndTime || addMinutesToTime(c.classTime, 60);
+  c.timeMode = c.timeMode === 'diff' ? 'diff' : 'same';
+  c.dayTimes = (c.dayTimes && typeof c.dayTimes === 'object') ? deepClone(c.dayTimes) : {};
+  c.weekdays.forEach(function(day){
+    var existing = c.dayTimes[day] || {};
+    var start = existing.start || c.classTime || '10:00';
+    var end = existing.end || c.classEndTime || addMinutesToTime(start, 60);
+    if (end <= start) end = addMinutesToTime(start, 60);
+    c.dayTimes[day] = { start:start, end:end };
+  });
   c.used = Math.max(0, parseInt(c.used, 10) || 0);
   c.courseType = (c.courseType === 'monthly') ? 'monthly' : 'package';
   c.total = (c.total === null || c.total === undefined || c.total === '') ? null : Math.max(0, parseInt(c.total, 10) || 0);
@@ -1254,6 +1288,16 @@ function getCourseWeekdays(course) {
 function formatWeekdayList(course) {
   return getCourseWeekdays(course).map(function(day){ return WEEKDAYS[day]; }).join(' / ');
 }
+function formatWeekdayTimeList(course) {
+  var days = getCourseWeekdays(course);
+  if (!days.length) return formatTimeRange(course);
+  if ((course && course.timeMode) === 'diff') {
+    return days.map(function(day){
+      return WEEKDAYS[day] + ' ' + formatTimeRange(course, day);
+    }).join(' / ');
+  }
+  return formatWeekdayList(course) + ' · ' + formatTimeRange(course);
+}
 function isRegularCourseOnDate(course, dateObj) {
   var current = new Date(dateObj || getTodayDate());
   current.setHours(0,0,0,0);
@@ -1610,7 +1654,7 @@ function openManager() {
         '<div class="course-row-dot" style="background:'+c.color+'"></div>' +
         '<div class="course-row-main">' +
           '<div class="course-row-name">'+getCourseDisplayName(c)+'</div>' +
-          '<div class="course-row-info">'+((c.courseType === 'monthly') ? ('订阅制 · '+formatWeekdayList(c)+' · '+formatTimeRange(c)) : ((rem!==null?('剩'+rem+'次'):'课包制')+' · '+formatWeekdayList(c)+' · '+formatTimeRange(c)) )+'</div>' +
+          '<div class="course-row-info">'+(c.courseType === 'monthly' ? '订阅制' : ((rem!==null?('剩'+rem+'次'):'课包制')))+' · '+formatWeekdayTimeList(c)+'</div>' +
         '</div>' +
         '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" >✏️</button>' +
         '<button class="icon-btn danger" onclick="deleteCourse('+idx+')">✕</button>';
@@ -1644,6 +1688,23 @@ function refreshWeekdayButtons() {
   document.querySelectorAll('.wd-btn').forEach(function(b){
     b.classList.toggle('selected', formWeekdays.indexOf(parseInt(b.dataset.day, 10)) >= 0);
   });
+  if (document.getElementById('f-time-mode') && document.getElementById('f-time-mode').value === 'diff') {
+    var prev = {};
+    Array.isArray(formWeekdays) && formWeekdays.forEach(function(day){
+      var s = document.getElementById('f-day-start-'+day);
+      var e = document.getElementById('f-day-end-'+day);
+      if (s && e) prev[day] = { start:s.value, end:e.value };
+    });
+    renderDayTimeEditors();
+    Object.keys(prev).forEach(function(day){
+      var s2 = document.getElementById('f-day-start-'+day);
+      var e2 = document.getElementById('f-day-end-'+day);
+      if (s2 && e2) {
+        s2.value = prev[day].start;
+        e2.value = prev[day].end;
+      }
+    });
+  }
 }
 function selectWeekday(days) {
   formWeekdays = sortWeekdays(Array.isArray(days) ? days : [days]);
@@ -1656,6 +1717,70 @@ function toggleWeekday(day) {
   else formWeekdays.push(day);
   formWeekdays = sortWeekdays(formWeekdays);
   refreshWeekdayButtons();
+}
+function syncEndTimeFromStart() {
+  var startEl = document.getElementById('f-time-start');
+  var endEl = document.getElementById('f-time-end');
+  if (!startEl || !endEl) return;
+  if (!endEl.value || endEl.value <= startEl.value) endEl.value = addMinutesToTime(startEl.value, 60);
+}
+function renderDayTimeEditors() {
+  var list = document.getElementById('f-day-time-list');
+  if (!list) return;
+  list.innerHTML = '';
+  sortWeekdays(formWeekdays).forEach(function(day){
+    var row = document.createElement('div');
+    row.className = 'day-time-row';
+    row.innerHTML = '<div class="day-time-label">'+WEEKDAYS[day]+'</div>' +
+      '<div class="time-range">' +
+      '<input class="time-input" type="time" id="f-day-start-'+day+'" value="'+(document.getElementById('f-time-start') ? document.getElementById('f-time-start').value : '10:00')+'" onchange="syncSpecificEndTime('+day+')" />' +
+      '<span class="time-sep">至</span>' +
+      '<input class="time-input" type="time" id="f-day-end-'+day+'" value="'+(document.getElementById('f-time-end') ? document.getElementById('f-time-end').value : '11:00')+'" />' +
+      '</div>';
+    list.appendChild(row);
+  });
+}
+function applyCourseDayTimesToForm(course) {
+  sortWeekdays(formWeekdays).forEach(function(day){
+    var startEl = document.getElementById('f-day-start-'+day);
+    var endEl = document.getElementById('f-day-end-'+day);
+    if (!startEl || !endEl) return;
+    var t = getCourseDayTime(course || {}, day);
+    startEl.value = t.start;
+    endEl.value = t.end;
+  });
+}
+function updateTimeModeUI() {
+  var mode = (document.getElementById('f-time-mode') || {}).value || 'same';
+  var sameBox = document.getElementById('f-same-time-box');
+  var diffBox = document.getElementById('f-diff-time-box');
+  if (sameBox) sameBox.classList.toggle('hidden', mode !== 'same');
+  if (diffBox) diffBox.classList.toggle('hidden', mode !== 'diff');
+  if (mode === 'diff') {
+    renderDayTimeEditors();
+  }
+}
+function syncSpecificEndTime(day) {
+  var startEl = document.getElementById('f-day-start-'+day);
+  var endEl = document.getElementById('f-day-end-'+day);
+  if (!startEl || !endEl) return;
+  if (!endEl.value || endEl.value <= startEl.value) endEl.value = addMinutesToTime(startEl.value, 60);
+}
+function collectDayTimesFromForm() {
+  var mode = (document.getElementById('f-time-mode') || {}).value || 'same';
+  var baseStart = document.getElementById('f-time-start').value || '10:00';
+  var baseEnd = document.getElementById('f-time-end').value || addMinutesToTime(baseStart, 60);
+  var map = {};
+  sortWeekdays(formWeekdays).forEach(function(day){
+    if (mode === 'diff') {
+      var start = (document.getElementById('f-day-start-'+day) || {}).value || baseStart;
+      var end = (document.getElementById('f-day-end-'+day) || {}).value || addMinutesToTime(start, 60);
+      map[day] = { start:start, end:end };
+    } else {
+      map[day] = { start:baseStart, end:baseEnd };
+    }
+  });
+  return map;
 }
 function renderRescheduleList(course) {
   var empty = document.getElementById('f-reschedule-empty');
@@ -1771,6 +1896,7 @@ function openAddForm() {
   document.getElementById('f-course-type').value = 'package';
   document.getElementById('f-monthly-from').value = isoDate(new Date());
   document.getElementById('f-monthly-to').value = isoDate(new Date(new Date().getFullYear(), new Date().getMonth()+1, 0));
+  document.getElementById('f-time-mode').value = 'same';
   document.getElementById('f-time-start').value = '10:00';
   document.getElementById('f-time-end').value = '11:00';
   setCounterValue('f-total', 0);
@@ -1782,7 +1908,7 @@ function openAddForm() {
   clearFeeInputs(false);
   renderFeeList(null);
   refreshCourseChildField(currentChildId !== 'all' ? currentChildId : '');
-  selectWeekday([1]); buildColorGrid(COLORS[0]); renderRescheduleList(null); updateCourseTypeFields();
+  selectWeekday([1]); buildColorGrid(COLORS[0]); renderRescheduleList(null); updateCourseTypeFields(); updateTimeModeUI();
   document.getElementById('edit-form-btns').innerHTML =
     "<button class='form-btn' onclick=\"closeModal('edit-modal')\">取消</button>" +
     "<button class='form-btn save' onclick=\"saveForm()\">保存</button>";
@@ -1801,6 +1927,7 @@ function openEditForm(idx) {
   document.getElementById('f-course-type').value = course.courseType || 'package';
   document.getElementById('f-monthly-from').value = course.monthlyFrom || course.startDate || '';
   document.getElementById('f-monthly-to').value = course.monthlyTo || '';
+  document.getElementById('f-time-mode').value = course.timeMode || 'same';
   document.getElementById('f-time-start').value = course.classTime || '10:00';
   document.getElementById('f-time-end').value = course.classEndTime || addMinutesToTime(course.classTime || '10:00', 60);
   setCounterValue('f-total', course.total !== null && course.total !== undefined ? course.total : (course.used + Math.max(0, getRemainingCount(course) || 0)));
@@ -1814,9 +1941,9 @@ function openEditForm(idx) {
   document.getElementById('f-fee-currency').value = lastCurrency;
   renderFeeList(course);
   refreshCourseChildField(course.childId || '');
-  selectWeekday(formWeekdays); buildColorGrid(course.color); renderRescheduleList(course); updateCourseTypeFields();
+  selectWeekday(formWeekdays); buildColorGrid(course.color); renderRescheduleList(course); updateCourseTypeFields(); updateTimeModeUI(); applyCourseDayTimesToForm(course);
   document.getElementById('edit-form-btns').innerHTML =
-    "<button class='form-btn del' onclick=\"if(confirm('确定删除？'))deleteCourse(" + idx + ")\">删除</button>" +
+    '<button class="form-btn del" onclick="deleteCourse('+idx+', \'edit\', this)">删除</button>' +
     "<button class='form-btn save' onclick=\"saveForm()\">保存</button>";
   openModal('edit-modal');
 }
@@ -1825,9 +1952,15 @@ function saveForm() {
   var name = document.getElementById('f-name').value.trim();
   if (!name) { showToast('请填写课程名称'); return; }
   if (!formWeekdays.length) { showToast('请至少选择一个上课日'); return; }
+  var timeMode = (document.getElementById('f-time-mode').value || 'same');
   var classTime = document.getElementById('f-time-start').value || '10:00';
   var classEndTime = document.getElementById('f-time-end').value || addMinutesToTime(classTime, 60);
   if (classEndTime <= classTime) { showToast('结束时间要晚于开始时间'); return; }
+  var dayTimes = collectDayTimesFromForm();
+  for (var dayKey in dayTimes) {
+    if (!dayTimes.hasOwnProperty(dayKey)) continue;
+    if ((dayTimes[dayKey].end || '') <= (dayTimes[dayKey].start || '')) { showToast('每个上课日的结束时间都要晚于开始时间'); return; }
+  }
   var courseType = document.getElementById('f-course-type').value || 'package';
   var total = courseType === 'package' ? getCounterValue('f-total') : null;
   var remaining = null;
@@ -1854,6 +1987,8 @@ function saveForm() {
     c.monthlyTo = courseType === 'monthly' ? (document.getElementById('f-monthly-to').value || '') : '';
     c.classTime = classTime;
     c.classEndTime = classEndTime;
+    c.timeMode = timeMode;
+    c.dayTimes = dayTimes;
     c.total = total;
     c.remaining = remaining;
     c.used = used;
@@ -1881,6 +2016,8 @@ function saveForm() {
       remaining: remaining,
       classTime: classTime,
       classEndTime: classEndTime,
+      timeMode: timeMode,
+      dayTimes: dayTimes,
       history: [],
       reschedules: [],
       fees: [],
@@ -2211,20 +2348,20 @@ function buildWeekScheduleItems() {
       if (isRegularCourseOnDate(course, dayObj.date)) {
         dayObj.items.push({
           type: 'regular',
-          sortTime: course.classTime || '10:00',
+          sortTime: getCourseTimeForDate(course, dayObj.date).start,
           color: course.color,
           courseName: getCourseDisplayName(course),
-          timeText: formatTimeRange(course),
+          timeText: formatTimeRange(course, dayObj.date.getDay()),
           note: '固定课程 · 每' + formatWeekdayList(course)
         });
       }
       getPendingReschedulesForDate(course, dayObj.iso).forEach(function(plan){
         dayObj.items.push({
           type: 'reschedule',
-          sortTime: course.classTime || '10:00',
+          sortTime: getCourseTimeForDate(course, dayObj.date).start,
           color: course.color,
           courseName: getCourseDisplayName(course),
-          timeText: formatTimeRange(course),
+          timeText: formatTimeRange(course, dayObj.date.getDay()),
           note: '调课：' + formatShortDateFromIso(plan.fromDate) + ' → ' + formatShortDateFromIso(plan.toDate) + (plan.note ? ' · ' + plan.note : '')
         });
       });
@@ -2285,30 +2422,57 @@ function openExportModal() {
       row.style.gap = '8px';
       var savedTime = c.classTime || '10:00';
       var savedEnd = c.classEndTime || addMinutesToTime(savedTime, 60);
+      var dayRows = (c.timeMode === 'diff' ? getCourseWeekdays(c) : [null]).map(function(day){
+        var t = day === null ? { start:savedTime, end:savedEnd } : getCourseDayTime(c, day);
+        var label = day === null ? '统一时间' : WEEKDAYS[day];
+        var dayArg = day === null ? 'null' : day;
+        return '<div class="day-time-row" style="margin-top:6px;">' +
+          '<div class="day-time-label">'+label+'</div>' +
+          '<div class="time-range">' +
+            '<input class="time-input" type="time" value="'+t.start+'" onchange="saveClassTime('+idx+',this.value,null,'+dayArg+')" />' +
+            '<span class="time-sep">至</span>' +
+            '<input class="time-input" type="time" value="'+t.end+'" onchange="saveClassTime('+idx+',null,this.value,'+dayArg+')" />' +
+          '</div>' +
+        '</div>';
+      }).join('');
       row.innerHTML =
         '<div style="display:flex;align-items:center;gap:8px;">' +
           '<div class="time-dot" style="background:'+c.color+';flex-shrink:0;"></div>' +
-          '<span style="font-size:14px;font-weight:600;color:#4a3f73;flex:1;">'+c.name+'</span>' +
-          '<span style="font-size:11px;color:#a39abb;font-weight:500;">每'+formatWeekdayList(c)+'</span>' +
-        '</div>' +
-        '<div class="time-range">' +
-          '<input class="time-input" type="time" value="'+savedTime+'" onchange="saveClassTime('+idx+',this.value,null)" />' +
-          '<span class="time-sep">至</span>' +
-          '<input class="time-input" type="time" value="'+savedEnd+'" onchange="saveClassTime('+idx+',null,this.value)" />' +
-        '</div>';
+          '<span style="font-size:14px;font-weight:600;color:#4a3f73;flex:1;">'+getCourseDisplayName(c)+'</span>' +
+          '<span style="font-size:11px;color:#a39abb;font-weight:500;">每'+formatWeekdayList(c)+(c.timeMode === 'diff' ? ' · 分别设置' : '')+'</span>' +
+        '</div>' + dayRows;
       list.appendChild(row);
     })(courses[idx], idx);
   }
   openModal('export-modal');
 }
-function saveClassTime(idx, startVal, endVal) {
+function saveClassTime(idx, startVal, endVal, weekday) {
   var courses = loadData();
-  if (startVal) courses[idx].classTime = startVal;
-  if (endVal) courses[idx].classEndTime = endVal;
-  if (!courses[idx].classEndTime) courses[idx].classEndTime = addMinutesToTime(courses[idx].classTime || '10:00', 60);
-  if ((courses[idx].classEndTime || '') <= (courses[idx].classTime || '')) {
-    courses[idx].classEndTime = addMinutesToTime(courses[idx].classTime || '10:00', 60);
-    showToast('结束时间已自动调整到开始时间后 1 小时');
+  var visible = getVisibleCourseEntries(courses);
+  var entry = visible[idx];
+  if (!entry) return;
+  var c = courses[entry.idx];
+  if (weekday === null || weekday === undefined || weekday === 'null') {
+    if (startVal) c.classTime = startVal;
+    if (endVal) c.classEndTime = endVal;
+    if (!c.classEndTime) c.classEndTime = addMinutesToTime(c.classTime || '10:00', 60);
+    if ((c.classEndTime || '') <= (c.classTime || '')) {
+      c.classEndTime = addMinutesToTime(c.classTime || '10:00', 60);
+      showToast('结束时间已自动调整到开始时间后 1 小时');
+    }
+    (getCourseWeekdays(c) || []).forEach(function(day){
+      c.dayTimes = c.dayTimes || {};
+      c.dayTimes[day] = { start:c.classTime, end:c.classEndTime };
+    });
+  } else {
+    var day = parseInt(weekday, 10);
+    c.dayTimes = c.dayTimes || {};
+    var current = getCourseDayTime(c, day);
+    c.dayTimes[day] = { start:startVal || current.start, end:endVal || current.end };
+    if ((c.dayTimes[day].end || '') <= (c.dayTimes[day].start || '')) {
+      c.dayTimes[day].end = addMinutesToTime(c.dayTimes[day].start || '10:00', 60);
+      showToast('结束时间已自动调整到开始时间后 1 小时');
+    }
   }
   saveData(courses);
 }
@@ -2339,19 +2503,17 @@ function generateICS() {
 
   for (var i = 0; i < courses.length; i++) {
     var c = courses[i];
-    var time = c.classTime || '10:00';
-    var tp = time.split(':');
-    var th = parseInt(tp[0], 10), tm = parseInt(tp[1], 10);
-    var endTime = c.classEndTime || addMinutesToTime(time, 60);
-    var ep = endTime.split(':');
-    var eh = parseInt(ep[0], 10), em = parseInt(ep[1], 10);
     var totalSessions = null;
     if (c.total !== null && c.total !== undefined) totalSessions = c.total;
-    else if (c.remaining !== null && c.remaining !== undefined) totalSessions = c.used + c.remaining;
     var weeklySlots = Math.max(1, getCourseWeekdays(c).length);
     var weeksToRun = totalSessions ? Math.ceil(totalSessions / weeklySlots) + 6 : 60;
 
     getCourseWeekdays(c).forEach(function(day){
+      var dayTime = getCourseDayTime(c, day);
+      var tp = dayTime.start.split(':');
+      var th = parseInt(tp[0], 10), tm = parseInt(tp[1], 10);
+      var ep = dayTime.end.split(':');
+      var eh = parseInt(ep[0], 10), em = parseInt(ep[1], 10);
       var startDate = new Date(c.startDate); startDate.setHours(0,0,0,0);
       var firstDate = new Date(startDate);
       var diff = (day - firstDate.getDay() + 7) % 7;
@@ -2368,26 +2530,31 @@ function generateICS() {
       lines.push('DTSTART:'+toICSDate(evStart,th,tm));
       lines.push('DTEND:'+toICSDate(evEndDate, evEndDate.getHours(), evEndDate.getMinutes()));
       lines.push('RRULE:FREQ=WEEKLY;BYDAY='+rrDays[day]+';UNTIL='+untilStr);
-      lines.push('SUMMARY:'+getCourseDisplayName(c));
-      lines.push('DESCRIPTION:' + getCourseDisplayName(c) + '，记得打卡！');
+      lines.push('SUMMARY:'+c.name);
+      lines.push('DESCRIPTION:记得打卡！');
       lines.push('BEGIN:VALARM');
       lines.push('TRIGGER:-PT'+reminderMins+'M');
       lines.push('ACTION:DISPLAY');
-      lines.push('DESCRIPTION:'+getCourseDisplayName(c)+'要上课了，记得打卡');
+      lines.push('DESCRIPTION:'+c.name+'要上课了，记得打卡');
       lines.push('END:VALARM');
       lines.push('END:VEVENT');
     });
 
     (c.reschedules || []).forEach(function(plan){
       if (plan.used) return;
-      var shiftDate = new Date(plan.toDate);
-      shiftDate.setHours(th,tm,0,0);
-      var shiftEnd = new Date(shiftDate); shiftEnd.setHours(eh, em, 0, 0);
+      var shiftBase = new Date(plan.toDate); shiftBase.setHours(0,0,0,0);
+      var shiftTime = getCourseTimeForDate(c, shiftBase);
+      var tp2 = shiftTime.start.split(':');
+      var th2 = parseInt(tp2[0], 10), tm2 = parseInt(tp2[1], 10);
+      var ep2 = shiftTime.end.split(':');
+      var eh2 = parseInt(ep2[0], 10), em2 = parseInt(ep2[1], 10);
+      var shiftDate = new Date(shiftBase); shiftDate.setHours(th2,tm2,0,0);
+      var shiftEnd = new Date(shiftBase); shiftEnd.setHours(eh2, em2, 0, 0);
       lines.push('BEGIN:VEVENT');
       lines.push('UID:shift-'+c.id+'-'+plan.id+'@keshidaka');
-      lines.push('DTSTART:'+toICSDate(shiftDate,th,tm));
+      lines.push('DTSTART:'+toICSDate(shiftDate,th2,tm2));
       lines.push('DTEND:'+toICSDate(shiftEnd, shiftEnd.getHours(), shiftEnd.getMinutes()));
-      lines.push('SUMMARY:'+getCourseDisplayName(c)+'（调课）');
+      lines.push('SUMMARY:'+c.name+'（调课）');
       lines.push('DESCRIPTION:调课：'+formatShortDateFromIso(plan.fromDate)+' → '+formatShortDateFromIso(plan.toDate)+(plan.note ? '；'+plan.note : ''));
       lines.push('BEGIN:VALARM');
       lines.push('TRIGGER:-PT'+reminderMins+'M');
@@ -2401,18 +2568,23 @@ function generateICS() {
       var rem = getRemainingCount(c);
       if (rem !== null && rem <= 2 && rem > 0) {
         var alertDate = getNextRegularClassDate(c, getTodayDate());
-        alertDate.setHours(th,tm,0,0);
-        var alertEnd = new Date(alertDate); alertEnd.setHours(eh, em, 0, 0);
+        var alertTime = getCourseTimeForDate(c, alertDate);
+        var ap = alertTime.start.split(':');
+        var ah = parseInt(ap[0], 10), am = parseInt(ap[1], 10);
+        var aep = alertTime.end.split(':');
+        var aeh = parseInt(aep[0], 10), aem = parseInt(aep[1], 10);
+        alertDate.setHours(ah,am,0,0);
+        var alertEnd = new Date(alertDate); alertEnd.setHours(aeh, aem, 0, 0);
         lines.push('BEGIN:VEVENT');
         lines.push('UID:pay-'+c.id+'@keshidaka');
-        lines.push('DTSTART:'+toICSDate(alertDate,th,tm));
+        lines.push('DTSTART:'+toICSDate(alertDate,ah,am));
         lines.push('DTEND:'+toICSDate(alertEnd,alertEnd.getHours(),alertEnd.getMinutes()));
-        lines.push('SUMMARY:⚠️ '+getCourseDisplayName(c)+' 需要续费');
-        lines.push('DESCRIPTION:'+getCourseDisplayName(c)+'仅剩'+rem+'次课，记得联系老师续费！');
+        lines.push('SUMMARY:⚠️ '+c.name+' 需要续费');
+        lines.push('DESCRIPTION:'+c.name+'仅剩'+rem+'次课，记得联系老师续费！');
         lines.push('BEGIN:VALARM');
         lines.push('TRIGGER:-PT0M');
         lines.push('ACTION:DISPLAY');
-        lines.push('DESCRIPTION:'+getCourseDisplayName(c)+'需要续费了！');
+        lines.push('DESCRIPTION:'+c.name+'需要续费了！');
         lines.push('END:VALARM');
         lines.push('END:VEVENT');
       }
@@ -2422,23 +2594,28 @@ function generateICS() {
       var sessionsLeft = totalSessions - c.used;
       if (sessionsLeft > 0) {
         var lastDate = estimateLastRegularDate(c, sessionsLeft);
-        lastDate.setHours(th,tm,0,0);
-        var lastEnd = new Date(lastDate.getTime()+3600000);
+        var lastTime = getCourseTimeForDate(c, lastDate);
+        var lp = lastTime.start.split(':');
+        var lh = parseInt(lp[0], 10), lm = parseInt(lp[1], 10);
+        var lep = lastTime.end.split(':');
+        var leh = parseInt(lep[0], 10), lem = parseInt(lep[1], 10);
+        lastDate.setHours(lh,lm,0,0);
+        var lastEnd = new Date(lastDate); lastEnd.setHours(leh, lem, 0, 0);
         lines.push('BEGIN:VEVENT');
         lines.push('UID:expire-'+c.id+'@keshidaka');
-        lines.push('DTSTART:'+toICSDate(lastDate,th,tm));
+        lines.push('DTSTART:'+toICSDate(lastDate,lh,lm));
         lines.push('DTEND:'+toICSDate(lastEnd,lastEnd.getHours(),lastEnd.getMinutes()));
-        lines.push('SUMMARY:🎓 '+getCourseDisplayName(c)+' 最后一节课');
-        lines.push('DESCRIPTION:'+getCourseDisplayName(c)+'课包的最后一次课（共'+totalSessions+'次），记得安排续费！');
+        lines.push('SUMMARY:🎓 '+c.name+' 最后一节课');
+        lines.push('DESCRIPTION:'+c.name+'课包的最后一次课（共'+totalSessions+'次），记得安排续费！');
         lines.push('BEGIN:VALARM');
         lines.push('TRIGGER:-PT'+reminderMins+'M');
         lines.push('ACTION:DISPLAY');
-        lines.push('DESCRIPTION:'+getCourseDisplayName(c)+'今天是最后一节课！');
+        lines.push('DESCRIPTION:'+c.name+'今天是最后一节课！');
         lines.push('END:VALARM');
         lines.push('BEGIN:VALARM');
         lines.push('TRIGGER:-P3D');
         lines.push('ACTION:DISPLAY');
-        lines.push('DESCRIPTION:'+getCourseDisplayName(c)+'3天后是最后一节课，记得续费！');
+        lines.push('DESCRIPTION:'+c.name+'3天后是最后一节课，记得续费！');
         lines.push('END:VALARM');
         lines.push('END:VEVENT');
       }
@@ -2453,7 +2630,7 @@ function generateICS() {
   document.body.appendChild(a); a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('已下载！用 iPhone 打开文件导入日历');
+  showToast('已下载');
   closeModal('export-modal');
 }
 
