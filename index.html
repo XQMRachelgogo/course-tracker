@@ -574,6 +574,16 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
       <div class="mini-tip">有孩子档案时才显示。新增课程会默认继承当前选中的孩子。</div>
     </div>
     <div class="form-group">
+      <label class="form-label">上课模式</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button type="button" id="smode-fixed" class="wd-btn selected" onclick="setScheduleMode('fixed')">📅 固定上课日</button>
+        <button type="button" id="smode-flexible" class="wd-btn" onclick="setScheduleMode('flexible')">🎲 随时打卡</button>
+      </div>
+      <div class="mini-tip" id="smode-tip-fixed">选择每周固定上课的日期，到了那一天就可以打卡。</div>
+      <div class="mini-tip hidden" id="smode-tip-flexible">不设固定上课日，随时来上课随时打卡，适合弹性安排或私教课。</div>
+    </div>
+    <div id="f-fixed-schedule-wrap">
+    <div class="form-group">
       <label class="form-label">上课日（可多选）</label>
       <div class="weekday-grid">
         <button type="button" class="wd-btn" data-day="1" onclick="toggleWeekday(1)">周一</button>
@@ -612,6 +622,14 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
         <div class="mini-tip">已选上课日会分别显示时间，课表会按各自时间显示。</div>
         <div id="f-day-time-list" class="day-time-list"></div>
       </div>
+    </div>
+    </div><!-- end f-fixed-schedule-wrap -->
+    <div id="f-flexible-schedule-wrap" class="hidden">
+    <div class="form-group">
+      <label class="form-label">开始日期</label>
+      <input class="form-input" id="f-start-flexible" type="date" />
+      <div class="mini-tip" style="margin-top:6px;">随时打卡模式无需选择上课日，直接在主页点"立即打卡"即可记录。</div>
+    </div>
     </div>
     <div class="form-group">
       <label class="form-label">调课安排</label>
@@ -834,6 +852,7 @@ function normalizeCourse(course) {
   c.monthlyFrom = c.monthlyFrom || '';
   c.monthlyTo = c.monthlyTo || '';
   c.childId = c.childId || '';
+  c.scheduleMode = (c.scheduleMode === 'flexible') ? 'flexible' : 'fixed';
   return c;
 }
 function normalizeCourses(courses) {
@@ -1381,11 +1400,22 @@ function getSessionKeyFromPlan(plan) {
 function findRescheduleById(course, planId) {
   return (course.reschedules || []).find(function(plan){ return plan.id === planId; }) || null;
 }
+function isFlexible(course) { return course && course.scheduleMode === 'flexible'; }
 function hasTodaySchedule(course) {
+  if (isFlexible(course)) return false;
   var today = getTodayDate();
   return isRegularCourseOnDate(course, today) || getPendingReschedulesForDate(course, isoDate(today)).length > 0;
 }
 function getTodayOpportunities(course) {
+  if (isFlexible(course)) {
+    // 灵活模式：今天只要没打过卡就允许打
+    var todayStr = isoDate(getTodayDate());
+    var alreadyToday = course.history.filter(function(h){ return h.date === todayStr && h.status === 'done'; }).length;
+    if (alreadyToday === 0) {
+      return [{ type: 'flexible', key: 'flexible:' + todayStr, label: '立即打卡 ✓' }];
+    }
+    return [];
+  }
   var today = getTodayDate();
   var todayStr = isoDate(today);
   var opportunities = [];
@@ -1412,6 +1442,9 @@ function getTodayMeta(course) {
   return '今天有调课安排，点击即可打卡记录';
 }
 function getNextSessionInfo(course) {
+  if (isFlexible(course)) {
+    return { date: getTodayDate(), type: 'flexible', note: '随时打卡' };
+  }
   var today = getTodayDate();
   var nextRegular = getNextRegularClassDate(course, today);
   var best = { date: nextRegular, type: 'regular', note: '每' + formatWeekdayList(course) };
@@ -1467,12 +1500,13 @@ function getSortedCourses() {
   var entries = getVisibleCourseEntries(loadData());
   return entries.map(function(entry){
     var nextInfo = getNextSessionInfo(entry.course);
+    var isTodayFixed = hasTodaySchedule(entry.course);
     return {
       course: entry.course,
       idx: entry.idx,
       nextDate: nextInfo.date,
       nextInfo: nextInfo,
-      isToday: hasTodaySchedule(entry.course)
+      isToday: isTodayFixed
     };
   }).sort(function(a,b){
     if (a.isToday && !b.isToday) return -1;
@@ -1530,6 +1564,7 @@ function render() {
 
     var badgeClass = 'badge-ok', badgeText = '正常';
     if (isToday) { badgeClass = 'badge-today'; badgeText = '今天上课'; }
+    else if (isFlexible(course)) { badgeClass = 'badge-ok'; badgeText = '随时打卡'; }
     else if (course.payAlert && remaining !== null && remaining <= 2) { badgeClass='badge-alert'; badgeText='需续费'; }
     else if (remaining !== null && remaining <= 2) { badgeClass='badge-warn'; badgeText='剩'+remaining+'次'; }
     else if (remaining !== null) { badgeText='剩'+remaining+'次'; }
@@ -1542,6 +1577,7 @@ function render() {
         var label = h.status === 'done' ? '✓ 已上课' : '— 请假';
         if (h.kind === 'reschedule' && h.status === 'done') label = '✓ 调课补课';
         else if (h.kind === 'manual' && h.status === 'done') label = '✓ 手动补打卡';
+        else if (h.kind === 'flexible' && h.status === 'done') label = '✓ 打卡';
         else if (h.kind === 'regular' && h.status === 'skip') label = '— 请假 / 顺延';
         var cls = h.status === 'done' ? 'status-done' : 'status-skip';
         var note = '';
@@ -1559,7 +1595,19 @@ function render() {
     }
 
     var actionBtns = '';
-    if (isToday) {
+    if (isFlexible(course)) {
+      // 灵活打卡模式
+      var todayStr2 = isoDate(getTodayDate());
+      var flexOps = getTodayOpportunities(course);
+      var todayDoneCount = course.history.filter(function(h){ return h.date === todayStr2 && h.status === 'done'; }).length;
+      if (flexOps.length) {
+        actionBtns = '<button class="btn btn-primary" onclick="markClass('+idx+',\'done\',\''+flexOps[0].key+'\')">立即打卡 ✓</button>';
+        actionBtns += '<button class="btn btn-skip" onclick="markFlexSkip('+idx+')">今天请假</button>';
+      } else {
+        actionBtns = '<div class="checked-label">今天已打卡 '+todayDoneCount+' 次 ✓</div>';
+        actionBtns += '<button class="btn btn-primary" style="font-size:12px;" onclick="markFlexExtra('+idx+')">再打一次</button>';
+      }
+    } else if (isToday) {
       if (todayOps.length) {
         todayOps.forEach(function(op){
           var btnClass = op.type === 'regular' ? 'btn btn-primary' : 'btn';
@@ -1576,8 +1624,12 @@ function render() {
       actionBtns = '<button class="btn" onclick="markClass('+idx+',\'done\')" style="font-size:12px;color:#8d84aa;">手动补打卡</button>';
     }
 
-    var nextDisplay = isToday ? '今天' : formatDate(nextDate);
+    var nextDisplay = isFlexible(course) ? '随时' : (isToday ? '今天' : formatDate(nextDate));
+    var nextNote = isFlexible(course) ? '随时打卡模式' : nextInfo.note;
     var compactCount = (course.courseType === 'monthly') ? '订阅制' : (totalDisplay ? (remaining !== null ? remaining : '—') + '/' + totalDisplay : (remaining !== null ? '剩'+remaining+'次' : '—'));
+    var summaryMeta = isFlexible(course)
+      ? ('灵活打卡 · 已上 ' + course.used + ' 次' + (remaining !== null ? ' · 剩 ' + remaining + ' 次' : ''))
+      : (isToday ? getTodayMeta(course) : '下次：'+formatShortDate(nextDate)+' · '+nextInfo.note);
 
     var wrap = document.createElement('div');
     wrap.className = 'card-wrap' + (isToday ? ' today' : '') + (expanded ? ' expanded' : '') + ((course.payAlert && remaining !== null && remaining <= 2) ? ' urgent' : '');
@@ -1590,7 +1642,7 @@ function render() {
             '<span class="summary-title">'+getCourseDisplayName(course)+'</span>'+
             (isToday ? '<span class="today-chip">今日打卡</span>' : '<span class="badge '+badgeClass+'">'+badgeText+'</span>')+
           '</div>'+
-          '<div class="summary-meta">'+(isToday ? getTodayMeta(course) : '下次：'+formatShortDate(nextDate)+' · '+nextInfo.note)+'</div>'+
+          '<div class="summary-meta">'+summaryMeta+'</div>'+
         '</div>'+
         '<div class="summary-count">'+compactCount+'</div>'+
         (isToday ? '' : '<div class="summary-chevron">⌄</div>')+
@@ -1608,7 +1660,7 @@ function render() {
           '<div class="stat"><div class="stat-label">'+(course.courseType === 'monthly' ? '类型' : (totalDisplay?'总课时':'类型'))+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+(course.courseType === 'monthly' ? '订阅制' : (totalDisplay?'共'+totalDisplay+'次':'—'))+'</div></div>'+
         '</div>'+
         (totalDisplay ? '<div class="progress-bar"><div class="progress-fill" style="width:'+getProgressPercent(course)+'%;background:'+course.color+'"></div></div>' : '')+
-        '<div class="next-info">下次上课：<strong>'+nextDisplay+'</strong>（'+nextInfo.note+'）</div>'+
+        '<div class="next-info">'+(!isFlexible(course) ? '下次上课：<strong>'+nextDisplay+'</strong>（'+nextNote+'）' : '随时打卡模式，来上课就点下方按钮记录。')+'</div>'+
         '<div class="actions">'+actionBtns+'</div>'+
         '<span class="history-toggle" onclick="toggleHistory(\'hist-'+idx+'\')">查看近期记录</span>'+
         '<div class="history" id="hist-'+idx+'">'+historyHTML+'</div>'+
@@ -1623,9 +1675,15 @@ function markClass(idx, status, sessionKey) {
   var course = courses[idx];
   var todayStr = isoDate(new Date());
   var key = sessionKey || ('manual:' + todayStr);
-  if (course.history.some(function(h){ return h.sessionKey === key; })) { showToast('这次课程已经记录过了'); return; }
+  // 灵活模式允许一天多次打卡，key用时间戳区分
+  var isFlexKey = key.indexOf('flexible:') === 0;
+  if (!isFlexKey && course.history.some(function(h){ return h.sessionKey === key; })) { showToast('这次课程已经记录过了'); return; }
 
-  var entry = { date: todayStr, status: status, sessionKey: key, kind: key.indexOf('manual:') === 0 ? 'manual' : 'regular' };
+  var kind = 'regular';
+  if (key.indexOf('manual:') === 0) kind = 'manual';
+  else if (key.indexOf('flexible:') === 0) kind = 'flexible';
+
+  var entry = { date: todayStr, status: status, sessionKey: key, kind: kind };
 
   if (key.indexOf('reschedule:') === 0) {
     var planId = key.split(':')[1];
@@ -1654,6 +1712,49 @@ function markClass(idx, status, sessionKey) {
     }
   } else {
     showToast(course.name+' 已记录请假，课时顺延');
+  }
+  saveData(courses);
+  render();
+}
+
+function markFlexSkip(idx) {
+  var courses = loadData();
+  var course = courses[idx];
+  var todayStr = isoDate(new Date());
+  var key = 'flexible-skip:' + todayStr + ':' + Date.now();
+  var entry = { date: todayStr, status: 'skip', sessionKey: key, kind: 'flexible' };
+  course.history.push(entry);
+  saveData(courses);
+  showToast(course.name + ' 已记录请假');
+  render();
+}
+
+function markFlexExtra(idx) {
+  var courses = loadData();
+  var course = courses[idx];
+  var todayStr = isoDate(new Date());
+  // 每次生成唯一key，允许一天多次
+  var key = 'flexible:' + todayStr + ':' + Date.now();
+  markClassWithKey(idx, 'done', key);
+}
+
+function markClassWithKey(idx, status, key) {
+  var courses = loadData();
+  var course = courses[idx];
+  var todayStr = isoDate(new Date());
+  var entry = { date: todayStr, status: status, sessionKey: key, kind: 'flexible' };
+  course.history.push(entry);
+  if (status === 'done') {
+    course.used += 1;
+    if (course.total === null && course.remaining !== null && course.remaining !== undefined) {
+      course.remaining = Math.max(0, course.remaining - 1);
+    }
+    var renewed = handleRenewalAfterLastClass(course, entry);
+    showToast(course.name + ' 打卡成功！已上 ' + course.used + ' 次');
+    var rem = getRemainingCount(course);
+    if (!renewed && rem !== null && rem <= 2 && rem > 0) {
+      setTimeout(function(){ showToast('提醒：' + course.name + ' 仅剩 ' + rem + ' 次课！'); }, 2500);
+    }
   }
   saveData(courses);
   render();
@@ -1703,7 +1804,7 @@ function openManager() {
         '<div class="course-row-dot" style="background:'+c.color+'"></div>' +
         '<div class="course-row-main">' +
           '<div class="course-row-name">'+getCourseDisplayName(c)+'</div>' +
-          '<div class="course-row-info">'+(c.courseType === 'monthly' ? '订阅制' : ((rem!==null?('剩'+rem+'次'):'课包制')))+' · '+formatWeekdayTimeList(c)+'</div>' +
+          '<div class="course-row-info">'+(c.courseType === 'monthly' ? '订阅制' : ((rem!==null?('剩'+rem+'次'):'课包制')))+' · '+(c.scheduleMode === 'flexible' ? '🎲 随时打卡' : formatWeekdayTimeList(c))+'</div>' +
         '</div>' +
         '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" >✏️</button>' +
         '<button class="icon-btn danger" onclick="deleteCourse('+idx+')">✕</button>';
@@ -1732,6 +1833,32 @@ function buildColorGrid(selected) {
     sw.onclick = function(){ formColor = c; buildColorGrid(c); };
     grid.appendChild(sw);
   });
+}
+var formScheduleMode = 'fixed';
+function setScheduleMode(mode) {
+  formScheduleMode = (mode === 'flexible') ? 'flexible' : 'fixed';
+  var fixedBtn = document.getElementById('smode-fixed');
+  var flexBtn = document.getElementById('smode-flexible');
+  var fixedWrap = document.getElementById('f-fixed-schedule-wrap');
+  var flexWrap = document.getElementById('f-flexible-schedule-wrap');
+  var tipFixed = document.getElementById('smode-tip-fixed');
+  var tipFlex = document.getElementById('smode-tip-flexible');
+  if (!fixedBtn) return;
+  if (formScheduleMode === 'flexible') {
+    fixedBtn.classList.remove('selected');
+    flexBtn.classList.add('selected');
+    if (fixedWrap) fixedWrap.classList.add('hidden');
+    if (flexWrap) flexWrap.classList.remove('hidden');
+    if (tipFixed) tipFixed.classList.add('hidden');
+    if (tipFlex) tipFlex.classList.remove('hidden');
+  } else {
+    fixedBtn.classList.add('selected');
+    flexBtn.classList.remove('selected');
+    if (fixedWrap) fixedWrap.classList.remove('hidden');
+    if (flexWrap) flexWrap.classList.add('hidden');
+    if (tipFixed) tipFixed.classList.remove('hidden');
+    if (tipFlex) tipFlex.classList.add('hidden');
+  }
 }
 function refreshWeekdayButtons() {
   document.querySelectorAll('.wd-btn').forEach(function(b){
@@ -1944,6 +2071,7 @@ function openAddForm() {
   document.getElementById('edit-modal-title').textContent = '新增课程';
   document.getElementById('f-name').value = '';
   document.getElementById('f-start').value = isoDate(new Date());
+  document.getElementById('f-start-flexible').value = isoDate(new Date());
   document.getElementById('f-course-type').value = 'package';
   document.getElementById('f-monthly-from').value = isoDate(new Date());
   document.getElementById('f-monthly-to').value = isoDate(new Date(new Date().getFullYear(), new Date().getMonth()+1, 0));
@@ -1959,6 +2087,7 @@ function openAddForm() {
   clearFeeInputs(false);
   renderFeeList(null);
   refreshCourseChildField(currentChildId !== 'all' ? currentChildId : '');
+  setScheduleMode('fixed');
   selectWeekday([1]); buildColorGrid(COLORS[0]); renderRescheduleList(null); updateCourseTypeFields(); updateTimeModeUI();
   document.getElementById('edit-form-btns').innerHTML =
     "<button class='form-btn' onclick=\"closeModal('edit-modal')\">取消</button>" +
@@ -1992,6 +2121,8 @@ function openEditForm(idx) {
   document.getElementById('f-fee-currency').value = lastCurrency;
   renderFeeList(course);
   refreshCourseChildField(course.childId || '');
+  setScheduleMode(course.scheduleMode || 'fixed');
+  document.getElementById('f-start-flexible').value = course.startDate || isoDate(new Date());
   selectWeekday(formWeekdays); buildColorGrid(course.color); renderRescheduleList(course); updateCourseTypeFields(); updateTimeModeUI(); applyCourseDayTimesToForm(course);
   document.getElementById('edit-form-btns').innerHTML =
     '<button class="form-btn del" onclick="deleteCourse('+idx+', \'edit\', this)">删除</button>' +
@@ -2002,15 +2133,20 @@ function openEditForm(idx) {
 function saveForm() {
   var name = document.getElementById('f-name').value.trim();
   if (!name) { showToast('请填写课程名称'); return; }
-  if (!formWeekdays.length) { showToast('请至少选择一个上课日'); return; }
+  var scheduleMode = document.getElementById('smode-flexible') && document.getElementById('smode-flexible').classList.contains('selected') ? 'flexible' : 'fixed';
+  if (scheduleMode === 'fixed' && !formWeekdays.length) { showToast('请至少选择一个上课日'); return; }
   var timeMode = (document.getElementById('f-time-mode').value || 'same');
   var classTime = document.getElementById('f-time-start').value || '10:00';
   var classEndTime = document.getElementById('f-time-end').value || addMinutesToTime(classTime, 60);
-  if (classEndTime <= classTime) { showToast('结束时间要晚于开始时间'); return; }
-  var dayTimes = collectDayTimesFromForm();
-  for (var dayKey in dayTimes) {
-    if (!dayTimes.hasOwnProperty(dayKey)) continue;
-    if ((dayTimes[dayKey].end || '') <= (dayTimes[dayKey].start || '')) { showToast('每个上课日的结束时间都要晚于开始时间'); return; }
+  if (scheduleMode === 'fixed') {
+    if (classEndTime <= classTime) { showToast('结束时间要晚于开始时间'); return; }
+    var dayTimes = collectDayTimesFromForm();
+    for (var dayKey in dayTimes) {
+      if (!dayTimes.hasOwnProperty(dayKey)) continue;
+      if ((dayTimes[dayKey].end || '') <= (dayTimes[dayKey].start || '')) { showToast('每个上课日的结束时间都要晚于开始时间'); return; }
+    }
+  } else {
+    var dayTimes = {};
   }
   var courseType = document.getElementById('f-course-type').value || 'package';
   var total = courseType === 'package' ? getCounterValue('f-total') : null;
@@ -2025,14 +2161,18 @@ function saveForm() {
     if (!monthlyFrom || !monthlyTo) { showToast('请填写订阅周期'); return; }
     if (monthlyTo < monthlyFrom) { showToast('订阅结束日期不能早于开始日期'); return; }
   }
+  var startDate = scheduleMode === 'flexible'
+    ? (document.getElementById('f-start-flexible').value || isoDate(new Date()))
+    : (document.getElementById('f-start').value || isoDate(new Date()));
   var courses = loadData();
   if (editingIdx !== null) {
     var c = courses[editingIdx];
     c.name = name;
-    c.weekdays = formWeekdays.slice();
-    c.weekday = c.weekdays[0];
+    c.scheduleMode = scheduleMode;
+    c.weekdays = scheduleMode === 'flexible' ? [] : formWeekdays.slice();
+    c.weekday = c.weekdays[0] || null;
     c.color = formColor;
-    c.startDate = document.getElementById('f-start').value;
+    c.startDate = startDate;
     c.courseType = courseType;
     c.monthlyFrom = courseType === 'monthly' ? (document.getElementById('f-monthly-from').value || '') : '';
     c.monthlyTo = courseType === 'monthly' ? (document.getElementById('f-monthly-to').value || '') : '';
@@ -2055,10 +2195,11 @@ function saveForm() {
     var newCourse = {
       id: newId,
       name: name,
-      weekdays: formWeekdays.slice(),
-      weekday: formWeekdays[0],
+      scheduleMode: scheduleMode,
+      weekdays: scheduleMode === 'flexible' ? [] : formWeekdays.slice(),
+      weekday: scheduleMode === 'flexible' ? null : formWeekdays[0],
       color: formColor,
-      startDate: document.getElementById('f-start').value,
+      startDate: startDate,
       courseType: courseType,
       monthlyFrom: courseType === 'monthly' ? (document.getElementById('f-monthly-from').value || '') : '',
       monthlyTo: courseType === 'monthly' ? (document.getElementById('f-monthly-to').value || '') : '',
@@ -2395,6 +2536,7 @@ function buildWeekScheduleItems() {
   }
   var courses = getCoursesForCurrentFilter(loadData());
   courses.forEach(function(course){
+    if (isFlexible(course)) return; // 灵活模式不出现在固定课表
     weekDays.forEach(function(dayObj){
       if (isRegularCourseOnDate(course, dayObj.date)) {
         dayObj.items.push({
@@ -2613,7 +2755,8 @@ initAuth();
 
       <h3>2. 打卡与调课</h3>
       <ul>
-        <li>当天有课的课程自动排在最上方并展开，点"今天上课了"打卡扣课时；点"今天请假"则课时保留顺延。</li>
+        <li><strong>固定上课日：</strong>当天有课的课程自动排在最上方并展开，点"今天上课了"打卡扣课时；点"今天请假"则课时保留顺延。</li>
+        <li><strong>随时打卡模式：</strong>新增课程时选择"🎲 随时打卡"，无需设定上课日，随时点"立即打卡"即可扣课时，适合私教课或弹性安排。</li>
         <li>调课：在课程编辑里填写原定日期和调课后日期，到调课日当天出现"调课补上"按钮，打卡扣 1 次。</li>
         <li>所有打卡记录可撤销，历史记录可在课程卡片里查看，方便核对机构是否正确扣课时。</li>
       </ul>
