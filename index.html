@@ -1398,6 +1398,7 @@ function isRegularCourseOnDate(course, dateObj) {
 function hasTodaySchedule(course) {
   if (isFlexible(course)) return false;
   if (course.archived) return false;
+  if (isPackageExhausted(course)) return false;
   var today = getTodayDate();
   return isRegularCourseOnDate(course, today) || getPendingReschedulesForDate(course, isoDate(today)).length > 0;
 }
@@ -1439,6 +1440,13 @@ function isSubscriptionNotStarted(course) {
   if (!course.monthlyFrom) return false;
   var startDate = new Date(course.monthlyFrom); startDate.setHours(0,0,0,0);
   return getTodayDate() < startDate;
+}
+function isPackageExhausted(course) {
+  // 课时制：total已设置，且剩余为0
+  if (course.courseType === 'monthly') return false;
+  if (isFlexible(course)) return false;
+  var rem = getRemainingCount(course);
+  return rem !== null && rem <= 0;
 }
 function isFlexible(course) { return course && course.scheduleMode === 'flexible'; }
 function isRegularCourseOnDate(course, dateObj) {
@@ -1494,6 +1502,10 @@ function getTodayMeta(course) {
 function getNextSessionInfo(course) {
   if (isFlexible(course)) {
     return { date: getTodayDate(), type: 'flexible', note: '随时打卡' };
+  }
+  // 课时制：课时已用完
+  if (isPackageExhausted(course)) {
+    return { date: getTodayDate(), type: 'exhausted', note: '课时已用完，续费后继续' };
   }
   // 订阅制：期已过
   if (isSubscriptionExpired(course)) {
@@ -1631,10 +1643,12 @@ function render() {
 
     var isExpired = nextInfo.type === 'expired';
     var isNotStarted = nextInfo.type === 'notStarted';
+    var isExhausted = nextInfo.type === 'exhausted';
 
     var badgeClass = 'badge-ok', badgeText = '正常';
     if (isToday) { badgeClass = 'badge-today'; badgeText = '今天上课'; }
     else if (isFlexible(course)) { badgeClass = 'badge-ok'; badgeText = '随时打卡'; }
+    else if (isExhausted) { badgeClass = 'badge-alert'; badgeText = '需续费'; }
     else if (isExpired) { badgeClass = 'badge-warn'; badgeText = '订阅到期'; }
     else if (isNotStarted) { badgeClass = 'badge-ok'; badgeText = '待开课'; }
     else if (course.payAlert && remaining !== null && remaining <= 2) { badgeClass='badge-alert'; badgeText='需续费'; }
@@ -1683,6 +1697,8 @@ function render() {
       actionBtns += '<button class="btn" onclick="markClass('+idx+',\'done\')" style="font-size:12px;color:#8d84aa;">手动补打卡</button>';
     } else if (isNotStarted) {
       actionBtns = '<div class="checked-label" style="color:#8d84aa;">下期尚未开始，到开课日再来打卡吧</div>';
+    } else if (isExhausted) {
+      actionBtns = '<button class="btn" onclick="openEditForm('+idx+')" style="font-size:12px;color:#b33b4d;">续费后继续上课 →</button>';
     } else if (isToday) {
       if (todayOps.length) {
         todayOps.forEach(function(op){
@@ -1713,6 +1729,10 @@ function render() {
       nextDisplay = formatShortDateFromIso(course.monthlyFrom); nextNote = nextInfo.note;
       summaryMeta = nextInfo.note;
       nextInfoBox = '下一期将于 <strong>' + formatShortDateFromIso(course.monthlyFrom) + '</strong> 开始，届时即可打卡。';
+    } else if (isExhausted) {
+      nextDisplay = '—'; nextNote = '课时已用完';
+      summaryMeta = '课时已全部用完，续费后继续';
+      nextInfoBox = '课时已全部用完，续费后可继续打卡。在编辑里增加课时数即可恢复。';
     } else if (isToday) {
       nextDisplay = '今天'; nextNote = nextInfo.note;
       summaryMeta = getTodayMeta(course);
@@ -1726,7 +1746,7 @@ function render() {
     var compactCount = (course.courseType === 'monthly') ? '订阅制' : (totalDisplay ? (remaining !== null ? remaining : '—') + '/' + totalDisplay : (remaining !== null ? '剩'+remaining+'次' : '—'));
 
     var wrap = document.createElement('div');
-    wrap.className = 'card-wrap' + (isToday ? ' today' : '') + (expanded ? ' expanded' : '') + ((course.payAlert && remaining !== null && remaining <= 2) ? ' urgent' : '') + (isExpired ? ' urgent' : '');
+    wrap.className = 'card-wrap' + (isToday ? ' today' : '') + (expanded ? ' expanded' : '') + ((course.payAlert && remaining !== null && remaining <= 2) ? ' urgent' : '') + (isExpired ? ' urgent' : '') + (isExhausted ? ' urgent' : '');
 
     wrap.innerHTML =
       '<div class="card-summary" '+(isToday ? '' : 'onclick="toggleCard(\''+course.id+'\')"')+'>'+
