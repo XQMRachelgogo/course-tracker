@@ -354,21 +354,6 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .child-helper{font-size:11px;color:#a39abb;line-height:1.6;margin-top:6px}
 .filter-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#6c5db5;background:#f4efff;border-radius:999px;padding:4px 8px;margin-top:6px}
 
-/* 归档功能 */
-.archive-toggle-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
-.archive-toggle-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#a39abb;background:transparent;border:none;cursor:pointer;padding:4px 2px;font-family:inherit;-webkit-tap-highlight-color:transparent}
-.archive-toggle-btn:hover{color:#7a6fa8}
-.archive-toggle-btn.active{color:#6c5db5}
-.card-wrap.archived{opacity:0.55;filter:grayscale(0.3)}
-.card-wrap.archived .card-summary{background:linear-gradient(180deg,rgba(245,243,252,0.95) 0%,rgba(240,237,250,0.82) 100%)}
-.badge-archived{background:#f0edf9;color:#9b93c0}
-.archive-section-label{font-size:11px;color:#b4acc9;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin:16px 0 8px;display:flex;align-items:center;gap:6px}
-.archive-section-label::before,.archive-section-label::after{content:'';flex:1;height:1px;background:rgba(127,119,221,0.1)}
-.form-btn.archive{color:#7a6fa8;border-color:rgba(127,119,221,0.2)}
-.form-btn.archive:hover{background:#f4efff}
-.form-btn.unarchive{color:#5a9e6f;border-color:rgba(90,158,111,0.25)}
-.form-btn.unarchive:hover{background:#eef8e7}
-
 </style>
 </head>
 <body>
@@ -771,7 +756,6 @@ var editingIdx = null;
 var formWeekdays = [1];
 var formColor = COLORS[0];
 var expandedIds = {};
-var showArchived = false;
 
 var defaultCourses = [];
 var defaultChildren = [];
@@ -869,7 +853,6 @@ function normalizeCourse(course) {
   c.monthlyTo = c.monthlyTo || '';
   c.childId = c.childId || '';
   c.scheduleMode = (c.scheduleMode === 'flexible') ? 'flexible' : 'fixed';
-  c.archived = !!c.archived;
   return c;
 }
 function normalizeCourses(courses) {
@@ -958,15 +941,8 @@ function getCoursesForCurrentFilter(courses) {
 function getVisibleCourseEntries(courses) {
   var list = Array.isArray(courses) ? courses : loadData();
   return list.map(function(course, idx){ return { course: course, idx: idx }; }).filter(function(entry){
-    var childOk = currentChildId === 'all' || (entry.course.childId || '') === currentChildId;
-    return childOk;
+    return currentChildId === 'all' || (entry.course.childId || '') === currentChildId;
   });
-}
-function getActiveEntries(courses) {
-  return getVisibleCourseEntries(courses).filter(function(e){ return !e.course.archived; });
-}
-function getArchivedEntries(courses) {
-  return getVisibleCourseEntries(courses).filter(function(e){ return !!e.course.archived; });
 }
 function renderChildLauncher() {
   var btn = document.getElementById('child-launcher');
@@ -1393,6 +1369,14 @@ function formatWeekdayTimeList(course) {
 function isRegularCourseOnDate(course, dateObj) {
   var current = new Date(dateObj || getTodayDate());
   current.setHours(0,0,0,0);
+  // 订阅制：必须在订阅期内才算有课
+  if (course.courseType === 'monthly') {
+    if (course.monthlyFrom && course.monthlyTo) {
+      var from = new Date(course.monthlyFrom); from.setHours(0,0,0,0);
+      var to = new Date(course.monthlyTo); to.setHours(0,0,0,0);
+      if (current < from || current > to) return false;
+    }
+  }
   var startDate = new Date(course.startDate);
   startDate.setHours(0,0,0,0);
   return startDate <= current && getCourseWeekdays(course).indexOf(current.getDay()) >= 0;
@@ -1423,6 +1407,28 @@ function getSessionKeyFromPlan(plan) {
 }
 function findRescheduleById(course, planId) {
   return (course.reschedules || []).find(function(plan){ return plan.id === planId; }) || null;
+}
+function isSubscriptionExpired(course) {
+  if (course.courseType !== 'monthly') return false;
+  if (!course.monthlyTo) return false;
+  var endDate = new Date(course.monthlyTo);
+  endDate.setHours(0,0,0,0);
+  return getTodayDate() > endDate;
+}
+function isSubscriptionNotStarted(course) {
+  if (course.courseType !== 'monthly') return false;
+  if (!course.monthlyFrom) return false;
+  var startDate = new Date(course.monthlyFrom);
+  startDate.setHours(0,0,0,0);
+  return getTodayDate() < startDate;
+}
+function isSubscriptionActive(course) {
+  if (course.courseType !== 'monthly') return true;
+  if (!course.monthlyFrom || !course.monthlyTo) return true;
+  var today = getTodayDate();
+  var from = new Date(course.monthlyFrom); from.setHours(0,0,0,0);
+  var to = new Date(course.monthlyTo); to.setHours(0,0,0,0);
+  return today >= from && today <= to;
 }
 function isFlexible(course) { return course && course.scheduleMode === 'flexible'; }
 function hasTodaySchedule(course) {
@@ -1469,8 +1475,26 @@ function getNextSessionInfo(course) {
   if (isFlexible(course)) {
     return { date: getTodayDate(), type: 'flexible', note: '随时打卡' };
   }
+  // 订阅制：期已过
+  if (isSubscriptionExpired(course)) {
+    var expDate = new Date(course.monthlyTo); expDate.setHours(0,0,0,0);
+    return { date: expDate, type: 'expired', note: '订阅已到期（' + formatShortDateFromIso(course.monthlyTo) + '）' };
+  }
+  // 订阅制：还没开始
+  if (isSubscriptionNotStarted(course)) {
+    var startDate2 = new Date(course.monthlyFrom); startDate2.setHours(0,0,0,0);
+    return { date: startDate2, type: 'notStarted', note: '下期从 ' + formatShortDateFromIso(course.monthlyFrom) + ' 开始' };
+  }
   var today = getTodayDate();
-  var nextRegular = getNextRegularClassDate(course, today);
+  // 订阅制：限定在订阅期内寻找下次上课日
+  var searchFrom = today;
+  var searchLimit = course.courseType === 'monthly' && course.monthlyTo ? new Date(course.monthlyTo) : null;
+  if (searchLimit) searchLimit.setHours(0,0,0,0);
+  var nextRegular = getNextRegularClassDate(course, searchFrom);
+  // 如果算出来的日期超出订阅期，说明本期内没有更多课了
+  if (searchLimit && nextRegular > searchLimit) {
+    return { date: searchLimit, type: 'expired', note: '订阅已到期（' + formatShortDateFromIso(course.monthlyTo) + '）' };
+  }
   var best = { date: nextRegular, type: 'regular', note: '每' + formatWeekdayList(course) };
   (course.reschedules || []).forEach(function(plan){
     if (plan.used) return;
@@ -1521,7 +1545,7 @@ function handleRenewalAfterLastClass(course, entry) {
 }
 
 function getSortedCourses() {
-  var entries = getActiveEntries(loadData());
+  var entries = getVisibleCourseEntries(loadData());
   return entries.map(function(entry){
     var nextInfo = getNextSessionInfo(entry.course);
     var isTodayFixed = hasTodaySchedule(entry.course);
@@ -1586,9 +1610,14 @@ function render() {
     var isToday = item.isToday;
     var expanded = isToday || !!expandedIds[course.id];
 
+    var isExpired = nextInfo.type === 'expired';
+    var isNotStarted = nextInfo.type === 'notStarted';
+
     var badgeClass = 'badge-ok', badgeText = '正常';
     if (isToday) { badgeClass = 'badge-today'; badgeText = '今天上课'; }
     else if (isFlexible(course)) { badgeClass = 'badge-ok'; badgeText = '随时打卡'; }
+    else if (isExpired) { badgeClass = 'badge-warn'; badgeText = '订阅到期'; }
+    else if (isNotStarted) { badgeClass = 'badge-ok'; badgeText = '待开课'; }
     else if (course.payAlert && remaining !== null && remaining <= 2) { badgeClass='badge-alert'; badgeText='需续费'; }
     else if (remaining !== null && remaining <= 2) { badgeClass='badge-warn'; badgeText='剩'+remaining+'次'; }
     else if (remaining !== null) { badgeText='剩'+remaining+'次'; }
@@ -1631,6 +1660,11 @@ function render() {
         actionBtns = '<div class="checked-label">今天已打卡 '+todayDoneCount+' 次 ✓</div>';
         actionBtns += '<button class="btn btn-primary" style="font-size:12px;" onclick="markFlexExtra('+idx+')">再打一次</button>';
       }
+    } else if (isExpired) {
+      actionBtns = '<button class="btn" onclick="openEditForm('+idx+')" style="font-size:12px;color:#7a6fa8;">续订下一期 →</button>';
+      actionBtns += '<button class="btn" onclick="markClass('+idx+',\'done\')" style="font-size:12px;color:#8d84aa;">手动补打卡</button>';
+    } else if (isNotStarted) {
+      actionBtns = '<div class="checked-label" style="color:#8d84aa;">下期尚未开始，到开课日再来打卡吧</div>';
     } else if (isToday) {
       if (todayOps.length) {
         todayOps.forEach(function(op){
@@ -1648,15 +1682,38 @@ function render() {
       actionBtns = '<button class="btn" onclick="markClass('+idx+',\'done\')" style="font-size:12px;color:#8d84aa;">手动补打卡</button>';
     }
 
-    var nextDisplay = isFlexible(course) ? '随时' : (isToday ? '今天' : formatDate(nextDate));
-    var nextNote = isFlexible(course) ? '随时打卡模式' : nextInfo.note;
+    var nextDisplay, nextNote, summaryMeta, nextInfoBox;
+    if (isFlexible(course)) {
+      nextDisplay = '随时';
+      nextNote = '随时打卡模式';
+      summaryMeta = '灵活打卡 · 已上 ' + course.used + ' 次' + (remaining !== null ? ' · 剩 ' + remaining + ' 次' : '');
+      nextInfoBox = '随时打卡模式，来上课就点下方按钮记录。';
+    } else if (isExpired) {
+      nextDisplay = '—';
+      nextNote = nextInfo.note;
+      summaryMeta = nextInfo.note;
+      nextInfoBox = '订阅期已结束（' + formatShortDateFromIso(course.monthlyTo) + '），如需续订请在编辑里更新订阅周期。';
+    } else if (isNotStarted) {
+      nextDisplay = formatShortDateFromIso(course.monthlyFrom);
+      nextNote = nextInfo.note;
+      summaryMeta = nextInfo.note;
+      nextInfoBox = '下一期将于 <strong>' + formatShortDateFromIso(course.monthlyFrom) + '</strong> 开始，届时即可打卡。';
+    } else if (isToday) {
+      nextDisplay = '今天';
+      nextNote = nextInfo.note;
+      summaryMeta = getTodayMeta(course);
+      nextInfoBox = '下次上课：<strong>' + nextDisplay + '</strong>（' + nextNote + '）';
+    } else {
+      nextDisplay = formatDate(nextDate);
+      nextNote = nextInfo.note;
+      summaryMeta = '下次：' + formatShortDate(nextDate) + ' · ' + nextInfo.note;
+      nextInfoBox = '下次上课：<strong>' + nextDisplay + '</strong>（' + nextNote + '）';
+    }
+
     var compactCount = (course.courseType === 'monthly') ? '订阅制' : (totalDisplay ? (remaining !== null ? remaining : '—') + '/' + totalDisplay : (remaining !== null ? '剩'+remaining+'次' : '—'));
-    var summaryMeta = isFlexible(course)
-      ? ('灵活打卡 · 已上 ' + course.used + ' 次' + (remaining !== null ? ' · 剩 ' + remaining + ' 次' : ''))
-      : (isToday ? getTodayMeta(course) : '下次：'+formatShortDate(nextDate)+' · '+nextInfo.note);
 
     var wrap = document.createElement('div');
-    wrap.className = 'card-wrap' + (isToday ? ' today' : '') + (expanded ? ' expanded' : '') + ((course.payAlert && remaining !== null && remaining <= 2) ? ' urgent' : '');
+    wrap.className = 'card-wrap' + (isToday ? ' today' : '') + (expanded ? ' expanded' : '') + ((course.payAlert && remaining !== null && remaining <= 2) ? ' urgent' : '') + (isExpired ? ' urgent' : '');
 
     wrap.innerHTML =
       '<div class="card-summary" '+(isToday ? '' : 'onclick="toggleCard(\''+course.id+'\')"')+'>'+
@@ -1684,7 +1741,7 @@ function render() {
           '<div class="stat"><div class="stat-label">'+(course.courseType === 'monthly' ? '类型' : (totalDisplay?'总课时':'类型'))+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+(course.courseType === 'monthly' ? '订阅制' : (totalDisplay?'共'+totalDisplay+'次':'—'))+'</div></div>'+
         '</div>'+
         (totalDisplay ? '<div class="progress-bar"><div class="progress-fill" style="width:'+getProgressPercent(course)+'%;background:'+course.color+'"></div></div>' : '')+
-        '<div class="next-info">'+(!isFlexible(course) ? '下次上课：<strong>'+nextDisplay+'</strong>（'+nextNote+'）' : '随时打卡模式，来上课就点下方按钮记录。')+'</div>'+
+        '<div class="next-info">'+nextInfoBox+'</div>'+
         '<div class="actions">'+actionBtns+'</div>'+
         '<span class="history-toggle" onclick="toggleHistory(\'hist-'+idx+'\')">查看近期记录</span>'+
         '<div class="history" id="hist-'+idx+'">'+historyHTML+'</div>'+
@@ -1692,105 +1749,6 @@ function render() {
 
     container.appendChild(wrap);
   });
-
-  // 归档课程区域
-  var archivedEntries = getArchivedEntries(loadData());
-  if (archivedEntries.length > 0) {
-    var toggleBar = document.createElement('div');
-    toggleBar.className = 'archive-toggle-bar';
-    toggleBar.innerHTML =
-      '<div class="archive-section-label" style="flex:1;margin:0;">已归档（' + archivedEntries.length + '）</div>' +
-      '<button class="archive-toggle-btn' + (showArchived ? ' active' : '') + '" onclick="toggleShowArchived()">' +
-        (showArchived ? '▲ 收起' : '▼ 展开') +
-      '</button>';
-    container.appendChild(toggleBar);
-
-    if (showArchived) {
-      archivedEntries.forEach(function(entry) {
-        var course = entry.course;
-        var idx = entry.idx;
-        var remaining = getRemainingCount(course);
-        var totalDisplay = getTotalDisplay(course);
-        var expanded = !!expandedIds[course.id];
-        var compactCount = (course.courseType === 'monthly') ? '订阅制' : (totalDisplay ? (remaining !== null ? remaining : '—') + '/' + totalDisplay : (remaining !== null ? '剩'+remaining+'次' : '—'));
-
-        var historyHTML = '';
-        if (course.history.length > 0) {
-          var rev = course.history.slice().reverse().slice(0,6);
-          for (var i = 0; i < rev.length; i++) {
-            var h = rev[i];
-            var label = h.status === 'done' ? '✓ 已上课' : '— 请假';
-            if (h.kind === 'flexible' && h.status === 'done') label = '✓ 打卡';
-            var cls = h.status === 'done' ? 'status-done' : 'status-skip';
-            historyHTML += '<div class="history-item"><span>' + h.date + '</span><span class="' + cls + '">' + label + '</span></div>';
-          }
-        } else {
-          historyHTML = '<div class="history-item"><span style="color:#c2bbd7">暂无记录</span></div>';
-        }
-
-        var scheduleInfo = isFlexible(course) ? '随时打卡' : (course.scheduleMode === 'fixed' ? formatWeekdayList(course) : '');
-
-        var aw = document.createElement('div');
-        aw.className = 'card-wrap archived' + (expanded ? ' expanded' : '');
-        aw.innerHTML =
-          '<div class="card-summary" onclick="toggleCard(\'' + course.id + '\')">' +
-            '<div class="summary-dot" style="background:' + course.color + '"></div>' +
-            '<div class="summary-main">' +
-              '<div class="summary-title-row">' +
-                '<span class="summary-title">' + getCourseDisplayName(course) + '</span>' +
-                '<span class="badge badge-archived">已归档</span>' +
-              '</div>' +
-              '<div class="summary-meta">' + (scheduleInfo ? scheduleInfo + ' · ' : '') + '已上 ' + course.used + ' 次</div>' +
-            '</div>' +
-            '<div class="summary-count">' + compactCount + '</div>' +
-            '<div class="summary-chevron">⌄</div>' +
-          '</div>' +
-          '<div class="card-body">' +
-            '<div class="card-header">' +
-              '<div class="dot" style="background:' + course.color + '"></div>' +
-              '<span class="card-title">' + getCourseDisplayName(course) + '</span>' +
-              '<span class="badge badge-archived">已归档</span>' +
-              '<button class="icon-btn edit-btn" aria-label="编辑课程" onclick="openEditForm(' + idx + ')">✏️</button>' +
-            '</div>' +
-            '<div class="stats-row">' +
-              '<div class="stat"><div class="stat-label">已上</div><div class="stat-value">' + course.used + '</div></div>' +
-              '<div class="stat"><div class="stat-label">剩余</div><div class="stat-value">' + (remaining !== null ? remaining : '—') + '</div></div>' +
-              '<div class="stat"><div class="stat-label">' + (course.courseType === 'monthly' ? '类型' : (totalDisplay ? '总课时' : '类型')) + '</div><div class="stat-value" style="font-size:13px;padding-top:3px;">' + (course.courseType === 'monthly' ? '订阅制' : (totalDisplay ? '共' + totalDisplay + '次' : '—')) + '</div></div>' +
-            '</div>' +
-            (totalDisplay ? '<div class="progress-bar"><div class="progress-fill" style="width:' + getProgressPercent(course) + '%;background:' + course.color + '"></div></div>' : '') +
-            '<div class="next-info" style="background:rgba(240,237,250,0.6);">课程已归档，打卡记录仍然保留。如需继续上课，可在编辑里取消归档。</div>' +
-            '<div class="actions">' +
-              '<button class="btn" style="font-size:12px;color:#7a6fa8;" onclick="unarchiveCourse(' + idx + ')">↩ 取消归档</button>' +
-              '<button class="btn" onclick="openEditForm(' + idx + ')" style="font-size:12px;color:#8d84aa;">编辑</button>' +
-            '</div>' +
-            '<span class="history-toggle" onclick="toggleHistory(\'hist-arch-' + idx + '\')">查看近期记录</span>' +
-            '<div class="history" id="hist-arch-' + idx + '">' + historyHTML + '</div>' +
-          '</div>';
-        container.appendChild(aw);
-      });
-    }
-  }
-}
-
-function toggleShowArchived() {
-  showArchived = !showArchived;
-  render();
-}
-
-function archiveCourse(idx) {
-  var courses = loadData();
-  courses[idx].archived = true;
-  saveData(courses);
-  showToast(courses[idx].name + ' 已归档');
-  render();
-}
-
-function unarchiveCourse(idx) {
-  var courses = loadData();
-  courses[idx].archived = false;
-  saveData(courses);
-  showToast(courses[idx].name + ' 已取消归档，课程恢复显示');
-  render();
 }
 
 function markClass(idx, status, sessionKey) {
@@ -1910,39 +1868,29 @@ function undoRecord(courseIdx, histIdx) {
 function toggleHistory(id) { document.getElementById(id).classList.toggle('open'); }
 
 function openManager() {
-  var allEntries = getVisibleCourseEntries(loadData());
-  var activeEntries = allEntries.filter(function(e){ return !e.course.archived; });
-  var archivedEntries = allEntries.filter(function(e){ return !!e.course.archived; });
+  var entries = getVisibleCourseEntries(loadData());
   var list = document.getElementById('manager-list');
   list.innerHTML = '';
-  if (!allEntries.length) {
+  if (!entries.length) {
     list.innerHTML = '<div class="child-empty">'+(currentChildId === 'all' ? '还没有课程。' : (getSelectedChildLabel() + ' 还没有课程。'))+'</div>';
   }
-  function makeRow(entry) {
-    var c = entry.course;
-    var idx = entry.idx;
-    var rem = getRemainingCount(c);
-    var row = document.createElement('div');
-    row.className = 'course-row' + (c.archived ? ' ' : '');
-    row.style.opacity = c.archived ? '0.6' : '1';
-    row.innerHTML =
-      '<div class="course-row-dot" style="background:'+c.color+'"></div>' +
-      '<div class="course-row-main">' +
-        '<div class="course-row-name">'+getCourseDisplayName(c)+(c.archived ? ' <span class="badge badge-archived" style="font-size:10px;">已归档</span>' : '')+'</div>' +
-        '<div class="course-row-info">'+(c.courseType === 'monthly' ? '订阅制' : ((rem!==null?('剩'+rem+'次'):'课包制')))+' · '+(c.scheduleMode === 'flexible' ? '🎲 随时打卡' : formatWeekdayTimeList(c))+'</div>' +
-      '</div>' +
-      '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" >✏️</button>' +
-      '<button class="icon-btn danger" onclick="deleteCourse('+idx+')">✕</button>';
-    list.appendChild(row);
-  }
-  activeEntries.forEach(makeRow);
-  if (archivedEntries.length) {
-    var sep = document.createElement('div');
-    sep.className = 'archive-section-label';
-    sep.style.margin = '12px 0 6px';
-    sep.textContent = '已归档';
-    list.appendChild(sep);
-    archivedEntries.forEach(makeRow);
+  for (var i = 0; i < entries.length; i++) {
+    (function(entry){
+      var c = entry.course;
+      var idx = entry.idx;
+      var rem = getRemainingCount(c);
+      var row = document.createElement('div');
+      row.className = 'course-row';
+      row.innerHTML =
+        '<div class="course-row-dot" style="background:'+c.color+'"></div>' +
+        '<div class="course-row-main">' +
+          '<div class="course-row-name">'+getCourseDisplayName(c)+'</div>' +
+          '<div class="course-row-info">'+(c.courseType === 'monthly' ? '订阅制' : ((rem!==null?('剩'+rem+'次'):'课包制')))+' · '+(c.scheduleMode === 'flexible' ? '🎲 随时打卡' : formatWeekdayTimeList(c))+'</div>' +
+        '</div>' +
+        '<button class="icon-btn" onclick="closeModal(\'manager-modal\');openEditForm('+idx+')" >✏️</button>' +
+        '<button class="icon-btn danger" onclick="deleteCourse('+idx+')">✕</button>';
+      list.appendChild(row);
+    })(entries[i]);
   }
   openModal('manager-modal');
 }
@@ -2257,12 +2205,8 @@ function openEditForm(idx) {
   setScheduleMode(course.scheduleMode || 'fixed');
   document.getElementById('f-start-flexible').value = course.startDate || isoDate(new Date());
   selectWeekday(formWeekdays); buildColorGrid(course.color); renderRescheduleList(course); updateCourseTypeFields(); updateTimeModeUI(); applyCourseDayTimesToForm(course);
-  var archiveBtn = course.archived
-    ? '<button class="form-btn unarchive" onclick="unarchiveCourse('+idx+');closeModal(\'edit-modal\')">↩ 取消归档</button>'
-    : '<button class="form-btn archive" onclick="archiveCourse('+idx+');closeModal(\'edit-modal\')">📦 归档</button>';
   document.getElementById('edit-form-btns').innerHTML =
     '<button class="form-btn del" onclick="deleteCourse('+idx+', \'edit\', this)">删除</button>' +
-    archiveBtn +
     "<button class='form-btn save' onclick=\"saveForm()\">保存</button>";
   openModal('edit-modal');
 }
@@ -2904,12 +2848,6 @@ initAuth();
         <li><strong>有打卡记录时：</strong>按各年实际打卡次数比例分摊总学费。例如课包共 10 次，2025 年打卡 4 次、2026 年打卡 6 次，则学费按 4:6 拆分到两年，续费叠加计算。</li>
         <li><strong>无打卡记录时：</strong>学费暂时全归入当前年，开始打卡后自动按比例重新分配。</li>
         <li>右上角切换显示货币，所有金额按参考汇率统一换算（仅供参考，不实时更新）。</li>
-      </ul>
-
-      <h3>3.5 归档课程</h3>
-      <ul>
-        <li>已上完或暂停的课程，可在课程编辑里点"📦 归档"，主页不再显示，但打卡记录和学费数据完整保留。</li>
-        <li>主页底部会出现"已归档（N）"折叠区，点"展开"可查看所有归档课程，随时可取消归档恢复显示。</li>
       </ul>
 
       <h3>4. 一键课表</h3>
