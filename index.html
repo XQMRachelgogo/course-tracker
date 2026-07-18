@@ -1587,11 +1587,18 @@ function getSortedCourses() {
       nextInfo: nextInfo,
       isToday: isTodayFixed
     };
-  }).sort(function(a,b){
-    if (a.isToday && !b.isToday) return -1;
-    if (!a.isToday && b.isToday) return 1;
+  }).sort(function(a, b){
+    function priority(item) {
+      if (item.isToday) return 0;                              // 今天有课
+      var t = item.nextInfo.type;
+      if (t === 'exhausted' || t === 'expired') return 2;     // 用完/到期，沉底
+      return 1;                                                // 正常/待开课/随时打卡
+    }
+    var pa = priority(a), pb = priority(b);
+    if (pa !== pb) return pa - pb;
+    // 同优先级内按下次上课时间排
     if (a.nextDate.getTime() !== b.nextDate.getTime()) return a.nextDate - b.nextDate;
-    return a.course.name.localeCompare(b.course.name,'zh-CN');
+    return a.course.name.localeCompare(b.course.name, 'zh-CN');
   });
 }
 
