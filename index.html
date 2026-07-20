@@ -354,7 +354,21 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .child-helper{font-size:11px;color:#a39abb;line-height:1.6;margin-top:6px}
 .filter-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#6c5db5;background:#f4efff;border-radius:999px;padding:4px 8px;margin-top:6px}
 
-/* 归档功能 */
+/* 折叠面板 */
+.collapsible-section{border:1px solid rgba(127,119,221,0.12);border-radius:14px;overflow:hidden;margin-bottom:14px}
+.collapsible-header{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;cursor:pointer;background:#faf8ff;-webkit-tap-highlight-color:transparent;gap:8px}
+.collapsible-header:active{background:#f3efff}
+.collapsible-title{font-size:13px;font-weight:700;color:#574e74;display:flex;align-items:center;gap:6px}
+.collapsible-summary{font-size:11px;color:#a39abb;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:4px}
+.collapsible-chevron{font-size:13px;color:#b0a7ca;transition:transform 0.2s;flex-shrink:0}
+.collapsible-section.open .collapsible-chevron{transform:rotate(180deg)}
+.collapsible-body{display:none;padding:12px 13px 13px;border-top:1px solid rgba(127,119,221,0.08);background:#fff}
+.collapsible-section.open .collapsible-body{display:block}
+
+/* 暂停badge */
+.badge-paused{background:#e8f4fd;color:#2b7bb5}
+
+</style>
 .archive-toggle-bar{display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:8px;gap:8px}
 .archive-toggle-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#a39abb;background:transparent;border:none;cursor:pointer;padding:4px 2px;font-family:inherit;-webkit-tap-highlight-color:transparent}
 .archive-toggle-btn:hover{color:#7a6fa8}
@@ -608,63 +622,115 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
         <button type="button" class="wd-btn" data-day="6" onclick="toggleWeekday(6)">周六</button>
         <button type="button" class="wd-btn" data-day="0" onclick="toggleWeekday(0)">周日</button>
       </div>
-      <div class="mini-tip">一门课可以选多个上课日；每轮到一次上课日，就能扣 1 次课时。</div>
     </div>
-    <div class="form-group">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;margin-bottom:8px;">
-        <div>
-          <label class="form-label">开始日期</label>
-          <input class="form-input" id="f-start" type="date" />
-        </div>
-        <div>
-          <label class="form-label">上课时间</label>
-          <select class="form-input" id="f-time-mode" onchange="updateTimeModeUI()">
-            <option value="same">时间一样</option>
-            <option value="diff">时间不一样</option>
-          </select>
-        </div>
+
+    <!-- 折叠：时间设置 -->
+    <div class="collapsible-section" id="cs-time">
+      <div class="collapsible-header" onclick="toggleCollapsible('cs-time')">
+        <span class="collapsible-title">⏰ 时间设置</span>
+        <span class="collapsible-summary" id="cs-time-summary">点击设置开始日期和上课时间</span>
+        <span class="collapsible-chevron">⌄</span>
       </div>
-      <div class="mini-tip" style="margin-bottom:8px;">一周多次课时，可以分别设置各天的上课时间。</div>
-      <div id="f-same-time-box">
-        <div class="time-range">
-          <input class="time-input" id="f-time-start" type="time" value="10:00" onchange="syncEndTimeFromStart()" />
-          <span class="time-sep">至</span>
-          <input class="time-input" id="f-time-end" type="time" value="11:00" />
+      <div class="collapsible-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;">
+            <div>
+              <label class="form-label">开始日期</label>
+              <input class="form-input" id="f-start" type="date" onchange="updateTimeSummary()" />
+            </div>
+            <div>
+              <label class="form-label">上课时间</label>
+              <select class="form-input" id="f-time-mode" onchange="updateTimeModeUI();updateTimeSummary()">
+                <option value="same">时间一样</option>
+                <option value="diff">时间不一样</option>
+              </select>
+            </div>
+          </div>
         </div>
-      </div>
-      <div id="f-diff-time-box" class="hidden">
-        <div class="mini-tip">已选上课日会分别显示时间，课表会按各自时间显示。</div>
-        <div id="f-day-time-list" class="day-time-list"></div>
+        <div id="f-same-time-box">
+          <div class="time-range">
+            <input class="time-input" id="f-time-start" type="time" value="10:00" onchange="syncEndTimeFromStart();updateTimeSummary()" />
+            <span class="time-sep">至</span>
+            <input class="time-input" id="f-time-end" type="time" value="11:00" onchange="updateTimeSummary()" />
+          </div>
+        </div>
+        <div id="f-diff-time-box" class="hidden">
+          <div class="mini-tip">已选上课日会分别显示时间，课表会按各自时间显示。</div>
+          <div id="f-day-time-list" class="day-time-list"></div>
+        </div>
       </div>
     </div>
     </div><!-- end f-fixed-schedule-wrap -->
+
     <div id="f-flexible-schedule-wrap" class="hidden">
-    <div class="form-group">
-      <label class="form-label">开始日期</label>
-      <input class="form-input" id="f-start-flexible" type="date" />
-      <div class="mini-tip" style="margin-top:6px;">随时打卡模式无需选择上课日，直接在主页点"立即打卡"即可记录。</div>
-    </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">调课安排</label>
-      <div class="reschedule-box">
-        <div id="f-reschedule-empty" class="mini-tip">先保存课程后，再添加调课安排。</div>
-        <div id="f-reschedule-editor" class="hidden">
-          <div class="mini-tip">如果这次课程临时改时间，不用改固定上课日；左边填原计划，右边填调课后日期，到新日期时就可以正常打卡。</div>
-          <div class="reschedule-grid-labels">
-            <span>原计划</span>
-            <span>调课后</span>
-          </div>
-          <div class="reschedule-grid">
-            <input class="form-input" id="f-shift-from" type="date" />
-            <input class="form-input" id="f-shift-to" type="date" />
-          </div>
-          <input class="form-input" id="f-shift-note" placeholder="备注（可选）" style="margin-top:8px;" />
-          <button type="button" class="add-shift-btn" onclick="addRescheduleFromForm()">+ 添加调课</button>
-          <div class="reschedule-list" id="f-reschedule-list"></div>
+    <div class="collapsible-section" id="cs-time-flex">
+      <div class="collapsible-header" onclick="toggleCollapsible('cs-time-flex')">
+        <span class="collapsible-title">⏰ 时间设置</span>
+        <span class="collapsible-summary" id="cs-time-flex-summary">点击设置开始日期</span>
+        <span class="collapsible-chevron">⌄</span>
+      </div>
+      <div class="collapsible-body">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">开始日期</label>
+          <input class="form-input" id="f-start-flexible" type="date" />
+          <div class="mini-tip" style="margin-top:6px;">随时打卡模式无需选择上课日，直接在主页点"立即打卡"即可记录。</div>
         </div>
       </div>
     </div>
+    </div>
+
+    <!-- 折叠：暂停课程 -->
+    <div class="collapsible-section" id="cs-pause">
+      <div class="collapsible-header" onclick="toggleCollapsible('cs-pause')">
+        <span class="collapsible-title">⏸ 暂停课程</span>
+        <span class="collapsible-summary" id="cs-pause-summary">暑假/特殊情况暂时不上课</span>
+        <span class="collapsible-chevron">⌄</span>
+      </div>
+      <div class="collapsible-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <div class="form-switch-row">
+            <span class="form-switch-label">暂停这门课</span>
+            <label class="switch"><input type="checkbox" id="f-paused" onchange="updatePauseUI()" /><span class="switch-slider"></span></label>
+          </div>
+        </div>
+        <div id="f-pause-date-wrap" class="hidden">
+          <div class="form-group" style="margin-bottom:6px">
+            <label class="form-label">恢复上课日期（可选）</label>
+            <input class="form-input" id="f-resume-date" type="date" />
+            <div class="mini-tip" style="margin-top:6px;">填写后到了这一天会自动恢复，不填则需要手动取消暂停。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 折叠：调课安排 -->
+    <div class="collapsible-section" id="cs-reschedule">
+      <div class="collapsible-header" onclick="toggleCollapsible('cs-reschedule')">
+        <span class="collapsible-title">🔄 调课安排</span>
+        <span class="collapsible-summary" id="cs-reschedule-summary">临时改时间用这里</span>
+        <span class="collapsible-chevron">⌄</span>
+      </div>
+      <div class="collapsible-body">
+        <div class="reschedule-box" style="border:none;padding:0;background:transparent">
+          <div id="f-reschedule-empty" class="mini-tip">先保存课程后，再添加调课安排。</div>
+          <div id="f-reschedule-editor" class="hidden">
+            <div class="mini-tip" style="margin-bottom:8px;">左边填原计划日期，右边填调课后的日期，到新日期时就可以正常打卡。</div>
+            <div class="reschedule-grid-labels">
+              <span>原计划</span>
+              <span>调课后</span>
+            </div>
+            <div class="reschedule-grid">
+              <input class="form-input" id="f-shift-from" type="date" />
+              <input class="form-input" id="f-shift-to" type="date" />
+            </div>
+            <input class="form-input" id="f-shift-note" placeholder="备注（可选）" style="margin-top:8px;" />
+            <button type="button" class="add-shift-btn" onclick="addRescheduleFromForm()">+ 添加调课</button>
+            <div class="reschedule-list" id="f-reschedule-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="form-group">
       <label class="form-label">颜色</label>
       <div class="color-grid" id="f-color-grid"></div>
@@ -716,28 +782,37 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
         <label class="switch"><input type="checkbox" id="f-pay-alert" /><span class="switch-slider"></span></label>
       </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">学费记录</label>
-      <div id="f-fee-hint" style="font-size:12px;color:#a39abb;margin-bottom:8px;line-height:1.5;">新建课程时可直接填写首笔付费和购买课时，点保存后会一起创建；已有课程再买课包时，新增购买课时会自动并入课包总数。</div>
-      <div id="f-fee-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
-      <div id="f-fee-grid" style="display:grid;grid-template-columns:88px 1fr 60px 132px;gap:6px;align-items:center;">
-        <select class="form-input" id="f-fee-currency" style="padding:0 4px;font-size:16px;height:38px;">
-          <option value="CNY">¥ 人民币</option>
-          <option value="USD">$ 美元</option>
-          <option value="HKD">HK$ 港币</option>
-          <option value="EUR">€ 欧元</option>
-          <option value="GBP">£ 英镑</option>
-          <option value="JPY">¥ 日元</option>
-          <option value="CAD">CA$ 加元</option>
-          <option value="AUD">A$ 澳元</option>
-        </select>
-        <input class="form-input" id="f-fee-amount" type="number" min="0" step="0.01" placeholder="金额" inputmode="decimal" style="padding:0 8px;font-size:16px;height:38px;" />
-        <div id="f-fee-sessions-wrap"><input class="form-input" id="f-fee-sessions" type="number" min="0" step="1" placeholder="次" inputmode="numeric" style="padding:0 6px;font-size:16px;width:100%;height:38px;text-align:center;" /></div>
-        <input class="form-input" id="f-fee-date" type="date" style="padding:0 5px;font-size:15px;height:38px;min-height:38px;line-height:38px;" />
+
+    <!-- 折叠：学费记录 -->
+    <div class="collapsible-section" id="cs-fee">
+      <div class="collapsible-header" onclick="toggleCollapsible('cs-fee')">
+        <span class="collapsible-title">💰 学费记录</span>
+        <span class="collapsible-summary" id="cs-fee-summary">点击添加缴费记录</span>
+        <span class="collapsible-chevron">⌄</span>
       </div>
-      <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">课包制可填写购买课时；订阅制只需要金额和付款日期。</div>
-      <button type="button" class="add-shift-btn" style="margin-top:8px;" onclick="addFeeFromForm()">+ 添加一笔学费</button>
+      <div class="collapsible-body">
+        <div id="f-fee-hint" style="font-size:12px;color:#a39abb;margin-bottom:8px;line-height:1.5;">新建课程时可直接填写首笔付费和购买课时，点保存后会一起创建；已有课程再买课包时，新增购买课时会自动并入课包总数。</div>
+        <div id="f-fee-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
+        <div id="f-fee-grid" style="display:grid;grid-template-columns:88px 1fr 60px 132px;gap:6px;align-items:center;">
+          <select class="form-input" id="f-fee-currency" style="padding:0 4px;font-size:16px;height:38px;">
+            <option value="CNY">¥ 人民币</option>
+            <option value="USD">$ 美元</option>
+            <option value="HKD">HK$ 港币</option>
+            <option value="EUR">€ 欧元</option>
+            <option value="GBP">£ 英镑</option>
+            <option value="JPY">¥ 日元</option>
+            <option value="CAD">CA$ 加元</option>
+            <option value="AUD">A$ 澳元</option>
+          </select>
+          <input class="form-input" id="f-fee-amount" type="number" min="0" step="0.01" placeholder="金额" inputmode="decimal" style="padding:0 8px;font-size:16px;height:38px;" />
+          <div id="f-fee-sessions-wrap"><input class="form-input" id="f-fee-sessions" type="number" min="0" step="1" placeholder="次" inputmode="numeric" style="padding:0 6px;font-size:16px;width:100%;height:38px;text-align:center;" /></div>
+          <input class="form-input" id="f-fee-date" type="date" style="padding:0 5px;font-size:15px;height:38px;min-height:38px;line-height:38px;" />
+        </div>
+        <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">课包制可填写购买课时；订阅制只需要金额和付款日期。</div>
+        <button type="button" class="add-shift-btn" style="margin-top:8px;" onclick="addFeeFromForm()">+ 添加一笔学费</button>
+      </div>
     </div>
+
     <div class="form-btns" id="edit-form-btns"></div>
   </div>
 
@@ -869,6 +944,8 @@ function normalizeCourse(course) {
   c.childId = c.childId || '';
   c.scheduleMode = (c.scheduleMode === 'flexible') ? 'flexible' : 'fixed';
   c.archived = !!c.archived;
+  c.paused = !!c.paused;
+  c.resumeDate = c.resumeDate || '';
   return c;
 }
 function normalizeCourses(courses) {
@@ -1398,7 +1475,7 @@ function isRegularCourseOnDate(course, dateObj) {
 function hasTodaySchedule(course) {
   if (isFlexible(course)) return false;
   if (course.archived) return false;
-  if (isPackageExhausted(course)) return false;
+  if (isCoursePaused(course)) return false;
   var today = getTodayDate();
   return isRegularCourseOnDate(course, today) || getPendingReschedulesForDate(course, isoDate(today)).length > 0;
 }
@@ -1429,6 +1506,77 @@ function getSessionKeyFromPlan(plan) {
 function findRescheduleById(course, planId) {
   return (course.reschedules || []).find(function(plan){ return plan.id === planId; }) || null;
 }
+// ── 折叠面板 ──
+function toggleCollapsible(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+function openCollapsible(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.add('open');
+}
+function closeCollapsible(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('open');
+}
+function updateTimeSummary() {
+  var startEl = document.getElementById('f-start');
+  var startFlexEl = document.getElementById('f-start-flexible');
+  var s1El = document.getElementById('f-time-start');
+  var s2El = document.getElementById('f-time-end');
+  var sumEl = document.getElementById('cs-time-summary');
+  var sumFlexEl = document.getElementById('cs-time-flex-summary');
+  if (sumEl) {
+    var start = startEl && startEl.value ? startEl.value : '';
+    var ts = s1El && s1El.value ? s1El.value : '';
+    var te = s2El && s2El.value ? s2El.value : '';
+    sumEl.textContent = (start ? start + '  ' : '') + (ts && te ? ts + ' - ' + te : ts || '');
+    if (!sumEl.textContent.trim()) sumEl.textContent = '点击设置开始日期和上课时间';
+  }
+  if (sumFlexEl) {
+    var sf = startFlexEl && startFlexEl.value ? startFlexEl.value : '';
+    sumFlexEl.textContent = sf || '点击设置开始日期';
+  }
+}
+function updatePauseUI() {
+  var checked = document.getElementById('f-paused') && document.getElementById('f-paused').checked;
+  var wrap = document.getElementById('f-pause-date-wrap');
+  if (wrap) wrap.classList.toggle('hidden', !checked);
+  // 更新暂停面板摘要
+  var sumEl = document.getElementById('cs-pause-summary');
+  if (sumEl) {
+    if (checked) {
+      var resumeDate = document.getElementById('f-resume-date') && document.getElementById('f-resume-date').value;
+      sumEl.textContent = resumeDate ? '已暂停，恢复日：' + resumeDate : '已暂停（手动恢复）';
+    } else {
+      sumEl.textContent = '暑假/特殊情况暂时不上课';
+    }
+  }
+}
+function updateRescheduleSummary(course) {
+  var sumEl = document.getElementById('cs-reschedule-summary');
+  if (!sumEl) return;
+  var pending = (course && course.reschedules ? course.reschedules.filter(function(r){ return !r.used; }) : []).length;
+  sumEl.textContent = pending ? pending + ' 条待补课' : '临时改时间用这里';
+}
+function updateFeeSummaryLabel(course) {
+  var sumEl = document.getElementById('cs-fee-summary');
+  if (!sumEl) return;
+  var count = (course && course.fees) ? course.fees.length : 0;
+  sumEl.textContent = count ? '共 ' + count + ' 笔记录' : '点击添加缴费记录';
+}
+
+// ── 暂停判断 ──
+function isCoursePaused(course) {
+  if (!course.paused) return false;
+  // 有恢复日期且今天已到或超过，自动解除暂停
+  if (course.resumeDate) {
+    var resume = new Date(course.resumeDate); resume.setHours(0,0,0,0);
+    if (getTodayDate() >= resume) return false;
+  }
+  return true;
+}
+
 function isSubscriptionExpired(course) {
   if (course.courseType !== 'monthly') return false;
   if (!course.monthlyTo) return false;
@@ -1502,6 +1650,11 @@ function getTodayMeta(course) {
 function getNextSessionInfo(course) {
   if (isFlexible(course)) {
     return { date: getTodayDate(), type: 'flexible', note: '随时打卡' };
+  }
+  // 暂停中
+  if (isCoursePaused(course)) {
+    var resumeD = course.resumeDate ? new Date(course.resumeDate) : null;
+    return { date: resumeD || getTodayDate(), type: 'paused', note: course.resumeDate ? ('暂停中，' + formatShortDateFromIso(course.resumeDate) + ' 恢复') : '暂停中（手动恢复）' };
   }
   // 课时制：课时已用完
   if (isPackageExhausted(course)) {
@@ -1591,7 +1744,7 @@ function getSortedCourses() {
     function priority(item) {
       if (item.isToday) return 0;                              // 今天有课
       var t = item.nextInfo.type;
-      if (t === 'exhausted' || t === 'expired') return 2;     // 用完/到期，沉底
+      if (t === 'exhausted' || t === 'expired' || t === 'paused') return 2;     // 用完/到期，沉底
       return 1;                                                // 正常/待开课/随时打卡
     }
     var pa = priority(a), pb = priority(b);
@@ -1651,10 +1804,12 @@ function render() {
     var isExpired = nextInfo.type === 'expired';
     var isNotStarted = nextInfo.type === 'notStarted';
     var isExhausted = nextInfo.type === 'exhausted';
+    var isPaused = nextInfo.type === 'paused';
 
     var badgeClass = 'badge-ok', badgeText = '正常';
     if (isToday) { badgeClass = 'badge-today'; badgeText = '今天上课'; }
     else if (isFlexible(course)) { badgeClass = 'badge-ok'; badgeText = '随时打卡'; }
+    else if (isPaused) { badgeClass = 'badge-paused'; badgeText = '已暂停'; }
     else if (isExhausted) { badgeClass = 'badge-alert'; badgeText = '需续费'; }
     else if (isExpired) { badgeClass = 'badge-warn'; badgeText = '订阅到期'; }
     else if (isNotStarted) { badgeClass = 'badge-ok'; badgeText = '待开课'; }
@@ -1706,6 +1861,10 @@ function render() {
       actionBtns = '<div class="checked-label" style="color:#8d84aa;">下期尚未开始，到开课日再来打卡吧</div>';
     } else if (isExhausted) {
       actionBtns = '<button class="btn" onclick="openEditForm('+idx+')" style="font-size:12px;color:#b33b4d;">续费后继续上课 →</button>';
+    } else if (isPaused) {
+      var resumeStr = course.resumeDate ? formatShortDateFromIso(course.resumeDate) + ' 自动恢复' : '手动恢复';
+      actionBtns = '<div class="checked-label" style="color:#2b7bb5;">课程暂停中（' + resumeStr + '）</div>';
+      actionBtns += '<button class="btn" onclick="quickUnpause(' + idx + ')" style="font-size:12px;color:#7a6fa8;">立即恢复上课</button>';
     } else if (isToday) {
       if (todayOps.length) {
         todayOps.forEach(function(op){
@@ -1740,6 +1899,11 @@ function render() {
       nextDisplay = '—'; nextNote = '课时已用完';
       summaryMeta = '课时已全部用完，续费后继续';
       nextInfoBox = '课时已全部用完，续费后可继续打卡。在编辑里增加课时数即可恢复。';
+    } else if (isPaused) {
+      nextDisplay = course.resumeDate ? formatShortDateFromIso(course.resumeDate) : '—';
+      nextNote = nextInfo.note;
+      summaryMeta = nextInfo.note;
+      nextInfoBox = '课程已暂停' + (course.resumeDate ? '，将于 <strong>' + formatShortDateFromIso(course.resumeDate) + '</strong> 自动恢复。' : '，需手动恢复后才能打卡。');
     } else if (isToday) {
       nextDisplay = '今天'; nextNote = nextInfo.note;
       summaryMeta = getTodayMeta(course);
@@ -1876,6 +2040,14 @@ function unarchiveCourse(idx) {
   courses[idx].archived = false;
   saveData(courses);
   showToast(courses[idx].name + ' 已取消归档，课程恢复显示');
+  render();
+}
+function quickUnpause(idx) {
+  var courses = loadData();
+  courses[idx].paused = false;
+  courses[idx].resumeDate = '';
+  saveData(courses);
+  showToast(courses[idx].name + ' 已恢复上课');
   render();
 }
 
@@ -2308,6 +2480,17 @@ function openAddForm() {
   refreshCourseChildField(currentChildId !== 'all' ? currentChildId : '');
   setScheduleMode('fixed');
   selectWeekday([1]); buildColorGrid(COLORS[0]); renderRescheduleList(null); updateCourseTypeFields(); updateTimeModeUI();
+  // 暂停
+  var pausedEl = document.getElementById('f-paused');
+  var resumeEl = document.getElementById('f-resume-date');
+  if (pausedEl) pausedEl.checked = false;
+  if (resumeEl) resumeEl.value = '';
+  updatePauseUI();
+  // 折叠面板：新建时全部收起
+  ['cs-time','cs-time-flex','cs-pause','cs-reschedule','cs-fee'].forEach(closeCollapsible);
+  updateTimeSummary();
+  updateRescheduleSummary(null);
+  updateFeeSummaryLabel(null);
   document.getElementById('edit-form-btns').innerHTML =
     "<button class='form-btn' onclick=\"closeModal('edit-modal')\">取消</button>" +
     "<button class='form-btn save' onclick=\"saveForm()\">保存</button>";
@@ -2342,7 +2525,22 @@ function openEditForm(idx) {
   refreshCourseChildField(course.childId || '');
   setScheduleMode(course.scheduleMode || 'fixed');
   document.getElementById('f-start-flexible').value = course.startDate || isoDate(new Date());
+  // 暂停
+  var pausedEl = document.getElementById('f-paused');
+  var resumeEl = document.getElementById('f-resume-date');
+  if (pausedEl) pausedEl.checked = !!course.paused;
+  if (resumeEl) resumeEl.value = course.resumeDate || '';
+  updatePauseUI();
   selectWeekday(formWeekdays); buildColorGrid(course.color); renderRescheduleList(course); updateCourseTypeFields(); updateTimeModeUI(); applyCourseDayTimesToForm(course);
+  // 折叠面板：编辑时全部收起，有内容的提示用摘要
+  ['cs-time','cs-time-flex','cs-pause','cs-reschedule','cs-fee'].forEach(closeCollapsible);
+  updateTimeSummary();
+  updateRescheduleSummary(course);
+  updateFeeSummaryLabel(course);
+  // 有调课记录或暂停时自动展开对应面板
+  if (course.paused) openCollapsible('cs-pause');
+  var pendingShifts = (course.reschedules || []).filter(function(r){ return !r.used; }).length;
+  if (pendingShifts) openCollapsible('cs-reschedule');
   var archiveBtn = course.archived
     ? '<button class="form-btn unarchive" onclick="unarchiveCourse('+idx+');closeModal(\'edit-modal\')">↩ 取消归档</button>'
     : '<button class="form-btn archive" onclick="archiveCourse('+idx+');closeModal(\'edit-modal\')">📦 归档</button>';
@@ -2407,6 +2605,8 @@ function saveForm() {
     c.remaining = remaining;
     c.used = used;
     c.payAlert = document.getElementById('f-pay-alert').checked;
+    c.paused = document.getElementById('f-paused') ? document.getElementById('f-paused').checked : false;
+    c.resumeDate = (c.paused && document.getElementById('f-resume-date')) ? (document.getElementById('f-resume-date').value || '') : '';
     c.childId = (document.getElementById('f-child-id') || {}).value || '';
     c.fees = c.fees || [];
     if (pendingFee) {
@@ -2437,6 +2637,8 @@ function saveForm() {
       reschedules: [],
       fees: [],
       payAlert: document.getElementById('f-pay-alert').checked,
+      paused: false,
+      resumeDate: '',
       childId: (document.getElementById('f-child-id') || {}).value || ''
     };
     if (pendingFee) {
