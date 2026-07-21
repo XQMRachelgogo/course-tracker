@@ -1442,10 +1442,19 @@ async function initAuth() {
 
 function isoDate(d) { return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function formatDate(d) { return d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'}); }
-function formatShortDate(d) { return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}); }
+function formatShortDate(d) { return (d.getMonth()+1) + '月' + d.getDate() + '日'; }
+// 把 "YYYY-MM-DD" 当本地时间解析，避免 UTC 时区偏移导致日期少一天
+function parseLocalDate(iso) {
+  if (!iso) return new Date(NaN);
+  var parts = String(iso).slice(0,10).split('-');
+  if (parts.length !== 3) return new Date(NaN);
+  var d = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
+  d.setHours(0,0,0,0);
+  return d;
+}
 function formatShortDateFromIso(iso) {
   if (!iso) return '';
-  var d = new Date(iso);
+  var d = parseLocalDate(iso);
   return isNaN(d.getTime()) ? iso : formatShortDate(d);
 }
 function getTodayDate(){ var t = new Date(); t.setHours(0,0,0,0); return t; }
@@ -1482,8 +1491,7 @@ function hasTodaySchedule(course) {
 function getNextRegularClassDate(course, fromDate) {
   var base = new Date(fromDate || getTodayDate());
   base.setHours(0,0,0,0);
-  var start = new Date(course.startDate);
-  start.setHours(0,0,0,0);
+  var start = parseLocalDate(course.startDate);
   if (base < start) base = new Date(start);
   var best = null;
   getCourseWeekdays(course).forEach(function(day){
@@ -1571,7 +1579,7 @@ function isCoursePaused(course) {
   if (!course.paused) return false;
   // 有恢复日期且今天已到或超过，自动解除暂停
   if (course.resumeDate) {
-    var resume = new Date(course.resumeDate); resume.setHours(0,0,0,0);
+    var resume = parseLocalDate(course.resumeDate);
     if (getTodayDate() >= resume) return false;
   }
   return true;
@@ -1580,13 +1588,13 @@ function isCoursePaused(course) {
 function isSubscriptionExpired(course) {
   if (course.courseType !== 'monthly') return false;
   if (!course.monthlyTo) return false;
-  var endDate = new Date(course.monthlyTo); endDate.setHours(0,0,0,0);
+  var endDate = parseLocalDate(course.monthlyTo);
   return getTodayDate() > endDate;
 }
 function isSubscriptionNotStarted(course) {
   if (course.courseType !== 'monthly') return false;
   if (!course.monthlyFrom) return false;
-  var startDate = new Date(course.monthlyFrom); startDate.setHours(0,0,0,0);
+  var startDate = parseLocalDate(course.monthlyFrom);
   return getTodayDate() < startDate;
 }
 function isPackageExhausted(course) {
@@ -1603,13 +1611,12 @@ function isRegularCourseOnDate(course, dateObj) {
   // 订阅制：必须在订阅期内才算有课
   if (course.courseType === 'monthly') {
     if (course.monthlyFrom && course.monthlyTo) {
-      var from = new Date(course.monthlyFrom); from.setHours(0,0,0,0);
-      var to = new Date(course.monthlyTo); to.setHours(0,0,0,0);
+      var from = parseLocalDate(course.monthlyFrom);
+      var to = parseLocalDate(course.monthlyTo);
       if (current < from || current > to) return false;
     }
   }
-  var startDate = new Date(course.startDate);
-  startDate.setHours(0,0,0,0);
+  var startDate = parseLocalDate(course.startDate);
   return startDate <= current && getCourseWeekdays(course).indexOf(current.getDay()) >= 0;
 }
 function getTodayOpportunities(course) {
@@ -1653,7 +1660,7 @@ function getNextSessionInfo(course) {
   }
   // 暂停中
   if (isCoursePaused(course)) {
-    var resumeD = course.resumeDate ? new Date(course.resumeDate) : null;
+    var resumeD = course.resumeDate ? parseLocalDate(course.resumeDate) : null;
     return { date: resumeD || getTodayDate(), type: 'paused', note: course.resumeDate ? ('暂停中，' + formatShortDateFromIso(course.resumeDate) + ' 恢复') : '暂停中（手动恢复）' };
   }
   // 课时制：课时已用完
@@ -1662,19 +1669,19 @@ function getNextSessionInfo(course) {
   }
   // 订阅制：期已过
   if (isSubscriptionExpired(course)) {
-    var expDate = new Date(course.monthlyTo); expDate.setHours(0,0,0,0);
+    var expDate = parseLocalDate(course.monthlyTo);
     return { date: expDate, type: 'expired', note: '订阅已到期（' + formatShortDateFromIso(course.monthlyTo) + '）' };
   }
   // 订阅制：还没开始
   if (isSubscriptionNotStarted(course)) {
-    var nsDate = new Date(course.monthlyFrom); nsDate.setHours(0,0,0,0);
+    var nsDate = parseLocalDate(course.monthlyFrom);
     return { date: nsDate, type: 'notStarted', note: '下期从 ' + formatShortDateFromIso(course.monthlyFrom) + ' 开始' };
   }
   var today = getTodayDate();
   var nextRegular = getNextRegularClassDate(course, today);
   // 订阅制：若推算日期超出订阅期，说明本期已无更多课
   if (course.courseType === 'monthly' && course.monthlyTo) {
-    var searchLimit = new Date(course.monthlyTo); searchLimit.setHours(0,0,0,0);
+    var searchLimit = parseLocalDate(course.monthlyTo);
     if (nextRegular > searchLimit) {
       return { date: searchLimit, type: 'expired', note: '订阅已到期（' + formatShortDateFromIso(course.monthlyTo) + '）' };
     }
@@ -1682,9 +1689,7 @@ function getNextSessionInfo(course) {
   var best = { date: nextRegular, type: 'regular', note: '每' + formatWeekdayList(course) };
   (course.reschedules || []).forEach(function(plan){
     if (plan.used) return;
-    var d = new Date(plan.toDate);
-    d.setHours(0,0,0,0);
-    if (d < today) return;
+    var d = parseLocalDate(plan.toDate);
     if (!best || d < best.date) {
       best = { date: d, type: 'reschedule', note: '调课：' + formatShortDateFromIso(plan.fromDate) + ' → ' + formatShortDateFromIso(plan.toDate) };
     }
@@ -1742,10 +1747,11 @@ function getSortedCourses() {
     };
   }).sort(function(a, b){
     function priority(item) {
-      if (item.isToday) return 0;                              // 今天有课
+      if (item.isToday) return 0;                          // 今天有课
       var t = item.nextInfo.type;
-      if (t === 'exhausted' || t === 'expired' || t === 'paused') return 2;     // 用完/到期，沉底
-      return 1;                                                // 正常/待开课/随时打卡
+      if (t === 'exhausted' || t === 'expired') return 3; // 需续费/订阅到期，最底
+      if (t === 'paused') return 2;                        // 暂停，次底
+      return 1;                                            // 正常/待开课/随时打卡
     }
     var pa = priority(a), pb = priority(b);
     if (pa !== pb) return pa - pb;
@@ -2836,7 +2842,7 @@ function deleteFee(feeIdx, btnEl) {
 function weeksRemainingInYearForCourse(course, fromDateStr) {
   var weekdays = Array.isArray(course.weekdays) && course.weekdays.length ? course.weekdays.slice() : [typeof course.weekday === 'number' ? course.weekday : 1];
   if (!weekdays.length) weekdays = [1];
-  var from = fromDateStr ? new Date(fromDateStr + 'T00:00:00') : getTodayDate();
+  var from = fromDateStr ? parseLocalDate(fromDateStr) : getTodayDate();
   if (isNaN(from.getTime())) from = getTodayDate();
   from.setHours(0,0,0,0);
   var year = from.getFullYear();
@@ -2851,8 +2857,8 @@ function weeksRemainingInYearForCourse(course, fromDateStr) {
   return count;
 }
 function countCourseOccurrencesInRange(course, startStr, endStr, yearFilter) {
-  var start = startStr ? new Date(startStr + 'T00:00:00') : null;
-  var end = endStr ? new Date(endStr + 'T00:00:00') : null;
+  var start = startStr ? parseLocalDate(startStr) : null;
+  var end = endStr ? parseLocalDate(endStr) : null;
   if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return 0;
   start.setHours(0,0,0,0);
   end.setHours(0,0,0,0);
@@ -3171,14 +3177,14 @@ initAuth();
         <li>打完最后一次课时，系统弹出确认：选"已续费"后输入新增课时数，已上次数不清零，继续累计。</li>
       </ul>
 
-      <h3>2. 孩子档案与筛选</h3>
+      <h3>1.5 孩子档案与筛选</h3>
       <ul>
         <li>左上角云朵旁新增“孩子档案”按钮，可添加多个孩子，支持 emoji 头像、编辑和删除。</li>
         <li>可切换“全部孩子”或某个孩子；选中后，课程卡片、学费分摊、一键课表和导出日历都会只显示该孩子的课程。</li>
         <li>新增课程会默认继承当前选中的孩子，也可在课程编辑里修改归属。</li>
       </ul>
 
-      <h3>3. 打卡与调课</h3>
+      <h3>2. 打卡与调课</h3>
       <ul>
         <li><strong>固定上课日：</strong>当天有课的课程自动排在最上方并展开，点"今天上课了"打卡扣课时；点"今天请假"则课时保留顺延。</li>
         <li><strong>随时打卡模式：</strong>新增课程时选择"🎲 随时打卡"，无需设定上课日，随时点"立即打卡"即可扣课时，适合私教课或弹性安排。</li>
@@ -3186,7 +3192,7 @@ initAuth();
         <li>所有打卡记录可撤销，历史记录可在课程卡片里查看，方便核对机构是否正确扣课时。</li>
       </ul>
 
-      <h3>4. 今年学费分摊</h3>
+      <h3>3. 今年学费分摊</h3>
       <ul>
         <li>在课程编辑里记录每次缴费的金额、货币和缴费日期，支持人民币、美元、港币、欧元、英镑、日元等。</li>
         <li><strong>有打卡记录时：</strong>按各年实际打卡次数比例分摊总学费。例如课包共 10 次，2025 年打卡 4 次、2026 年打卡 6 次，则学费按 4:6 拆分到两年，续费叠加计算。</li>
@@ -3194,18 +3200,18 @@ initAuth();
         <li>右上角切换显示货币，所有金额按参考汇率统一换算（仅供参考，不实时更新）。</li>
       </ul>
 
-      <h3>5. 一键课表</h3>
+      <h3>4. 一键课表</h3>
       <ul>
         <li>点顶部"一键课表"，按周一到周日展示本周所有固定课程和调课安排，标注上课时间段，当天高亮。</li>
       </ul>
 
-      <h3>6. 订阅 Apple Calendar</h3>
+      <h3>5. 订阅 Apple Calendar</h3>
       <ul>
         <li>登录后点"订阅日历"，生成专属 webcal:// 链接，iPhone 点一下即可订阅。</li>
         <li>Apple Calendar 每 6 小时自动拉取最新数据，课程变动、调课后日历自动更新，无需重新操作。</li>
       </ul>
 
-      <h3>7. 账号与多设备同步</h3>
+      <h3>6. 账号与多设备同步</h3>
       <ul>
         <li>未登录时数据保存在本地浏览器，清除浏览器数据会丢失。</li>
         <li>注册登录后，所有课程和打卡记录自动同步到云端，手机、电脑均可查看。</li>
