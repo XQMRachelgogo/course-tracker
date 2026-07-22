@@ -881,6 +881,16 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
           <div id="f-fee-sessions-wrap"><input class="form-input" id="f-fee-sessions" type="number" min="0" step="1" placeholder="次" inputmode="numeric" style="padding:0 6px;font-size:16px;width:100%;height:38px;text-align:center;" /></div>
           <input class="form-input" id="f-fee-date" type="date" style="padding:0 5px;font-size:15px;height:38px;min-height:38px;line-height:38px;" />
         </div>
+        <!-- 订阅制：这笔费用适用的周期 -->
+        <div id="f-fee-period-wrap" class="hidden" style="margin-top:8px;">
+          <div style="font-size:11px;color:#7a6fa8;font-weight:600;margin-bottom:5px;">这笔费用适用的订阅周期</div>
+          <div class="time-range">
+            <input class="form-input" id="f-fee-period-from" type="date" style="height:38px;padding:0 8px;font-size:15px;" />
+            <span class="time-sep">至</span>
+            <input class="form-input" id="f-fee-period-to" type="date" style="height:38px;padding:0 8px;font-size:15px;" />
+          </div>
+          <div style="font-size:11px;color:#b4acc9;margin-top:5px;line-height:1.45;">填写后这笔费用会按此周期内的上课次数分摊到各年，不填则用课程默认订阅周期。</div>
+        </div>
         <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">课包制可填写购买课时；订阅制只需要金额和付款日期。</div>
         <button type="button" class="add-shift-btn" style="margin-top:8px;" onclick="addFeeFromForm()">+ 添加一笔学费</button>
       </div>
@@ -1558,6 +1568,7 @@ function hasTodaySchedule(course) {
   if (isFlexible(course)) return false;
   if (course.archived) return false;
   if (isCoursePaused(course)) return false;
+  if (isPackageExhausted(course)) return false;
   var today = getTodayDate();
   return isRegularCourseOnDate(course, today) || getPendingReschedulesForDate(course, isoDate(today)).length > 0;
 }
@@ -2501,9 +2512,11 @@ function updateCourseTypeFields() {
   var feeSessionsWrap = document.getElementById('f-fee-sessions-wrap');
   var feeSessionsInput = document.getElementById('f-fee-sessions');
   var feeHint = document.getElementById('f-fee-hint');
+  var feePeriodWrap = document.getElementById('f-fee-period-wrap');
   if (packageBox) packageBox.classList.toggle('hidden', type !== 'package');
   if (monthlyBox) monthlyBox.classList.toggle('hidden', type !== 'monthly');
   if (feeSessionsWrap) feeSessionsWrap.classList.toggle('hidden', type !== 'package');
+  if (feePeriodWrap) feePeriodWrap.classList.toggle('hidden', type !== 'monthly');
   if (type !== 'package' && feeSessionsInput) feeSessionsInput.value = '';
   var feeGrid = document.getElementById('f-fee-grid');
   if (feeGrid) feeGrid.style.gridTemplateColumns = type === 'package' ? '88px 1fr 60px 132px' : '88px 1fr 132px';
@@ -2771,6 +2784,10 @@ function clearFeeInputs(keepCurrency) {
   document.getElementById('f-fee-date').value = isoDate(new Date());
   var sessionsEl = document.getElementById('f-fee-sessions');
   if (sessionsEl) sessionsEl.value = '';
+  var pfrom = document.getElementById('f-fee-period-from');
+  var pto = document.getElementById('f-fee-period-to');
+  if (pfrom) pfrom.value = '';
+  if (pto) pto.value = '';
   if (!keepCurrency) document.getElementById('f-fee-currency').value = 'CNY';
 }
 function applyPurchasedSessionsToCourse(course, purchasedSessions) {
@@ -2785,10 +2802,15 @@ function buildFeeEntryFromInputs() {
   var currency = document.getElementById('f-fee-currency').value || 'CNY';
   var courseTypeEl = document.getElementById('f-course-type');
   var sessions = (courseTypeEl && courseTypeEl.value === 'package') ? getFeeSessionsInputValue() : 0;
+  var periodFrom = (document.getElementById('f-fee-period-from') || {}).value || '';
+  var periodTo = (document.getElementById('f-fee-period-to') || {}).value || '';
   if (!amountRaw && !sessions) return null;
   if (!amountRaw || isNaN(parseFloat(amountRaw)) || parseFloat(amountRaw) <= 0) { showToast('请填写有效金额'); return false; }
   if (!date) { showToast('请选择缴费日期'); return false; }
-  return { id: 'fee' + Date.now(), amount: parseFloat(amountRaw), currency: currency, date: date, sessions: sessions };
+  var entry = { id: 'fee' + Date.now(), amount: parseFloat(amountRaw), currency: currency, date: date, sessions: sessions };
+  if (periodFrom) entry.periodFrom = periodFrom;
+  if (periodTo) entry.periodTo = periodTo;
+  return entry;
 }
 
 function renderFeeSummary() {
@@ -2937,15 +2959,31 @@ function renderFeeList(course) {
   if (!list) return;
   var fees = (course && course.fees) ? course.fees : [];
   if (!fees.length) { list.innerHTML = '<div style="font-size:12px;color:#b4acc9;padding:4px 0;">暂无记录</div>'; return; }
+  var courseType = (course && course.courseType) || 'package';
   list.innerHTML = fees.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; }).map(function(f){
     var origIdx = fees.indexOf(f);
     var sessionsText = f.sessions ? '<span style="font-size:11px;color:#8f86aa;background:#f4efff;border-radius:999px;padding:2px 8px;">+' + f.sessions + '次</span>' : '';
-    return '<div class="fee-item-row">' +
-      '<span class="fee-item-date">' + f.date + '</span>' +
-      '<span style="font-size:11px;color:#a39abb;margin-right:2px;">' + (f.currency || 'CNY') + '</span>' +
-      '<span class="fee-item-amt">' + fmtMoney(f.amount, f.currency || 'CNY') + '</span>' +
-      sessionsText +
-      '<button class="fee-item-del" onclick="deleteFee(' + origIdx + ', this)" title="删除">✕</button>' +
+    var periodText = '';
+    if (courseType === 'monthly') {
+      var pf = f.periodFrom || '';
+      var pt = f.periodTo || '';
+      if (pf && pt) {
+        periodText = '<div style="font-size:11px;color:#7a6fa8;margin-top:3px;">周期：' + formatShortDateFromIso(pf) + ' — ' + formatShortDateFromIso(pt) + '</div>';
+      } else {
+        periodText = '<div style="font-size:11px;color:#e0a040;margin-top:3px;cursor:pointer;" onclick="startEditFeePeriod(' + origIdx + ')">⚠ 未设周期，点击补填</div>';
+      }
+    }
+    return '<div class="fee-item-row" style="flex-wrap:wrap;align-items:flex-start;padding:8px 10px;">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="display:flex;align-items:center;gap:6px;">' +
+          '<span class="fee-item-date">' + f.date + '</span>' +
+          '<span style="font-size:11px;color:#a39abb;">' + (f.currency || 'CNY') + '</span>' +
+          '<span class="fee-item-amt">' + fmtMoney(f.amount, f.currency || 'CNY') + '</span>' +
+          sessionsText +
+        '</div>' +
+        periodText +
+      '</div>' +
+      '<button class="fee-item-del" onclick="deleteFee(' + origIdx + ', this)" title="删除" style="margin-top:2px;">✕</button>' +
     '</div>';
   }).join('');
 }
@@ -2966,6 +3004,23 @@ function addFeeFromForm() {
   renderFeeSummary();
   render();
   showToast('已添加学费记录');
+}
+
+function startEditFeePeriod(feeIdx) {
+  if (editingIdx === null) return;
+  var pf = prompt('请输入这笔费用的订阅开始日期（格式 YYYY-MM-DD）：');
+  if (!pf) return;
+  var pt = prompt('请输入订阅结束日期（格式 YYYY-MM-DD）：');
+  if (!pt) return;
+  var courses = loadData();
+  var c = courses[editingIdx];
+  if (!c || !c.fees || !c.fees[feeIdx]) return;
+  c.fees[feeIdx].periodFrom = pf;
+  c.fees[feeIdx].periodTo = pt;
+  saveData(courses);
+  renderFeeList(c);
+  renderFeeSummary();
+  showToast('已更新订阅周期');
 }
 
 function deleteFee(feeIdx, btnEl) {
@@ -3031,8 +3086,9 @@ function allocateSubscriptionFeeByYear(course, fee, result) {
   var amount = parseFloat(fee.amount) || 0;
   if (!amount) return;
   var feeYear = fee.date ? parseInt(String(fee.date).slice(0,4), 10) : new Date().getFullYear();
-  var fromStr = course.monthlyFrom || fee.date || '';
-  var toStr = course.monthlyTo || fromStr;
+  // 优先用每笔费用自己的周期，没有再用课程的订阅周期
+  var fromStr = fee.periodFrom || course.monthlyFrom || fee.date || '';
+  var toStr = fee.periodTo || course.monthlyTo || fromStr;
   if (!fromStr || !toStr) {
     if (!result[feeYear]) result[feeYear] = {};
     result[feeYear][currency] = (result[feeYear][currency] || 0) + amount;
