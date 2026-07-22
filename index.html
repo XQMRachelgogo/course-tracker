@@ -1539,6 +1539,10 @@ function formatShortDateFromIso(iso) {
   var d = parseLocalDate(iso);
   return isNaN(d.getTime()) ? iso : formatShortDate(d);
 }
+function formatSubscriptionPeriodLabel(course) {
+  if (!course || !course.monthlyFrom || !course.monthlyTo) return '未设置订阅周期';
+  return formatShortDateFromIso(course.monthlyFrom) + ' – ' + formatShortDateFromIso(course.monthlyTo);
+}
 function getTodayDate(){ var t = new Date(); t.setHours(0,0,0,0); return t; }
 function getCourseWeekdays(course) {
   return sortWeekdays(Array.isArray(course.weekdays) && course.weekdays.length ? course.weekdays : [typeof course.weekday === 'number' ? course.weekday : 1]);
@@ -2029,11 +2033,15 @@ function render() {
           '<span class="badge '+badgeClass+'">'+badgeText+'</span>'+
           '<button class="icon-btn edit-btn" aria-label="编辑课程" onclick="openEditForm('+idx+')">✏️</button>'+
         '</div>'+
-        '<div class="stats-row">'+
-          '<div class="stat"><div class="stat-label">已上</div><div class="stat-value">'+course.used+'</div></div>'+
-          '<div class="stat"><div class="stat-label">剩余</div><div class="stat-value">'+(remaining!==null?remaining:'—')+'</div></div>'+
-          '<div class="stat"><div class="stat-label">'+(course.courseType === 'monthly' ? '类型' : (totalDisplay?'总课时':'类型'))+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+(course.courseType === 'monthly' ? '订阅制' : (totalDisplay?'共'+totalDisplay+'次':'—'))+'</div></div>'+
-        '</div>'+
+        (course.courseType === 'monthly'
+          ? '<div class="stats-row" style="grid-template-columns:1fr;">'+
+              '<div class="stat"><div class="stat-label">订阅制</div><div class="stat-value" style="font-size:15px;">'+formatSubscriptionPeriodLabel(course)+'</div></div>'+
+            '</div>'
+          : '<div class="stats-row">'+
+              '<div class="stat"><div class="stat-label">已上</div><div class="stat-value">'+course.used+'</div></div>'+
+              '<div class="stat"><div class="stat-label">剩余</div><div class="stat-value">'+(remaining!==null?remaining:'—')+'</div></div>'+
+              '<div class="stat"><div class="stat-label">'+(totalDisplay?'总课时':'类型')+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+(totalDisplay?'共'+totalDisplay+'次':'—')+'</div></div>'+
+            '</div>')+
         (totalDisplay ? '<div class="progress-bar"><div class="progress-fill" style="width:'+getProgressPercent(course)+'%;background:'+course.color+'"></div></div>' : '')+
         '<div class="next-info">'+nextInfoBox+'</div>'+
         '<div class="actions">'+actionBtns+'</div>'+
@@ -2097,11 +2105,15 @@ function render() {
               '<span class="badge badge-archived">已归档</span>'+
               '<button class="icon-btn edit-btn" onclick="openEditForm('+aidx+')">✏️</button>'+
             '</div>'+
-            '<div class="stats-row">'+
-              '<div class="stat"><div class="stat-label">已上</div><div class="stat-value">'+ac.used+'</div></div>'+
-              '<div class="stat"><div class="stat-label">剩余</div><div class="stat-value">'+(arem!==null?arem:'—')+'</div></div>'+
-              '<div class="stat"><div class="stat-label">'+(ac.courseType==='monthly'?'类型':(atotal?'总课时':'类型'))+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+(ac.courseType==='monthly'?'订阅制':(atotal?'共'+atotal+'次':'—'))+'</div></div>'+
-            '</div>'+
+            (ac.courseType === 'monthly'
+              ? '<div class="stats-row" style="grid-template-columns:1fr;">'+
+                  '<div class="stat"><div class="stat-label">订阅制</div><div class="stat-value" style="font-size:15px;">'+formatSubscriptionPeriodLabel(ac)+'</div></div>'+
+                '</div>'
+              : '<div class="stats-row">'+
+                  '<div class="stat"><div class="stat-label">已上</div><div class="stat-value">'+ac.used+'</div></div>'+
+                  '<div class="stat"><div class="stat-label">剩余</div><div class="stat-value">'+(arem!==null?arem:'—')+'</div></div>'+
+                  '<div class="stat"><div class="stat-label">'+(atotal?'总课时':'类型')+'</div><div class="stat-value" style="font-size:13px;padding-top:3px;">'+(atotal?'共'+atotal+'次':'—')+'</div></div>'+
+                '</div>')+
             (atotal ? '<div class="progress-bar"><div class="progress-fill" style="width:'+getProgressPercent(ac)+'%;background:'+ac.color+'"></div></div>' : '')+
             '<div class="next-info" style="background:rgba(240,237,250,0.6);">课程已归档，打卡记录仍然保留。如需继续上课，可在编辑里取消归档。</div>'+
             '<div class="actions">'+
@@ -2782,6 +2794,8 @@ function setSavedFeeDisplayCurrency(currency) {
 function applySavedFeeDisplayCurrency() {
   var el = document.getElementById('fee-display-currency');
   if (el) el.value = getSavedFeeDisplayCurrency();
+  var histEl = document.getElementById('fee-history-currency');
+  if (histEl) histEl.value = getSavedFeeDisplayCurrency();
 }
 function getFeeSessionsInputValue() {
   var el = document.getElementById('f-fee-sessions');
@@ -2880,8 +2894,10 @@ function renderFeeSummary() {
   if (!breakdownEl) return;
 
   if (displayCurEl && !displayCurEl.value) displayCurEl.value = getSavedFeeDisplayCurrency();
-  var displayCur = (displayCurEl && displayCurEl.value) || getSavedFeeDisplayCurrency() || 'CNY';
+  var displayCur = (displayCurEl && displayCurEl.value) || getSavedFeeDisplayCurrency() || 'USD';
   setSavedFeeDisplayCurrency(displayCur);
+  var histCurEl = document.getElementById('fee-history-currency');
+  if (histCurEl) histCurEl.value = displayCur;
   var needsConversion = false;
 
   var grandTotalCNY = 0;
@@ -2946,7 +2962,10 @@ function renderFeeHistory() {
 
   var courses = getCoursesForCurrentFilter(loadData());
   var displayCurEl = document.getElementById('fee-history-currency');
-  var displayCur = (displayCurEl && displayCurEl.value) || getSavedFeeDisplayCurrency() || 'CNY';
+  var displayCur = (displayCurEl && displayCurEl.value) || getSavedFeeDisplayCurrency() || 'USD';
+  setSavedFeeDisplayCurrency(displayCur);
+  var summaryCurEl = document.getElementById('fee-display-currency');
+  if (summaryCurEl) summaryCurEl.value = displayCur;
 
   // 收集所有有记录的年份
   var yearTotals = {}; // { year: totalCNY }
