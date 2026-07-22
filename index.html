@@ -365,6 +365,41 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
 .collapsible-body{display:none;padding:12px 13px 13px;border-top:1px solid rgba(127,119,221,0.08);background:#fff}
 .collapsible-section.open .collapsible-body{display:block}
 
+/* 历年学费总览 */
+.yearly-history{display:flex;flex-direction:column;gap:10px}
+.yearly-row{background:rgba(255,255,255,0.95);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.yearly-row-header{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.yearly-row-header:active{background:#f8f4ff}
+.yearly-row-year{font-size:15px;font-weight:700;color:#4a3f73}
+.yearly-row-total{font-size:15px;font-weight:700;color:#6c5db5;margin-right:6px}
+.yearly-row-chevron{font-size:13px;color:#b0a7ca;transition:transform 0.2s}
+.yearly-row.open .yearly-row-chevron{transform:rotate(180deg)}
+.yearly-row-body{display:none;border-top:1px solid var(--line);padding:10px 14px 13px}
+.yearly-row.open .yearly-row-body{display:block}
+.yearly-course-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(127,119,221,0.06)}
+.yearly-course-row:last-child{border-bottom:none}
+.yearly-course-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.yearly-course-name{font-size:13px;color:#574e74;flex:1}
+.yearly-course-amt{font-size:13px;font-weight:700;color:#4a3f73}
+.yearly-empty{font-size:12px;color:#b4acc9;padding:4px 2px}
+
+/* 学费折叠区域 */
+.fee-section{background:rgba(255,255,255,0.95);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)}
+.fee-section-header{display:flex;align-items:center;gap:10px;padding:14px 15px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.fee-section-header:active{background:#faf7ff}
+.fee-section-icon{font-size:18px;line-height:1;flex-shrink:0}
+.fee-section-title{font-size:15px;font-weight:700;color:#4a3f73;flex:1}
+.fee-section-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.fee-section-amount{font-size:14px;font-weight:700;color:#6c5db5}
+.fee-section-chevron{font-size:14px;color:#b0a7ca;transition:transform 0.22s}
+.fee-section.open .fee-section-chevron{transform:rotate(180deg)}
+.fee-section-body{display:none;border-top:1px solid var(--line);padding:14px 15px}
+.fee-section.open .fee-section-body{display:block}
+/* 年份切换 */
+.year-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.year-tab{padding:5px 12px;border-radius:999px;border:1px solid rgba(127,119,221,0.18);background:#fff;color:#7a6fa8;font:inherit;font-size:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.year-tab.active{background:#8a7ef0;border-color:#8a7ef0;color:#fff}
+
 /* 暂停badge */
 .badge-paused{background:#e8f4fd;color:#2b7bb5}
 
@@ -497,24 +532,62 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
   </div>
   <div class="cards" id="cards-container"></div>
   <div class="divider"></div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-    <p class="section-label" style="margin-bottom:0;">今年学费分摊</p>
-    <select id="fee-display-currency" class="fee-currency-select" onchange="renderFeeSummary()">
-      <option value="CNY">¥ CNY</option>
-      <option value="USD">$ USD</option>
-      <option value="HKD">HK$ HKD</option>
-      <option value="EUR">€ EUR</option>
-      <option value="GBP">£ GBP</option>
-      <option value="JPY">¥ JPY</option>
-      <option value="CAD">CA$ CAD</option>
-      <option value="AUD">A$ AUD</option>
-    </select>
+
+  <!-- 今年学费分摊 折叠块 -->
+  <div class="fee-section" id="fee-section-thisyear">
+    <div class="fee-section-header" onclick="toggleFeeSection('fee-section-thisyear')">
+      <span class="fee-section-icon">📊</span>
+      <span class="fee-section-title">今年学费分摊</span>
+      <div class="fee-section-right">
+        <select id="fee-display-currency" class="fee-currency-select" onchange="renderFeeSummary();event.stopPropagation()">
+          <option value="CNY">¥ CNY</option>
+          <option value="USD">$ USD</option>
+          <option value="HKD">HK$ HKD</option>
+          <option value="EUR">€ EUR</option>
+          <option value="GBP">£ GBP</option>
+          <option value="JPY">¥ JPY</option>
+          <option value="CAD">CA$ CAD</option>
+          <option value="AUD">A$ AUD</option>
+        </select>
+        <span class="fee-section-amount" id="fee-summary-headline">—</span>
+        <span class="fee-section-chevron">⌄</span>
+      </div>
+    </div>
+    <div class="fee-section-body">
+      <div id="fee-summary-card" class="fee-summary-card" style="box-shadow:none;border:none;padding:0;background:transparent">
+        <div class="fee-summary-breakdown" id="fee-summary-breakdown"></div>
+        <div id="fee-rate-note" class="fee-rate-note"></div>
+      </div>
+    </div>
   </div>
-  <div id="fee-summary-card" class="fee-summary-card">
-    <div class="fee-summary-total" id="fee-summary-total">—</div>
-    <div class="fee-summary-breakdown" id="fee-summary-breakdown"></div>
-    <div id="fee-rate-note" class="fee-rate-note"></div>
+
+  <div style="height:12px"></div>
+
+  <!-- 历年学费总览 折叠块 -->
+  <div class="fee-section" id="fee-section-history">
+    <div class="fee-section-header" onclick="toggleFeeSection('fee-section-history')">
+      <span class="fee-section-icon">📅</span>
+      <span class="fee-section-title">历年学费总览</span>
+      <div class="fee-section-right">
+        <select id="fee-history-currency" class="fee-currency-select" onchange="renderFeeHistory();event.stopPropagation()">
+          <option value="CNY">¥ CNY</option>
+          <option value="USD">$ USD</option>
+          <option value="HKD">HK$ HKD</option>
+          <option value="EUR">€ EUR</option>
+          <option value="GBP">£ GBP</option>
+          <option value="JPY">¥ JPY</option>
+          <option value="CAD">CA$ CAD</option>
+          <option value="AUD">A$ AUD</option>
+        </select>
+        <span class="fee-section-chevron">⌄</span>
+      </div>
+    </div>
+    <div class="fee-section-body">
+      <div class="year-tabs" id="fee-year-tabs"></div>
+      <div id="fee-history-container"></div>
+    </div>
   </div>
+
   <div class="divider"></div>
   <p class="section-label">日历提醒</p>
   <button class="export-btn" onclick="openIcalModal()">🔄 订阅日历（iPhone 自动更新）</button>
@@ -1784,6 +1857,7 @@ function render() {
   if (document.getElementById('today-date')) { document.getElementById('today-date').textContent += ' · ' + selectedChildLabel; }
   renderChildLauncher();
   renderFeeSummary();
+  renderFeeHistory();
 
   if (sorted.length === 0) {
     container.innerHTML =
@@ -2720,11 +2794,11 @@ function buildFeeEntryFromInputs() {
 function renderFeeSummary() {
   var courses = getCoursesForCurrentFilter(loadData());
   var thisYear = new Date().getFullYear();
-  var totalEl = document.getElementById('fee-summary-total');
+  var headlineEl = document.getElementById('fee-summary-headline');
   var breakdownEl = document.getElementById('fee-summary-breakdown');
   var rateNoteEl = document.getElementById('fee-rate-note');
   var displayCurEl = document.getElementById('fee-display-currency');
-  if (!totalEl || !breakdownEl) return;
+  if (!breakdownEl) return;
 
   if (displayCurEl && !displayCurEl.value) displayCurEl.value = getSavedFeeDisplayCurrency();
   var displayCur = (displayCurEl && displayCurEl.value) || getSavedFeeDisplayCurrency() || 'CNY';
@@ -2751,15 +2825,14 @@ function renderFeeSummary() {
     items.push({ name: getCourseDisplayName(c), color: c.color, amtCNY: courseCNY, converted: converted });
   });
 
+  var grandConverted = fromCNY(grandTotalCNY, displayCur);
+  if (headlineEl) headlineEl.textContent = items.length ? fmtMoney(grandConverted, displayCur) : '—';
+
   if (!items.length) {
-    totalEl.textContent = '—';
-    breakdownEl.innerHTML = '<div style="font-size:12px;color:#b4acc9;">在课程编辑里添加学费记录后，这里会按当前收费方式统计。今年只显示当前选中孩子的课程。</div>';
+    breakdownEl.innerHTML = '<div style="font-size:12px;color:#b4acc9;padding:4px 0;">在课程编辑里添加学费记录后，这里会按当前收费方式统计。</div>';
     if (rateNoteEl) rateNoteEl.textContent = '';
     return;
   }
-
-  var grandConverted = fromCNY(grandTotalCNY, displayCur);
-  totalEl.textContent = fmtMoney(grandConverted, displayCur);
 
   items.sort(function(a,b){ return b.amtCNY - a.amtCNY; });
   breakdownEl.innerHTML = items.map(function(item){
@@ -2771,10 +2844,92 @@ function renderFeeSummary() {
   }).join('');
 
   if (rateNoteEl) {
-    rateNoteEl.textContent = needsConversion
-      ? '* 已按参考汇率换算为 ' + displayCur + '，仅供参考'
-      : '';
+    rateNoteEl.textContent = needsConversion ? '* 已按参考汇率换算为 ' + displayCur + '，仅供参考' : '';
   }
+
+  // 同步更新历年总览
+  renderFeeHistory();
+}
+
+// ── 折叠面板切换 ──
+function toggleFeeSection(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+// ── 历年学费总览 ──
+var feeHistoryYear = null; // 当前选中年份
+
+function renderFeeHistory() {
+  var tabsEl = document.getElementById('fee-year-tabs');
+  var containerEl = document.getElementById('fee-history-container');
+  if (!tabsEl || !containerEl) return;
+
+  var courses = getCoursesForCurrentFilter(loadData());
+  var displayCurEl = document.getElementById('fee-history-currency');
+  var displayCur = (displayCurEl && displayCurEl.value) || getSavedFeeDisplayCurrency() || 'CNY';
+
+  // 收集所有有记录的年份
+  var yearTotals = {}; // { year: totalCNY }
+  var yearItems = {};  // { year: [{name, color, amtCNY}] }
+
+  courses.forEach(function(c) {
+    if (!(c.fees && c.fees.length)) return;
+    var byYear = prorateFeesByYear(c);
+    Object.keys(byYear).forEach(function(yr) {
+      var amts = byYear[yr];
+      var cny = 0;
+      Object.keys(amts).forEach(function(cur){ cny += toCNY(amts[cur], cur); });
+      if (!cny) return;
+      yr = parseInt(yr, 10);
+      yearTotals[yr] = (yearTotals[yr] || 0) + cny;
+      if (!yearItems[yr]) yearItems[yr] = [];
+      yearItems[yr].push({ name: getCourseDisplayName(c), color: c.color, amtCNY: cny });
+    });
+  });
+
+  var years = Object.keys(yearTotals).map(Number).sort(function(a,b){ return b - a; });
+
+  if (!years.length) {
+    tabsEl.innerHTML = '';
+    containerEl.innerHTML = '<div class="yearly-empty">在课程编辑里添加学费记录后，这里会显示历年汇总。</div>';
+    return;
+  }
+
+  // 默认选中最新年份
+  if (!feeHistoryYear || years.indexOf(feeHistoryYear) < 0) feeHistoryYear = years[0];
+
+  // 渲染年份 tabs
+  tabsEl.innerHTML = years.map(function(yr) {
+    return '<button class="year-tab' + (yr === feeHistoryYear ? ' active' : '') + '" onclick="selectFeeHistoryYear(' + yr + ')">' + yr + '年</button>';
+  }).join('');
+
+  // 渲染当前年的明细
+  var items = (yearItems[feeHistoryYear] || []).slice().sort(function(a,b){ return b.amtCNY - a.amtCNY; });
+  var yearTotal = fromCNY(yearTotals[feeHistoryYear] || 0, displayCur);
+  var needsConversion = false;
+  items.forEach(function(item){ if (item.currency && item.currency !== displayCur) needsConversion = true; });
+
+  containerEl.innerHTML =
+    '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">' +
+      '<span style="font-size:22px;font-weight:800;color:#4a3f73;">' + fmtMoney(yearTotal, displayCur) + '</span>' +
+      '<span style="font-size:11px;color:#b4acc9;">' + feeHistoryYear + '年合计</span>' +
+    '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:6px;">' +
+    items.map(function(item) {
+      return '<div class="yearly-course-row">' +
+        '<div class="yearly-course-dot" style="background:' + item.color + '"></div>' +
+        '<span class="yearly-course-name">' + item.name + '</span>' +
+        '<span class="yearly-course-amt">' + fmtMoney(fromCNY(item.amtCNY, displayCur), displayCur) + '</span>' +
+      '</div>';
+    }).join('') +
+    '</div>' +
+    (needsConversion ? '<div style="font-size:11px;color:#b4acc9;margin-top:8px;">* 已按参考汇率换算，仅供参考</div>' : '');
+}
+
+function selectFeeHistoryYear(yr) {
+  feeHistoryYear = yr;
+  renderFeeHistory();
 }
 
 function renderFeeList(course) {
