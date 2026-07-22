@@ -882,8 +882,15 @@ button,a,input,select,textarea,.card-summary,.btn,.manage-btn,.auth-launcher,.au
           <input class="form-input" id="f-fee-date" type="date" style="padding:0 5px;font-size:15px;height:38px;min-height:38px;line-height:38px;" />
         </div>
         <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">课包制可填写购买课时；订阅制只需要金额和付款日期。</div>
-        <input type="hidden" id="f-fee-period-from" />
-        <input type="hidden" id="f-fee-period-to" />
+        <div id="f-fee-period-wrap" class="hidden" style="margin-top:8px;">
+          <label class="form-label">这笔缴费覆盖的订阅周期</label>
+          <div class="time-range">
+            <input class="form-input" id="f-fee-period-from" type="date" />
+            <span class="time-sep">至</span>
+            <input class="form-input" id="f-fee-period-to" type="date" />
+          </div>
+          <div style="font-size:11px;color:#b4acc9;margin-top:6px;line-height:1.45;">已按上一笔缴费自动推算，补记历史缴费时请改成实际覆盖的日期段。</div>
+        </div>
         <button type="button" class="add-shift-btn" style="margin-top:8px;" onclick="addFeeFromForm()">+ 添加一笔学费</button>
       </div>
     </div>
@@ -2507,6 +2514,8 @@ function updateCourseTypeFields() {
   if (packageBox) packageBox.classList.toggle('hidden', type !== 'package');
   if (monthlyBox) monthlyBox.classList.toggle('hidden', type !== 'monthly');
   if (feeSessionsWrap) feeSessionsWrap.classList.toggle('hidden', type !== 'package');
+  var feePeriodWrap = document.getElementById('f-fee-period-wrap');
+  if (feePeriodWrap) feePeriodWrap.classList.toggle('hidden', type !== 'monthly');
   if (type !== 'package' && feeSessionsInput) feeSessionsInput.value = '';
   var feeGrid = document.getElementById('f-fee-grid');
   if (feeGrid) feeGrid.style.gridTemplateColumns = type === 'package' ? '88px 1fr 60px 132px' : '88px 1fr 132px';
@@ -2703,6 +2712,7 @@ function saveForm() {
       c.fees.push(pendingFee);
       applyPurchasedSessionsToCourse(c, pendingFee.sessions);
     }
+    syncMonthlyPeriodFromFees(c);
   } else {
     var newId = 'c' + Date.now();
     var newCourse = {
@@ -2735,6 +2745,7 @@ function saveForm() {
       newCourse.fees.push(pendingFee);
       applyPurchasedSessionsToCourse(newCourse, pendingFee.sessions);
     }
+    syncMonthlyPeriodFromFees(newCourse);
     courses.push(newCourse);
     expandedIds[newId] = false;
   }
@@ -2763,10 +2774,10 @@ function fmtMoney(amount, currency) {
   return sym + (n % 1 < 0.005 ? Math.round(n).toLocaleString('zh-CN') : n.toLocaleString('zh-CN', {minimumFractionDigits:2, maximumFractionDigits:2}));
 }
 function getSavedFeeDisplayCurrency() {
-  try { return localStorage.getItem(FEE_DISPLAY_CURRENCY_KEY) || 'CNY'; } catch(e) { return 'CNY'; }
+  try { return localStorage.getItem(FEE_DISPLAY_CURRENCY_KEY) || 'USD'; } catch(e) { return 'USD'; }
 }
 function setSavedFeeDisplayCurrency(currency) {
-  try { localStorage.setItem(FEE_DISPLAY_CURRENCY_KEY, currency || 'CNY'); } catch(e) {}
+  try { localStorage.setItem(FEE_DISPLAY_CURRENCY_KEY, currency || 'USD'); } catch(e) {}
 }
 function applySavedFeeDisplayCurrency() {
   var el = document.getElementById('fee-display-currency');
@@ -2781,20 +2792,56 @@ function clearFeeInputs(keepCurrency) {
   document.getElementById('f-fee-date').value = isoDate(new Date());
   var sessionsEl = document.getElementById('f-fee-sessions');
   if (sessionsEl) sessionsEl.value = '';
-  // 订阅制：自动预填课程当前订阅周期
+  // 订阅制：新增一笔缴费时，自动接着"最近一笔已有周期的缴费记录"往后推一期，
+  // 而不是套用课程当前显示的（可能早已过期）订阅周期，避免历史记录被错误地打上当前周期。
   var pfrom = document.getElementById('f-fee-period-from');
   var pto = document.getElementById('f-fee-period-to');
   var courseTypeEl = document.getElementById('f-course-type');
   if (pfrom && pto && courseTypeEl && courseTypeEl.value === 'monthly' && editingIdx !== null) {
     var courses = loadData();
     var c = courses[editingIdx];
-    if (pfrom) pfrom.value = (c && c.monthlyFrom) || '';
-    if (pto) pto.value = (c && c.monthlyTo) || '';
+    var latestFee = null;
+    (c && c.fees ? c.fees : []).forEach(function(f){
+      if (!f.periodFrom || !f.periodTo) return;
+      if (!latestFee || f.periodTo > latestFee.periodTo) latestFee = f;
+    });
+    if (latestFee) {
+      var prevFrom = parseLocalDate(latestFee.periodFrom);
+      var prevTo = parseLocalDate(latestFee.periodTo);
+      var durationDays = Math.round((prevTo - prevFrom) / 86400000);
+      var nextFrom = new Date(prevTo);
+      nextFrom.setDate(nextFrom.getDate() + 1);
+      var nextTo = new Date(nextFrom);
+      nextTo.setDate(nextTo.getDate() + Math.max(0, durationDays));
+      pfrom.value = isoDate(nextFrom);
+      pto.value = isoDate(nextTo);
+    } else {
+      // 还没有任何带周期的缴费记录（比如第一笔），沿用课程当前填写的订阅周期作为起点
+      pfrom.value = (c && c.monthlyFrom) || '';
+      pto.value = (c && c.monthlyTo) || '';
+    }
   } else {
     if (pfrom) pfrom.value = '';
     if (pto) pto.value = '';
   }
   if (!keepCurrency) document.getElementById('f-fee-currency').value = 'CNY';
+}
+// 订阅制：把课程当前显示的订阅周期，同步为"结束日期最晚"的那笔缴费记录所覆盖的周期。
+// 这样订阅周期永远反映的是最近一次缴费实际覆盖的时间段，而不是人工填写、容易过期的固定值。
+function syncMonthlyPeriodFromFees(course) {
+  if (!course || course.courseType !== 'monthly') return;
+  var fees = Array.isArray(course.fees) ? course.fees : [];
+  var latest = null;
+  fees.forEach(function(f){
+    if (!f.periodFrom || !f.periodTo) return;
+    if (!latest || f.periodTo > latest.periodTo) latest = f;
+  });
+  if (latest) {
+    course.monthlyFrom = latest.periodFrom;
+    course.monthlyTo = latest.periodTo;
+  }
+  // 没有任何带周期的缴费记录时，保留原有（人工填写的）订阅周期不动，
+  // 通常只在还没记录第一笔缴费的新课程上会出现这种情况。
 }
 function applyPurchasedSessionsToCourse(course, purchasedSessions) {
   if (course && course.courseType === 'monthly') return;
@@ -2813,6 +2860,10 @@ function buildFeeEntryFromInputs() {
   if (!amountRaw && !sessions) return null;
   if (!amountRaw || isNaN(parseFloat(amountRaw)) || parseFloat(amountRaw) <= 0) { showToast('请填写有效金额'); return false; }
   if (!date) { showToast('请选择缴费日期'); return false; }
+  if (courseTypeEl && courseTypeEl.value === 'monthly') {
+    if (!periodFrom || !periodTo) { showToast('请填写这笔缴费覆盖的订阅周期'); return false; }
+    if (periodTo < periodFrom) { showToast('订阅周期结束日期不能早于开始日期'); return false; }
+  }
   var entry = { id: 'fee' + Date.now(), amount: parseFloat(amountRaw), currency: currency, date: date, sessions: sessions };
   if (periodFrom) entry.periodFrom = periodFrom;
   if (periodTo) entry.periodTo = periodTo;
@@ -3004,6 +3055,7 @@ function addFeeFromForm() {
   target.fees = target.fees || [];
   target.fees.push(feeEntry);
   applyPurchasedSessionsToCourse(target, feeEntry.sessions);
+  syncMonthlyPeriodFromFees(target);
   saveData(courses);
   clearFeeInputs(true);
   renderFeeList(target);
@@ -3017,19 +3069,23 @@ function startEditFeePeriod(feeIdx) {
   var courses = loadData();
   var c = courses[editingIdx];
   if (!c || !c.fees || !c.fees[feeIdx]) return;
-  // 自动用课程当前订阅周期填入
-  var pf = c.monthlyFrom || '';
-  var pt = c.monthlyTo || '';
-  if (!pf || !pt) {
-    showToast('请先在上方填写订阅周期，再来补填');
-    return;
-  }
+  var fee = c.fees[feeIdx];
+  // 补填时应该填这笔缴费实际覆盖的历史周期，而不是直接套用课程当前显示的订阅周期
+  var pf = prompt('这笔缴费（' + fee.date + '）覆盖的订阅开始日期？格式 YYYY-MM-DD', fee.periodFrom || fee.date || '');
+  if (pf === null) return;
+  pf = pf.trim();
+  var pt = prompt('这笔缴费（' + fee.date + '）覆盖的订阅结束日期？格式 YYYY-MM-DD', fee.periodTo || '');
+  if (pt === null) return;
+  pt = pt.trim();
+  if (!pf || !pt) { showToast('请输入完整的起止日期'); return; }
+  if (pt < pf) { showToast('结束日期不能早于开始日期'); return; }
   c.fees[feeIdx].periodFrom = pf;
   c.fees[feeIdx].periodTo = pt;
+  syncMonthlyPeriodFromFees(c);
   saveData(courses);
   renderFeeList(c);
   renderFeeSummary();
-  showToast('已用当前订阅周期（' + formatShortDateFromIso(pf) + ' — ' + formatShortDateFromIso(pt) + '）补填');
+  showToast('已补填这笔缴费的订阅周期（' + formatShortDateFromIso(pf) + ' — ' + formatShortDateFromIso(pt) + '）');
 }
 
 function deleteFee(feeIdx, btnEl) {
@@ -3050,6 +3106,7 @@ function deleteFee(feeIdx, btnEl) {
   if (qty && c.courseType !== 'monthly') {
     c.total = Math.max(c.used, Math.max(0, parseInt(c.total, 10) || 0) - qty);
   }
+  syncMonthlyPeriodFromFees(c);
   saveData(courses);
   window.requestAnimationFrame(function(){
     renderFeeList(c);
@@ -3188,6 +3245,10 @@ function buildWeekScheduleItems() {
   var courses = getCoursesForCurrentFilter(loadData());
   courses.forEach(function(course){
     if (isFlexible(course)) return; // 灵活模式不出现在固定课表
+    if (course.archived) return; // 已归档不出现在课表
+    if (isCoursePaused(course)) return; // 暂停中不出现在课表
+    if (isPackageExhausted(course)) return; // 课包已用完，需续费后才恢复排课
+    if (isSubscriptionExpired(course)) return; // 订阅已到期，不出现在课表
     weekDays.forEach(function(dayObj){
       if (isRegularCourseOnDate(course, dayObj.date)) {
         dayObj.items.push({
@@ -3415,14 +3476,17 @@ initAuth();
       <h3>3. 今年学费分摊</h3>
       <ul>
         <li>在课程编辑里记录每次缴费的金额、货币和缴费日期，支持人民币、美元、港币、欧元、英镑、日元等。</li>
+        <li><strong>订阅制：</strong>每笔缴费记录都要单独填写"这笔缴费覆盖的订阅周期"，系统会自动接着上一笔的周期往后推一期作为预填值，补记历史缴费时请改成实际覆盖的日期段。课程卡片上显示的"当前订阅周期"永远取自结束日期最晚的那笔缴费记录，不再需要单独手工维护，也不会被过期周期覆盖新记录。</li>
+        <li>老记录如果没有周期（迁移前添加的），学费列表里会提示"未设周期"，点击可以手动补填该笔缴费真实覆盖的日期段。</li>
         <li><strong>有打卡记录时：</strong>按各年实际打卡次数比例分摊总学费。例如课包共 10 次，2025 年打卡 4 次、2026 年打卡 6 次，则学费按 4:6 拆分到两年，续费叠加计算。</li>
         <li><strong>无打卡记录时：</strong>学费暂时全归入当前年，开始打卡后自动按比例重新分配。</li>
-        <li>右上角切换显示货币，所有金额按参考汇率统一换算（仅供参考，不实时更新）。</li>
+        <li>右上角切换显示货币，所有金额按参考汇率统一换算（仅供参考，不实时更新）；切换过的货币会被记住，下次打开自动沿用，默认 USD。</li>
       </ul>
 
       <h3>4. 一键课表</h3>
       <ul>
         <li>点顶部"一键课表"，按周一到周日展示本周所有固定课程和调课安排，标注上课时间段，当天高亮。</li>
+        <li>只显示课时状态正常的课程：已归档、暂停中、课包已用完、订阅已到期的课程不会出现，续费或恢复后会自动重新出现。</li>
       </ul>
 
       <h3>5. 订阅 Apple Calendar</h3>
